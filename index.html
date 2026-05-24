@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCLL Monitoramento — Painel de Acionamentos</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #09090b;
+      --surface:  #0f0f13;
+      --card:     #15151c;
+      --card2:    #1c1c25;
+      --card3:    #22222e;
+      --border:   #222230;
+      --border2:  #2e2e3e;
+      --text:     #e2e2ec;
+      --subtext:  #8080a0;
+      --muted:    #505065;
+
+      --verde:    #22c55e;
+      --verde-dk: #16a34a;
+      --verde-wpp:#25D366;
+      --azul:     #3b82f6;
+      --laranja:  #f97316;
+      --roxo:     #a855f7;
+      --esmeralda:#10b981;
+      --vermelho: #ef4444;
+      --amarelo:  #eab308;
+      --wanderson:#f59e0b;
+      --flag-cor: #eab308;
+
+      --metal:    #8888a0;
+      --silver:   #c8c8d8;
+    }
+
+    html { font-size: 14px; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow: hidden; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+    /* ══════════════════════════════════════════════════
+       TOPBAR / BANNER MCLL (item 5 — maior e destacado)
+    ══════════════════════════════════════════════════ */
+    .topbar {
+      background: linear-gradient(90deg, #0a0a0f 0%, #181826 40%, #0d0d18 100%);
+      border-bottom: 2px solid #2a2a3a;
+      padding: 0 20px;
+      height: 62px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 300;
+      box-shadow: 0 2px 24px rgba(0,0,0,.8);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 0; }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+
+    /* MCLL Logo — item 5: banner maior */
+    .mcll-logo { display: flex; flex-direction: column; align-items: flex-start; line-height: 1; user-select: none; }
+    .mcll-letters {
+      font-size: 2.2rem; font-weight: 900; font-style: italic;
+      letter-spacing: -2px;
+      background: linear-gradient(175deg, #f0f0f0 0%, #c8c8d0 35%, #909098 70%, #686870 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(2px 3px 6px rgba(0,0,0,.7));
+    }
+    .mcll-sub-row { display: flex; align-items: center; gap: 6px; margin-top: 1px; }
+    .mcll-chevron-l, .mcll-chevron-r {
+      width: 18px; height: 5px; flex-shrink: 0;
+      background: linear-gradient(90deg, #6abf2e, #9ed44d);
+      clip-path: polygon(0 50%, 20% 0%, 100% 0%, 80% 50%, 100% 100%, 20% 100%);
+    }
+    .mcll-chevron-r { background: linear-gradient(90deg, #9ed44d, #6abf2e); }
+    .mcll-sub-text { font-size: .52rem; font-weight: 800; letter-spacing: 3.5px; text-transform: uppercase; color: #b8b8cc; white-space: nowrap; }
+
+    .badge-live {
+      background: #ef4444; color: #fff;
+      font-size: .6rem; font-weight: 800;
+      padding: 3px 9px; border-radius: 10px; letter-spacing: 1px;
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .conn-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,.05); border: 1px solid var(--border2);
+      border-radius: 20px; padding: 5px 13px;
+      font-size: .76rem; color: var(--subtext);
+    }
+    .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+    .conn-dot.on { background: var(--verde); box-shadow: 0 0 0 3px rgba(34,197,94,.22); }
+    .date-pill { font-size: .72rem; color: var(--muted); }
+
+    /* ══════════════════════════════════════════════════
+       LAYOUT (items 1 e 6)
+    ══════════════════════════════════════════════════ */
+    .app-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      height: calc(100vh - 62px);
+      overflow: hidden;
+    }
+
+    /* ══════════════════════════════════════════════════
+       SIDEBAR
+    ══════════════════════════════════════════════════ */
+    .sidebar { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+    .sidebar-hd {
+      padding: 10px 13px;
+      background: linear-gradient(135deg, #0a2e20, #122a1e);
+      border-bottom: 1px solid rgba(34,197,94,.16); flex-shrink: 0;
+    }
+    .sidebar-hd strong { font-size: .82rem; color: #4ade80; display: block; }
+    .sidebar-hd small  { font-size: .67rem; color: rgba(74,222,128,.6); }
+
+    .wpp-connect { padding: 10px 13px; border-bottom: 1px solid var(--border); text-align: center; flex-shrink: 0; }
+    .qr-box {
+      width: 120px; height: 120px; border: 1.5px dashed var(--border2); border-radius: 8px;
+      margin: 0 auto 6px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 5px; color: var(--muted); font-size: .68rem;
+    }
+    .qr-box svg { width: 30px; height: 30px; fill: var(--muted); }
+
+    /* Chat list — item 3 */
+    .sidebar-chats { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+    .sidebar-chats-hd {
+      padding: 6px 13px;
+      font-size: .63rem; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+    }
+    .chat-item {
+      padding: 8px 13px; border-bottom: 1px solid rgba(255,255,255,.02);
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer; transition: background .1s;
+    }
+    .chat-item:hover { background: rgba(255,255,255,.05); }
+    .chat-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--card2); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .82rem; flex-shrink: 0;
+    }
+    .chat-info { flex: 1; min-width: 0; }
+    .chat-nome { font-size: .76rem; font-weight: 600; word-break: break-word; line-height: 1.3; }
+    .chat-tipo { font-size: .62rem; color: var(--muted); }
+    .chat-badge { background: var(--verde); color: #000; font-size: .58rem; font-weight: 800; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 3px; flex-shrink: 0; }
+    .chats-vazio { padding: 16px 13px; text-align: center; color: var(--muted); font-size: .74rem; }
+
+    /* ══════════════════════════════════════════════════
+       MAIN CONTENT
+    ══════════════════════════════════════════════════ */
+    .main-content { overflow-y: auto; display: flex; flex-direction: column; gap: 9px; padding: 10px 12px; }
+
+    /* ══════════════════════════════════════════════════
+       STATS (item 8 — clicável + indicador ativo)
+    ══════════════════════════════════════════════════ */
+    .stats-row { display: grid; grid-template-columns: 1.2fr repeat(5,1fr); gap: 7px; flex-shrink: 0; }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px 12px; cursor: pointer; position: relative; overflow: hidden;
+      transition: all .13s;
+    }
+    .stat-card:hover { background: var(--card2); transform: translateY(-1px); box-shadow: 0 4px 18px rgba(0,0,0,.5); }
+    .stat-card.ativo { border-color: var(--azul) !important; box-shadow: 0 0 0 2px rgba(59,130,246,.2); }
+    .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+    .stat-total::before { background: linear-gradient(90deg, var(--verde-dk), var(--verde)); }
+    .stat-pa::before    { background: var(--azul); }
+    .stat-ma::before    { background: var(--laranja); }
+    .stat-ap::before    { background: var(--esmeralda); }
+    .stat-am::before    { background: var(--roxo); }
+    .stat-wand::before  { background: var(--wanderson); }
+    .stat-lbl { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 3px; }
+    .stat-num { font-size: 2rem; font-weight: 900; line-height: 1; }
+    .stat-total .stat-num { color: var(--verde); }
+    .stat-pa    .stat-num { color: var(--azul); }
+    .stat-ma    .stat-num { color: var(--laranja); }
+    .stat-ap    .stat-num { color: var(--esmeralda); }
+    .stat-am    .stat-num { color: var(--roxo); }
+    .stat-wand  .stat-num { color: var(--wanderson); }
+    .stat-sub { font-size: .62rem; color: var(--muted); margin-top: 2px; }
+
+    /* ══════════════════════════════════════════════════
+       TIMER COMPACTO (item 2)
+    ══════════════════════════════════════════════════ */
+    .timer-section { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+    .timer-hd {
+      padding: 7px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,.015); cursor: pointer;
+    }
+    .timer-hd h2 { font-size: .82rem; font-weight: 700; color: var(--silver); display: flex; align-items: center; gap: 6px; }
+    .timer-badge { font-size: .66rem; font-weight: 700; padding: 2px 9px; border-radius: 8px; background: var(--card2); color: var(--muted); }
+    .timer-badge.alerta { background: rgba(239,68,68,.14); color: var(--vermelho); }
+    .timer-toggle { font-size: .65rem; color: var(--muted); margin-left: 8px; }
+
+    .timer-body { padding: 7px 11px; display: flex; flex-direction: column; gap: 5px; max-height: 160px; overflow-y: auto; }
+    .timer-empty { color: var(--muted); font-size: .78rem; padding: 2px 0; }
+
+    /* Timer item compacto (item 2) */
+    .timer-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 11px;
+      background: var(--card2); border: 1px solid var(--border); border-left: 3px solid var(--border2);
+      border-radius: 7px;
+    }
+    .timer-item.urgente { border-left-color: var(--laranja); }
+    .timer-item.expirado { border-left-color: var(--vermelho); animation: blink-brd 1.2s infinite; }
+    @keyframes blink-brd { 0%,100%{border-left-color:var(--vermelho)} 50%{border-left-color:rgba(239,68,68,.2)} }
+
+    .timer-info { flex: 1; min-width: 0; }
+    .timer-muni { font-size: .82rem; font-weight: 700; color: var(--text); }
+    .timer-resumo { font-size: .68rem; color: var(--subtext); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+    .timer-tags { display: flex; gap: 3px; flex-wrap: nowrap; overflow: hidden; margin-top: 3px; }
+    .tag-pill { font-size: .6rem; font-weight: 800; padding: 1px 6px; border-radius: 4px; color: rgba(0,0,0,.85); flex-shrink: 0; }
+    .timer-bar { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 3px; }
+    .timer-bar-fill { height: 100%; border-radius: 2px; transition: width .5s linear; }
+
+    .timer-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .timer-clock { font-size: 1.1rem; font-weight: 900; font-variant-numeric: tabular-nums; text-align: center; white-space: nowrap; }
+    .timer-clock.ok      { color: var(--verde); }
+    .timer-clock.urgente { color: var(--laranja); }
+    .timer-clock.alerta  { color: var(--vermelho); font-size: .85rem; }
+    .btn-liberar {
+      background: rgba(22,163,74,.12); color: var(--verde);
+      border: 1px solid rgba(22,163,74,.28); border-radius: 12px;
+      padding: 4px 11px; font-size: .7rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all .12s;
+    }
+    .btn-liberar:hover { background: rgba(22,163,74,.22); }
+    .timer-item.expirado .btn-liberar { background: rgba(239,68,68,.12); color: var(--vermelho); border-color: rgba(239,68,68,.28); }
+
+    /* ══════════════════════════════════════════════════
+       FEED + DETALHE
+    ══════════════════════════════════════════════════ */
+    .feed-detail-row { display: flex; gap: 9px; min-height: 360px; flex: 1; }
+
+    .feed-wrap {
+      flex: 1; min-width: 0; background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .feed-hd {
+      padding: 8px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,.015); flex-shrink: 0;
+    }
+    .feed-hd h2 { font-size: .82rem; font-weight: 700; color: var(--silver); display: flex; align-items: center; gap: 6px; }
+    .filtro-ativo-tag {
+      font-size: .66rem; font-weight: 700;
+      padding: 2px 9px; border-radius: 8px;
+      background: rgba(59,130,246,.15); color: #93c5fd;
+      display: none;
+    }
+    .filtro-ativo-tag.visivel { display: inline-block; }
+    .msg-count-badge { font-size: .66rem; font-weight: 700; padding: 2px 9px; border-radius: 8px; background: var(--card2); color: var(--subtext); }
+
+    .filter-bar { padding: 6px 12px; border-bottom: 1px solid var(--border); display: flex; gap: 5px; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
+    .ftab {
+      padding: 3px 10px; border-radius: 12px; border: 1px solid var(--border2);
+      font-size: .68rem; font-weight: 700; cursor: pointer;
+      background: transparent; color: var(--subtext); transition: all .11s;
+    }
+    .ftab:hover { border-color: var(--metal); color: var(--text); }
+    .ftab.ativo { color: #09090b !important; border-color: transparent !important; }
+    .ftab.f-todos.ativo  { background: var(--metal); }
+    .ftab.f-pa.ativo     { background: var(--azul); }
+    .ftab.f-ma.ativo     { background: var(--laranja); }
+    .ftab.f-ap.ativo     { background: var(--esmeralda); }
+    .ftab.f-am.ativo     { background: var(--roxo); }
+
+    @keyframes blink-tab {
+      0%,100% { background: rgba(239,68,68,.13); border-color: var(--vermelho); color: var(--vermelho) !important; }
+      50%     { background: transparent; border-color: rgba(239,68,68,.2); color: rgba(239,68,68,.4) !important; }
+    }
+    .ftab.blink-alert:not(.ativo) { animation: blink-tab 1.1s infinite; }
+
+    .localidade-select {
+      background: var(--card2); border: 1px solid var(--border2); color: var(--text);
+      font-size: .68rem; padding: 3px 8px; border-radius: 7px; cursor: pointer; outline: none; margin-left: auto; max-width: 150px;
+    }
+    .localidade-select option { background: var(--card2); }
+
+    .msg-list { flex: 1; overflow-y: auto; padding: 6px 10px; }
+
+    /* Mensagem card (itens 9 — flag) */
+    .msg-card {
+      padding: 9px 11px; border: 1px solid var(--border); border-left: 3px solid var(--border2);
+      border-radius: 8px; margin-bottom: 6px; background: var(--card2);
+      cursor: pointer; transition: all .11s; position: relative;
+    }
+    .msg-card:hover { background: var(--card3); border-color: var(--border2); }
+    .msg-card.urgente { border-left-color: var(--vermelho); }
+    .msg-card.normal  { border-left-color: var(--verde-dk); }
+    .msg-card.lida    { opacity: .4; }
+    .msg-card.selecionada { background: var(--card3); border-color: var(--azul); border-left-color: var(--azul); }
+    .msg-card.flagged { border-left-color: var(--flag-cor); }
+    .msg-card.duplicado { opacity: .65; }
+
+    .msg-topo { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; gap: 6px; }
+    .msg-remetente { font-size: .8rem; font-weight: 700; color: var(--text); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .msg-hora { font-size: .64rem; color: var(--muted); flex-shrink: 0; }
+    .msg-text { font-size: .78rem; color: var(--subtext); line-height: 1.4; word-break: break-word; margin-bottom: 5px; }
+    .msg-footer { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+
+    /* Flag button (item 9) */
+    .btn-flag {
+      background: none; border: none; cursor: pointer;
+      font-size: .85rem; padding: 0 2px; line-height: 1;
+      color: var(--muted); transition: color .12s, transform .12s;
+      flex-shrink: 0;
+    }
+    .btn-flag:hover { color: var(--flag-cor); transform: scale(1.15); }
+    .btn-flag.ativo { color: var(--flag-cor); }
+
+    .chip {
+      display: inline-flex; align-items: center;
+      padding: 1px 7px; border-radius: 7px; font-size: .61rem; font-weight: 800;
+    }
+    .chip.uf-pa   { background: rgba(59,130,246,.18);   color: #93c5fd; }
+    .chip.uf-ma   { background: rgba(249,115,22,.18);   color: #fdba74; }
+    .chip.uf-ap   { background: rgba(16,185,129,.18);   color: #6ee7b7; }
+    .chip.uf-am   { background: rgba(168,85,247,.18);   color: #d8b4fe; }
+    .chip.sigla   { background: rgba(34,197,94,.14);    color: #86efac; }
+    .chip.muni    { background: rgba(144,144,168,.12);  color: var(--metal); }
+    .chip.eps-sln { background: rgba(22,163,74,.18);    color: #86efac; }
+    .chip.eps-adx { background: rgba(239,68,68,.18);    color: #fca5a5; }
+    .chip.chamado { background: rgba(234,179,8,.16);    color: #fde047; }
+    .chip.dup     { background: rgba(239,68,68,.12);    color: #fca5a5; font-style: italic; }
+    .badge-lida   { font-size: .64rem; color: var(--verde); margin-left: auto; }
+
+    /* ══════════════════════════════════════════════════
+       DETALHE / RESPOSTA
+    ══════════════════════════════════════════════════ */
+    .detail-wrap {
+      width: 340px; flex-shrink: 0; background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; display: flex; flex-direction: column; overflow: hidden;
+      transition: width .18s, opacity .18s;
+    }
+    .detail-wrap.oculto { width: 0; opacity: 0; pointer-events: none; overflow: hidden; border: none; }
+    .detail-hd {
+      padding: 8px 12px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,.015); flex-shrink: 0;
+    }
+    .detail-hd h3 { font-size: .82rem; font-weight: 700; color: var(--silver); }
+    .btn-fechar { background: none; border: none; cursor: pointer; color: var(--muted); font-size: .95rem; padding: 2px 5px; border-radius: 4px; transition: color .12s; }
+    .btn-fechar:hover { color: var(--text); }
+    .detail-body { flex: 1; overflow-y: auto; padding: 11px; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
+    .detail-wrap.com-msg { border-color: var(--azul) !important; }
+    @keyframes detail-flash { 0%{background:rgba(59,130,246,.08)} 100%{background:var(--card)} }
+    .detail-wrap.com-msg .detail-hd { animation: detail-flash .5s ease-out; }
+    .detalhe-vazio { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: .78rem; text-align: center; }
+    .detalhe-de   { font-size: .9rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .detalhe-grupo{ font-size: .7rem; color: var(--subtext); }
+    .detalhe-hora { font-size: .66rem; color: var(--muted); margin-top: 2px; }
+    .detalhe-texto {
+      background: var(--card2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 9px 11px; font-size: .82rem; line-height: 1.52;
+      color: var(--text); word-break: break-word; white-space: pre-wrap;
+    }
+    .detalhe-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+    .reply-label { font-size: .63rem; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 5px; }
+    .reply-textarea {
+      width: 100%; height: 75px; resize: vertical;
+      background: var(--card2); border: 1px solid var(--border2); border-radius: 8px;
+      padding: 7px 10px; font-size: .78rem; font-family: inherit; color: var(--text); outline: none;
+      transition: border-color .12s;
+    }
+    .reply-textarea:focus { border-color: var(--azul); }
+    .reply-status { font-size: .68rem; min-height: 15px; margin: 3px 0; }
+    .btn-reply {
+      width: 100%; background: linear-gradient(135deg, var(--verde-dk), var(--verde));
+      color: #09090b; border: none; border-radius: 8px; padding: 8px;
+      font-size: .78rem; font-weight: 800; cursor: pointer; transition: opacity .13s;
+    }
+    .btn-reply:hover { opacity: .88; }
+
+    /* ══════════════════════════════════════════════════
+       TABELA MUNICÍPIOS
+    ══════════════════════════════════════════════════ */
+    .table-section { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+    .table-hd {
+      padding: 8px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none; background: rgba(255,255,255,.015);
+    }
+    .table-hd h2 { font-size: .82rem; font-weight: 700; color: var(--silver); display: flex; align-items: center; gap: 6px; }
+    .table-toggle { font-size: .68rem; color: var(--muted); }
+    .table-filter-bar { display: flex; gap: 5px; flex-wrap: wrap; padding: 6px 12px; border-bottom: 1px solid var(--border); }
+    .muni-table { width: 100%; border-collapse: collapse; }
+    .muni-table th { font-size: .63rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,.02); text-align: left; }
+    .muni-table td { padding: 6px 10px; font-size: .77rem; border-bottom: 1px solid rgba(255,255,255,.02); color: var(--text); }
+    .muni-table tr:last-child td { border-bottom: none; }
+    .muni-table tr:hover td { background: rgba(255,255,255,.025); }
+    .table-wrap { max-height: 260px; overflow-y: auto; }
+
+    /* ══════════════════════════════════════════════════
+       MODAL DE CHAT (item 3)
+    ══════════════════════════════════════════════════ */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,.75); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.aberto { display: flex; }
+    .chat-modal {
+      background: var(--card); border: 1px solid var(--border2); border-radius: 14px;
+      width: 520px; max-width: 95vw; height: 620px; max-height: 90vh;
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,.8);
+    }
+    .chat-modal-hd {
+      padding: 13px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,.02); flex-shrink: 0;
+    }
+    .chat-modal-nome { font-size: .9rem; font-weight: 700; color: var(--silver); }
+    .chat-modal-sub  { font-size: .7rem; color: var(--muted); margin-top: 1px; }
+
+    .chat-modal-msgs { flex: 1; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+    .modal-loading { text-align: center; color: var(--muted); font-size: .8rem; padding: 20px; }
+    .modal-erro    { text-align: center; color: var(--vermelho); font-size: .8rem; padding: 20px; }
+
+    .chat-msg-item { display: flex; flex-direction: column; max-width: 80%; }
+    .chat-msg-item.from-me { align-self: flex-end; align-items: flex-end; }
+    .chat-msg-item.from-them { align-self: flex-start; }
+    .chat-msg-de { font-size: .64rem; font-weight: 700; color: var(--azul); margin-bottom: 2px; }
+    .chat-msg-bubble {
+      background: var(--card2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 7px 11px; font-size: .8rem; line-height: 1.45; color: var(--text);
+      word-break: break-word; white-space: pre-wrap;
+    }
+    .chat-msg-item.from-me .chat-msg-bubble { background: rgba(22,163,74,.15); border-color: rgba(22,163,74,.3); }
+    .chat-msg-hora { font-size: .62rem; color: var(--muted); margin-top: 2px; }
+
+    .chat-modal-reply { padding: 11px 14px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .chat-modal-reply textarea {
+      width: 100%; height: 65px; resize: none;
+      background: var(--card2); border: 1px solid var(--border2); border-radius: 8px;
+      padding: 7px 10px; font-size: .78rem; font-family: inherit; color: var(--text);
+      outline: none; transition: border-color .12s;
+    }
+    .chat-modal-reply textarea:focus { border-color: var(--azul); }
+    .chat-modal-reply-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .chat-modal-status { flex: 1; font-size: .68rem; color: var(--subtext); }
+    .btn-modal-reply {
+      background: linear-gradient(135deg, var(--verde-dk), var(--verde));
+      color: #09090b; border: none; border-radius: 8px; padding: 7px 18px;
+      font-size: .76rem; font-weight: 800; cursor: pointer; white-space: nowrap;
+    }
+    .btn-modal-close {
+      background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1.1rem; padding: 3px 6px; border-radius: 4px; transition: color .12s;
+    }
+    .btn-modal-close:hover { color: var(--text); }
+
+    /* ══════════════════════════════════════════════════
+       CHECKBOX SELEÇÃO GRUPOS (item 6)
+    ══════════════════════════════════════════════════ */
+    .chat-check {
+      width: 13px; height: 13px; flex-shrink: 0;
+      cursor: pointer; accent-color: var(--verde); margin-right: 1px;
+    }
+    .chat-item { cursor: default; }
+    .chat-item .chat-avatar,
+    .chat-item .chat-info { cursor: pointer; }
+    .chat-item.selecionado { background: rgba(34,197,94,.08); border-left: 2px solid var(--verde-dk); }
+
+    /* ══════════════════════════════════════════════════
+       PAINEL SECUNDÁRIO DE GRUPOS (item 6)
+    ══════════════════════════════════════════════════ */
+    .painel-sel {
+      background: var(--card); border: 1px solid rgba(59,130,246,.32);
+      border-radius: 10px; overflow: hidden; display: none; flex-shrink: 0;
+    }
+    .painel-sel.ativo { display: block; }
+    .painel-sel-hd {
+      padding: 7px 13px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(59,130,246,.05);
+    }
+    .painel-sel-hd h2 { font-size: .78rem; font-weight: 700; color: #93c5fd; }
+    .mini-stats {
+      display: flex; gap: 18px; align-items: center;
+      padding: 7px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .mini-stat { display: flex; flex-direction: column; align-items: center; min-width: 40px; }
+    .mini-stat-num { font-size: 1.4rem; font-weight: 900; line-height: 1; }
+    .mini-stat-lbl { font-size: .57rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-top: 1px; }
+    .painel-sel-feed { max-height: 250px; overflow-y: auto; padding: 5px 9px; }
+
+    /* ══════════════════════════════════════════════════
+       TIMER COMPACTO
+    ══════════════════════════════════════════════════ */
+    .timer-item  { padding: 5px 8px; border-radius: 6px; }
+    .timer-muni  { font-size: .73rem; }
+    .timer-resumo{ font-size: .6rem; }
+    .timer-clock { font-size: .9rem; }
+    .timer-clock.alerta { font-size: .75rem; }
+    .btn-liberar { font-size: .61rem; padding: 3px 7px; }
+    .timer-tags  { margin-top: 2px; }
+    .timer-bar   { margin-top: 2px; }
+
+    /* ══════════════════════════════════════════════════
+       UF BLINK BAR (item 4)
+    ══════════════════════════════════════════════════ */
+    .uf-blink-bar { display:flex; gap:6px; flex-shrink:0; }
+    .uf-blink-item {
+      flex:1; text-align:center; padding:5px 0;
+      border-radius:8px; font-size:.72rem; font-weight:800;
+      letter-spacing:.8px; text-transform:uppercase;
+      border:1px solid var(--border); background:var(--card);
+      color:var(--muted); cursor:pointer; user-select:none; transition:all .13s;
+    }
+    .uf-blink-item.blink-pa { background:rgba(59,130,246,.2); border-color:var(--azul); color:var(--azul); animation:uf-blink 1.1s infinite; }
+    .uf-blink-item.blink-ma { background:rgba(249,115,22,.2); border-color:var(--laranja); color:var(--laranja); animation:uf-blink 1.1s infinite; }
+    .uf-blink-item.blink-ap { background:rgba(16,185,129,.2); border-color:var(--esmeralda); color:var(--esmeralda); animation:uf-blink 1.1s infinite; }
+    .uf-blink-item.blink-am { background:rgba(168,85,247,.2); border-color:var(--roxo); color:var(--roxo); animation:uf-blink 1.1s infinite; }
+    @keyframes uf-blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ══════════════════════════════════════════════════
+       4-QUADRANT GRID (item 7)
+    ══════════════════════════════════════════════════ */
+    .main-content { overflow:hidden !important; }
+    .quadrant-grid {
+      flex:1; min-height:0;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      grid-template-rows:1fr 1fr;
+      gap:9px;
+    }
+    .quadrant { display:flex; flex-direction:column; overflow:hidden; min-height:0; }
+    .quadrant .timer-section { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+    .quadrant .timer-body {
+      display:grid !important;
+      grid-template-columns:repeat(auto-fill, minmax(180px,1fr));
+      gap:5px; flex:1; max-height:none !important;
+      padding:5px 8px; overflow-y:auto; align-content:start;
+    }
+    .quadrant .table-section { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+    .quadrant #tableBody { flex:1; display:flex !important; flex-direction:column; overflow:hidden; }
+    .quadrant .table-wrap { flex:1; max-height:none; overflow-y:auto; }
+    .quadrant .feed-wrap { flex:1; overflow:hidden; }
+    .quadrant .detail-wrap,
+    .quadrant .detail-wrap.oculto {
+      flex:1; width:auto !important; opacity:1 !important;
+      pointer-events:auto !important; border:1px solid var(--border) !important;
+      overflow:hidden !important;
+    }
+
+    /* RUPTURA chip + card (item 10) */
+    .chip.ruptura { background:rgba(239,68,68,.25); color:#fca5a5; animation:blink-rup .8s infinite; font-size:.65rem; letter-spacing:.5px; }
+    @keyframes blink-rup { 0%,100%{background:rgba(239,68,68,.25)} 50%{background:rgba(239,68,68,.05)} }
+    .msg-card.ruptura { border-left-color:#ef4444 !important; box-shadow:0 0 12px rgba(239,68,68,.25); }
+
+    /* Sel-ativo badge nos main counters (item 8) */
+    .stat-card.sel-ativo::after {
+      content:'FILTRADO'; position:absolute; top:5px; right:7px;
+      font-size:.5rem; font-weight:800; color:rgba(59,130,246,.8);
+    }
+    /* Chamados Massivos (Q4) */
+    .massivo-section { display:flex; flex-direction:column; height:100%; overflow:hidden; }
+    .massivo-hd { display:flex; align-items:center; justify-content:space-between; padding:10px 14px 8px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .massivo-hd h2 { font-size:.82rem; font-weight:700; color:var(--text); }
+    .massivo-stats { display:flex; gap:6px; padding:8px 14px; flex-shrink:0; }
+    .mas-card { flex:1; background:var(--card2); border:1px solid var(--border); border-radius:7px; padding:5px 8px; text-align:center; cursor:pointer; transition:background .15s; }
+    .mas-card:hover, .mas-card.ativo { background:var(--card3); border-color:var(--border2); }
+    .mas-card .mas-num { font-size:1.1rem; font-weight:700; }
+    .mas-card .mas-lbl { font-size:.6rem; color:var(--subtext); }
+    .massivo-filter { display:flex; gap:4px; flex-wrap:wrap; padding:4px 14px 6px; flex-shrink:0; }
+    .massivo-list { flex:1; overflow-y:auto; padding:0 8px 8px; }
+    .mas-item { background:var(--card); border:1px solid var(--border); border-radius:6px; padding:7px 10px; margin-bottom:5px; font-size:.73rem; }
+    .mas-item .mas-item-tipo { font-size:.6rem; font-weight:700; padding:2px 5px; border-radius:3px; margin-bottom:4px; display:inline-block; }
+    .mas-item .mas-item-de { color:var(--subtext); font-size:.67rem; margin-bottom:2px; }
+    .mas-item .mas-item-texto { color:var(--text); line-height:1.4; }
+    .mas-tipo-bdesk { background:rgba(59,130,246,.2); color:#93c5fd; }
+    .mas-tipo-total { background:rgba(239,68,68,.2); color:#fca5a5; }
+    .mas-tipo-conjunta { background:rgba(168,85,247,.2); color:#d8b4fe; }
+    .mas-tipo-ruptura { background:rgba(249,115,22,.2); color:#fdba74; }
+    /* Limpar seleção */
+    .btn-limpar-sel { font-size:.62rem; background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.3); color:#f87171; border-radius:4px; padding:2px 7px; cursor:pointer; display:none; }
+    .btn-limpar-sel.visivel { display:inline-block; }
+    /* blink nos cartões de contador do massivo */
+    .mas-card.blink-alert { animation: uf-blink 1.1s infinite; background:rgba(239,68,68,.1); border-color:rgba(239,68,68,.4) !important; }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="mcll-logo">
+      <div class="mcll-letters">MCLL</div>
+      <div class="mcll-sub-row">
+        <div class="mcll-chevron-l"></div>
+        <div class="mcll-sub-text">Monitoramento</div>
+        <div class="mcll-chevron-r"></div>
+      </div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="date-pill">📅 <span id="dataHoje">—</span></div>
+    <span class="badge-live">● AO VIVO</span>
+    <div class="conn-pill">
+      <div class="conn-dot" id="connDot"></div>
+      <span id="connLabel">Desconectado</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-left:8px;border-left:1px solid var(--border2);padding-left:12px">
+      <span id="userNome" style="font-size:.7rem;color:var(--subtext)"></span>
+      <span id="userPerfil" style="font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:4px"></span>
+      <button onclick="logout()" style="font-size:.68rem;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:5px;padding:3px 9px;cursor:pointer">Sair</button>
+    </div>
+  </div>
+</header>
+
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-hd">
+      <strong>WhatsApp</strong>
+      <small id="wppStatus">Aguardando conexão…</small>
+    </div>
+    <div class="wpp-connect" id="qrSection">
+      <div class="qr-box">
+        <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3V3zm2 2v3h3V5H5zm7-2h7v7h-7V3zm2 2v3h3V5h-3zM3 13h7v7H3v-7zm2 2v3h3v-3H5zm10 1h2v2h-2v-2zm2 2h2v2h-2v-2zm-2 2h2v2h-2v-2zm-2-6h2v2h-2v-2zm2 2h2v2h-2v-2zm2 0h2v2h-2v-2zm2-2h2v2h-2v-2z"/></svg>
+        Escaneie o QR
+      </div>
+    </div>
+    <div class="sidebar-chats">
+      <div class="sidebar-chats-hd">
+        <span>Grupos e Contatos</span>
+        <button id="btnLimparSel" class="btn-limpar-sel" onclick="limparSel()">✕ Limpar</button>
+        <span id="chatCount" style="color:var(--subtext)">0</span>
+      </div>
+      <div id="chatList">
+        <div class="chats-vazio">Conecte o WhatsApp<br>para ver os grupos</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- Stats — item 8: clicável -->
+    <div class="stats-row">
+      <div class="stat-card stat-total" id="card-TODOS" onclick="filtrarFeed('TODOS',null)">
+        <div class="stat-lbl">Total do dia</div>
+        <div class="stat-num" id="statTotal">0</div>
+        <div class="stat-sub">mensagens filtradas</div>
+      </div>
+      <div class="stat-card stat-pa" id="card-PA" onclick="filtrarFeed('PA',null)">
+        <div class="stat-lbl">Pará — PA</div>
+        <div class="stat-num" id="statPA">0</div>
+        <div class="stat-sub">46 municípios</div>
+      </div>
+      <div class="stat-card stat-ma" id="card-MA" onclick="filtrarFeed('MA',null)">
+        <div class="stat-lbl">Maranhão — MA</div>
+        <div class="stat-num" id="statMA">0</div>
+        <div class="stat-sub">São Luís e região</div>
+      </div>
+      <div class="stat-card stat-ap" id="card-AP" onclick="filtrarFeed('AP',null)">
+        <div class="stat-lbl">Amapá — AP</div>
+        <div class="stat-num" id="statAP">0</div>
+        <div class="stat-sub">Macapá · ADX</div>
+      </div>
+      <div class="stat-card stat-am" id="card-AM" onclick="filtrarFeed('AM',null)">
+        <div class="stat-lbl">Amazonas — AM</div>
+        <div class="stat-num" id="statAM">0</div>
+        <div class="stat-sub">Parintins · ADX</div>
+      </div>
+      <div class="stat-card stat-wand" id="card-WANDERSON" onclick="filtrarFeed('WANDERSON',null)">
+        <div class="stat-lbl">Wanderson</div>
+        <div class="stat-num" id="statWAND">0</div>
+        <div class="stat-sub">@mencionado</div>
+      </div>
+    </div>
+
+    <!-- UF Blink Bar (item 4) -->
+    <div class="uf-blink-bar">
+      <div class="uf-blink-item" id="blink-PA" onclick="filtrarFeed('PA',null)">PA — Pará</div>
+      <div class="uf-blink-item" id="blink-MA" onclick="filtrarFeed('MA',null)">MA — Maranhão</div>
+      <div class="uf-blink-item" id="blink-AP" onclick="filtrarFeed('AP',null)">AP — Amapá</div>
+      <div class="uf-blink-item" id="blink-AM" onclick="filtrarFeed('AM',null)">AM — Amazonas</div>
+    </div>
+
+    <!-- 4 Quadrantes (item 7) -->
+    <div class="quadrant-grid">
+
+      <!-- Q1 topo-esquerda: Timer -->
+      <div class="quadrant">
+        <div class="timer-section">
+          <div class="timer-hd" onclick="toggleTimer()">
+            <h2>⏰ Monitor de Reports — 60 min <span class="timer-toggle" id="timerToggleIco">▾</span></h2>
+            <span class="timer-badge" id="timerBadge">Sem acionamentos</span>
+          </div>
+          <div class="timer-body" id="timerPanel">
+            <span class="timer-empty">Nenhum acionamento em andamento.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 topo-direita: Detalhe -->
+      <div class="quadrant">
+        <div class="detail-wrap" id="detalhePanel">
+          <div class="detail-hd">
+            <h3>📋 Detalhes</h3>
+            <button class="btn-fechar" onclick="fecharDetalhe()">✕</button>
+          </div>
+          <div class="detail-body" id="detalheBody">
+            <div class="detalhe-vazio">Selecione uma mensagem</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 baixo-esquerda: Feed -->
+      <div class="quadrant">
+        <div class="feed-wrap">
+          <div class="feed-hd">
+            <h2>💬 Feed <span class="filtro-ativo-tag" id="filtroAtivoTag"></span></h2>
+            <span class="msg-count-badge" id="msgCount">0 hoje</span>
+          </div>
+          <div class="filter-bar" id="filterTabs">
+            <button class="ftab f-todos ativo" onclick="filtrarFeed('TODOS',this)">Todos</button>
+            <button class="ftab f-pa"  id="ftab-PA"       onclick="filtrarFeed('PA',this)">PA</button>
+            <button class="ftab f-ma"  id="ftab-MA"       onclick="filtrarFeed('MA',this)">MA</button>
+            <button class="ftab f-ap"  id="ftab-AP"       onclick="filtrarFeed('AP',this)">AP</button>
+            <button class="ftab f-am"  id="ftab-AM"       onclick="filtrarFeed('AM',this)">AM</button>
+            <button class="ftab"       id="ftab-URGENTE"  onclick="filtrarFeed('URGENTE',this)"  style="color:var(--vermelho);border-color:rgba(239,68,68,.35)">🚨 Urgentes</button>
+            <button class="ftab"       id="ftab-RUPTURA"  onclick="filtrarFeed('RUPTURA',this)"  style="color:#fca5a5;border-color:rgba(239,68,68,.35)">⚡ Ruptura</button>
+            <button class="ftab"       id="ftab-NAOIDA"   onclick="filtrarFeed('NAOIDA',this)"   style="color:var(--subtext)">🔔 Não lidas</button>
+            <button class="ftab"       id="ftab-FLAGGED"  onclick="filtrarFeed('FLAGGED',this)"  style="color:var(--flag-cor);border-color:rgba(234,179,8,.35)">⚑ Sinalizadas</button>
+            <button class="ftab"       id="ftab-WANDERSON" onclick="filtrarFeed('WANDERSON',this)" style="color:var(--wanderson);border-color:rgba(245,158,11,.35)">@W</button>
+            <select class="localidade-select" id="filtroLocalidade" onchange="filtrarPorLocalidade(this.value)">
+              <option value="">Todas as localidades</option>
+            </select>
+          </div>
+          <div class="msg-list" id="msgList">
+            <p style="color:var(--muted);font-size:.78rem;text-align:center;padding:18px">Aguardando mensagens…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q4 baixo-direita: Chamados Massivos -->
+      <div class="quadrant">
+        <div class="massivo-section">
+          <div class="massivo-hd">
+            <h2>🚨 Chamados Massivos</h2>
+            <span class="msg-count-badge" id="massivoCount">0 hoje</span>
+          </div>
+          <div class="massivo-stats">
+            <div class="mas-card ativo" id="mas-card-TODOS" onclick="filtrarMassivoUF('TODOS',this)">
+              <div class="mas-num" id="mas-total">0</div>
+              <div class="mas-lbl">Total</div>
+            </div>
+            <div class="mas-card" id="mas-card-PA" onclick="filtrarMassivoUF('PA',this)" style="border-color:rgba(59,130,246,.3)">
+              <div class="mas-num" style="color:#3b82f6" id="mas-PA">0</div>
+              <div class="mas-lbl">PA</div>
+            </div>
+            <div class="mas-card" id="mas-card-MA" onclick="filtrarMassivoUF('MA',this)" style="border-color:rgba(249,115,22,.3)">
+              <div class="mas-num" style="color:#f97316" id="mas-MA">0</div>
+              <div class="mas-lbl">MA</div>
+            </div>
+            <div class="mas-card" id="mas-card-AP" onclick="filtrarMassivoUF('AP',this)" style="border-color:rgba(16,185,129,.3)">
+              <div class="mas-num" style="color:#10b981" id="mas-AP">0</div>
+              <div class="mas-lbl">AP</div>
+            </div>
+            <div class="mas-card" id="mas-card-AM" onclick="filtrarMassivoUF('AM',this)" style="border-color:rgba(168,85,247,.3)">
+              <div class="mas-num" style="color:#a855f7" id="mas-AM">0</div>
+              <div class="mas-lbl">AM</div>
+            </div>
+          </div>
+          <div class="massivo-filter" id="massivoFilterBar">
+            <button class="ftab ativo" id="mas-ftab-TODOS" onclick="filtrarMassivoTipo('TODOS',this)">Todos</button>
+            <button class="ftab" id="mas-ftab-BDESK" onclick="filtrarMassivoTipo('BDESK',this)" style="color:#93c5fd;border-color:rgba(59,130,246,.35)">Bdesk</button>
+            <button class="ftab" id="mas-ftab-TOTAL" onclick="filtrarMassivoTipo('TOTAL',this)" style="color:#fca5a5;border-color:rgba(239,68,68,.35)">Falha Total</button>
+            <button class="ftab" id="mas-ftab-CONJUNTA" onclick="filtrarMassivoTipo('CONJUNTA',this)" style="color:#d8b4fe;border-color:rgba(168,85,247,.35)">Conjunta</button>
+            <button class="ftab" id="mas-ftab-RUPTURA" onclick="filtrarMassivoTipo('RUPTURA',this)" style="color:#fdba74;border-color:rgba(249,115,22,.35)">Ruptura</button>
+          </div>
+          <div class="massivo-list" id="massivoList">
+            <p style="color:var(--muted);font-size:.78rem;text-align:center;padding:18px">Nenhum chamado massivo.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL CHAT — item 3 -->
+<div class="modal-overlay" id="chatModal">
+  <div class="chat-modal">
+    <div class="chat-modal-hd">
+      <div>
+        <div class="chat-modal-nome" id="chatModalNome">—</div>
+        <div class="chat-modal-sub" id="chatModalSub">grupo</div>
+      </div>
+      <button class="btn-modal-close" onclick="fecharChatModal()">✕</button>
+    </div>
+    <div class="chat-modal-msgs" id="chatModalMsgs">
+      <div class="modal-loading">Carregando…</div>
+    </div>
+    <div class="chat-modal-reply">
+      <textarea id="chatModalReply" placeholder="Digite uma resposta…"></textarea>
+      <div class="chat-modal-reply-row">
+        <div class="chat-modal-status" id="chatModalStatus"></div>
+        <button class="btn-modal-reply" onclick="enviarRespostaModal()">▶ Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  (function() {
+    const token  = localStorage.getItem('mcll_token');
+    const nome   = localStorage.getItem('mcll_nome')  || '';
+    const perfil = localStorage.getItem('mcll_perfil') || '';
+    if (!token) { location.replace('/'); return; }
+    // Mostra usuário no topbar
+    const nomeEl   = document.getElementById('userNome');
+    const perfilEl = document.getElementById('userPerfil');
+    if (nomeEl)   nomeEl.textContent = nome;
+    if (perfilEl) {
+      perfilEl.textContent = perfil === 'administrador' ? 'Admin' : 'Usuário';
+      perfilEl.style.background = perfil === 'administrador' ? 'rgba(59,130,246,.18)' : 'rgba(34,197,94,.13)';
+      perfilEl.style.color      = perfil === 'administrador' ? '#93c5fd' : '#86efac';
+    }
+    // Oculta botão de resposta para não-admin
+    if (perfil !== 'administrador') {
+      document.querySelectorAll('.btn-reply, .btn-modal-reply').forEach(el => el.style.display = 'none');
+    }
+  })();
+
+  function logout() {
+    localStorage.removeItem('mcll_token');
+    localStorage.removeItem('mcll_nome');
+    localStorage.removeItem('mcll_perfil');
+    location.replace('/');
+  }
+
+  // Helper: fetch com token
+  function apiFetch(url, opts = {}) {
+    const token = localStorage.getItem('mcll_token') || '';
+    return fetch(url, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        ...(opts.headers || {})
+      }
+    });
+  }
+
+  // ── Data ─────────────────────────────────────────────────────────────────
+  (function() {
+    const d = new Date();
+    const dias  = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+    const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    document.getElementById('dataHoje').textContent =
+      `${dias[d.getDay()]}, ${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
+  })();
+
+  // ── Estado ───────────────────────────────────────────────────────────────
+  let ws, BASE = [], todasMensagens = [];
+  let filtroFeedAtual  = 'TODOS';
+  let filtroLocalidade = '';
+  let mensagemSelecionada = null;
+  let chatModalId = null;
+  const timers = {};
+  const alertedTimers = new Set();
+  let timerAberto = true;
+  const TIMER_DURACAO = 60 * 60 * 1000;
+  const COR_UF = { PA:'#3b82f6', MA:'#f97316', AP:'#10b981', AM:'#a855f7' };
+  const MA_TIMER_MUNIS = ['são luís', 'paço do lumiar', 'são josé de ribamar'];
+  // seleção de grupos
+  let selectedChats     = new Set();
+  let selectedChatsInfo = {};
+  let _chatMap          = {};
+  let _serverContadores = {};
+  let filtroMassivoUFAtual   = 'TODOS';
+  let filtroMassivoTipoAtual = 'TODOS';
+
+  // ── Áudio (items 9, 10) ───────────────────────────────────────────────────
+  let _audioCtx = null;
+  function _getACtx() {
+    if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return _audioCtx;
+  }
+  function playBeep(freq, dur, gain) {
+    try {
+      const ctx = _getACtx();
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.frequency.value = freq || 880;
+      g.gain.setValueAtTime(gain || 0.3, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (dur || 0.4));
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + (dur || 0.4));
+    } catch(e) {}
+  }
+  function playTimerAlert() {
+    playBeep(660, 0.3, 0.4);
+    setTimeout(() => playBeep(880, 0.3, 0.4), 350);
+    setTimeout(() => playBeep(660, 0.3, 0.4), 700);
+  }
+  function playRupturaAlert() {
+    playBeep(1100, 0.18, 0.5);
+    setTimeout(() => playBeep(1400, 0.18, 0.5), 220);
+    setTimeout(() => playBeep(1100, 0.18, 0.5), 440);
+    setTimeout(() => playBeep(1400, 0.18, 0.5), 660);
+  }
+
+  // ── Filtro por grupos selecionados (items 1, 2, 3) ────────────────────────
+  function getActiveMsgs() {
+    if (selectedChats.size === 0) return todasMensagens;
+    return todasMensagens.filter(m => selectedChats.has(m.numero));
+  }
+
+  // ── WebSocket ─────────────────────────────────────────────────────────────
+  function conectarWS() {
+    const token   = localStorage.getItem('mcll_token') || '';
+    const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
+    ws = new WebSocket(`${wsProto}://${location.host}?token=${encodeURIComponent(token)}`);
+    ws.onclose = () => { atualizarStatus('desconectado'); setTimeout(conectarWS, 3000); };
+    ws.onmessage = (evt) => {
+      const { tipo, dados } = JSON.parse(evt.data);
+      if      (tipo === 'init')         handleInit(dados);
+      else if (tipo === 'qr')           mostrarQR(dados.qrDataUrl);
+      else if (tipo === 'status')       atualizarStatus(dados.status);
+      else if (tipo === 'mensagem')     novaMensagem(dados);
+      else if (tipo === 'contadores')   atualizarContadores(dados);
+      else if (tipo === 'lida')         marcarLidaLocal(dados.id, dados.lidaEm);
+      else if (tipo === 'flag')         toggleFlagLocal(dados.id, dados.flagged);
+      else if (tipo === 'chats')        renderChatList(dados);
+      else if (tipo === 'reset_diario') resetDiario(dados.contadores);
+    };
+  }
+
+  function handleInit(dados) {
+    atualizarStatus(dados.statusWpp);
+    atualizarContadores(dados.contadores);
+    todasMensagens = dados.mensagens || [];
+    if (dados.chatList && dados.chatList.length) renderChatList(dados.chatList);
+    todasMensagens.forEach(m => {
+      if (m.temAcionamento && m.detectados && m.detectados.length > 0 && !m.lida) iniciarTimers(m, m.ts, m.texto);
+    });
+    renderFeed();
+    renderMassivo();
+    atualizarDropdownLocalidades();
+    apiFetch('/api/base').then(r => r.json()).then(b => { BASE = b; }).catch(() => {});
+  }
+
+  // ── QR ────────────────────────────────────────────────────────────────────
+  function mostrarQR(dataUrl) {
+    document.getElementById('qrSection').innerHTML =
+      `<p style="font-size:.66rem;color:var(--muted);margin-bottom:7px">Escaneie com o WhatsApp</p>
+       <img src="${dataUrl}" style="width:140px;height:140px;border-radius:8px;border:2px solid var(--border2)" />`;
+  }
+
+  function atualizarStatus(status) {
+    const ok = status === 'conectado';
+    document.getElementById('connDot').className   = ok ? 'conn-dot on' : 'conn-dot';
+    document.getElementById('connLabel').textContent = ok ? 'Conectado' : 'Desconectado';
+    document.getElementById('wppStatus').textContent  = ok ? 'Online ✔' : 'Aguardando…';
+    if (ok) {
+      document.getElementById('qrSection').innerHTML =
+        '<div style="padding:12px;text-align:center;color:#4ade80">' +
+        '<div style="font-size:1.6rem;margin-bottom:4px">✓</div>' +
+        '<div style="font-weight:700;font-size:.84rem">WhatsApp conectado</div>' +
+        '<div style="font-size:.68rem;color:var(--muted);margin-top:3px">Monitorando em tempo real</div></div>';
+    }
+  }
+
+  // ── Contadores (items 1, 5, 8, 11) ───────────────────────────────────────
+  function atualizarContadores(c) {
+    if (!c) return;
+    _serverContadores = c;
+    atualizarContadoresDisplay();
+  }
+
+  function atualizarContadoresDisplay() {
+    let c;
+    if (selectedChats.size > 0) {
+      c = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0 };
+      getActiveMsgs().forEach(m => {
+        if (m.duplicado) return;
+        if ((m.uf||[]).length > 0) {
+          m.uf.forEach(u => { if (c[u] !== undefined) c[u]++; });
+          c.total = c.PA + c.MA + c.AP + c.AM;
+        }
+        if (m.temWanderson) c.WANDERSON++;
+      });
+      document.querySelectorAll('.stat-card').forEach(el => el.classList.add('sel-ativo'));
+    } else {
+      c = _serverContadores;
+      document.querySelectorAll('.stat-card').forEach(el => el.classList.remove('sel-ativo'));
+    }
+    document.getElementById('statTotal').textContent = c.total    || 0;
+    document.getElementById('statPA').textContent    = c.PA       || 0;
+    document.getElementById('statMA').textContent    = c.MA       || 0;
+    document.getElementById('statAP').textContent    = c.AP       || 0;
+    document.getElementById('statAM').textContent    = c.AM       || 0;
+    document.getElementById('statWAND').textContent  = c.WANDERSON|| 0;
+    document.getElementById('msgCount').textContent  = (c.total || 0) + ' hoje';
+  }
+
+  // ── Chat list (itens 2, 3, 6) — data-cid + event delegation ─────────────
+  function renderChatList(chats) {
+    const el  = document.getElementById('chatList');
+    const cnt = document.getElementById('chatCount');
+    _chatMap  = {};
+    if (!chats || !chats.length) {
+      el.innerHTML = '<div class="chats-vazio">Nenhum chat encontrado</div>';
+      if (cnt) cnt.textContent = '0';
+      return;
+    }
+    chats.forEach(c => { _chatMap[c.id] = c; });
+    if (cnt) cnt.textContent = chats.length;
+    el.innerHTML = chats.map(c => `
+      <div class="chat-item${selectedChats.has(c.id) ? ' selecionado' : ''}" data-cid="${escAttr(c.id)}">
+        <input type="checkbox" class="chat-check" ${selectedChats.has(c.id) ? 'checked' : ''}>
+        <div class="chat-avatar">${c.grupo ? '👥' : '👤'}</div>
+        <div class="chat-info">
+          <div class="chat-nome" title="${escAttr(c.nome || c.id)}">${escHtml(c.nome || c.id)}</div>
+          <div class="chat-tipo">${c.grupo ? 'Grupo' : 'Contato'}</div>
+        </div>
+        ${c.naoLidas > 0 ? `<div class="chat-badge">${c.naoLidas}</div>` : ''}
+      </div>`).join('');
+
+    el.querySelectorAll('.chat-item').forEach(item => {
+      const id = item.dataset.cid;
+      const cb = item.querySelector('.chat-check');
+      cb.onchange = () => { item.classList.toggle('selecionado', cb.checked); toggleSel(id, cb.checked); };
+      ['.chat-avatar','.chat-info'].forEach(s => {
+        const n = item.querySelector(s);
+        if (n) n.onclick = (e) => { e.stopPropagation(); const c = _chatMap[id]; if (c) abrirChatModal(c.id, c.nome||'', c.grupo); };
+      });
+    });
+    atualizarBtnLimpar();
+  }
+
+  // ── Modal de chat (item 2) ────────────────────────────────────────────────
+  async function abrirChatModal(chatId, nome, grupo) {
+    chatModalId = chatId;
+    document.getElementById('chatModalNome').textContent = nome || chatId;
+    document.getElementById('chatModalSub').textContent  = (grupo === true || grupo === 'true') ? 'Grupo' : 'Contato';
+    document.getElementById('chatModal').classList.add('aberto');
+    document.getElementById('chatModalMsgs').innerHTML = '<div class="modal-loading">Carregando mensagens…</div>';
+    document.getElementById('chatModalStatus').textContent = '';
+    try {
+      const r = await apiFetch('/api/chat-messages', {
+        method: 'POST',
+        body: JSON.stringify({ chatId })
+      });
+      const data = await r.json();
+      if (data.erro) throw new Error(data.erro);
+      const msgs = data.messages || [];
+      if (!msgs.length) {
+        document.getElementById('chatModalMsgs').innerHTML = '<div class="modal-loading">Nenhuma mensagem encontrada.</div>';
+        return;
+      }
+      document.getElementById('chatModalMsgs').innerHTML = msgs.map(m => `
+        <div class="chat-msg-item ${m.fromMe ? 'from-me' : 'from-them'}">
+          ${!m.fromMe && m.de ? `<div class="chat-msg-de">${escHtml(m.de)}</div>` : ''}
+          <div class="chat-msg-bubble">${escHtml(m.texto || '(mídia)')}</div>
+          <div class="chat-msg-hora">${m.hora}</div>
+        </div>`).join('');
+      const c = document.getElementById('chatModalMsgs');
+      c.scrollTop = c.scrollHeight;
+    } catch(e) {
+      document.getElementById('chatModalMsgs').innerHTML = `<div class="modal-erro">Erro: ${escHtml(e.message)}</div>`;
+    }
+  }
+
+  function fecharChatModal() {
+    document.getElementById('chatModal').classList.remove('aberto');
+    chatModalId = null;
+    document.getElementById('chatModalReply').value = '';
+  }
+
+  async function enviarRespostaModal() {
+    const texto  = document.getElementById('chatModalReply').value.trim();
+    const status = document.getElementById('chatModalStatus');
+    if (!texto || !chatModalId) return;
+    status.textContent = 'Enviando…'; status.style.color = 'var(--subtext)';
+    try {
+      const r = await apiFetch('/api/reply', {
+        method: 'POST',
+        body: JSON.stringify({ numero: chatModalId, texto })
+      });
+      const data = await r.json();
+      if (data.ok) {
+        document.getElementById('chatModalReply').value = '';
+        status.textContent = '✓ Enviado'; status.style.color = 'var(--verde)';
+        setTimeout(() => { status.textContent = ''; }, 3000);
+      } else { throw new Error(data.erro || 'Falha'); }
+    } catch(e) {
+      status.textContent = '✗ ' + e.message; status.style.color = 'var(--vermelho)';
+    }
+  }
+
+  // Fechar modal clicando fora
+  document.getElementById('chatModal').addEventListener('click', function(e) {
+    if (e.target === this) fecharChatModal();
+  });
+
+  // ── Mensagens ─────────────────────────────────────────────────────────────
+  function novaMensagem(m) {
+    todasMensagens.unshift(m);
+    if (todasMensagens.length > 200) todasMensagens.pop();
+    if (m.temAcionamento && m.detectados && m.detectados.length > 0) iniciarTimers(m, m.ts, m.texto);
+    if (m.temRuptura) playRupturaAlert();  // item 10
+    atualizarDropdownLocalidades();
+    renderFeed();
+    renderMassivo();
+    atualizarContadoresDisplay();
+  }
+
+  // item 8 — filtro + indicador visual no card e na tag
+  function filtrarFeed(valor, btn) {
+    filtroFeedAtual  = valor;
+    filtroLocalidade = '';
+    const sel = document.getElementById('filtroLocalidade');
+    if (sel) sel.value = '';
+
+    document.querySelectorAll('#filterTabs .ftab').forEach(b => b.classList.remove('ativo'));
+    document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('ativo'));
+
+    if (btn) {
+      btn.classList.add('ativo');
+    } else {
+      const mapa = { TODOS:'.ftab.f-todos', PA:'#ftab-PA', MA:'#ftab-MA', AP:'#ftab-AP', AM:'#ftab-AM', WANDERSON:'#ftab-WANDERSON', RUPTURA:'#ftab-RUPTURA' };
+      const s = mapa[valor];
+      if (s) { const t = document.querySelector(s); if (t) t.classList.add('ativo'); }
+    }
+
+    // Destacar card ativo
+    const cardId = 'card-' + valor;
+    const card = document.getElementById(cardId);
+    if (card) card.classList.add('ativo');
+
+    // Tag de filtro ativo
+    const tag = document.getElementById('filtroAtivoTag');
+    const nomes = { TODOS:'Todos', PA:'Pará (PA)', MA:'Maranhão (MA)', AP:'Amapá (AP)', AM:'Amazonas (AM)', WANDERSON:'@Wanderson', URGENTE:'Urgentes', RUPTURA:'Ruptura', NAOIDA:'Não lidas', FLAGGED:'Sinalizadas' };
+    if (valor !== 'TODOS') {
+      tag.textContent = '● ' + (nomes[valor] || valor);
+      tag.classList.add('visivel');
+    } else {
+      tag.classList.remove('visivel');
+    }
+
+    renderFeed();
+    // Scroll suave até o feed
+    document.querySelector('.feed-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function filtrarPorLocalidade(val) {
+    filtroLocalidade = val;
+    filtroFeedAtual  = '';
+    document.querySelectorAll('#filterTabs .ftab').forEach(b => b.classList.remove('ativo'));
+    const tag = document.getElementById('filtroAtivoTag');
+    if (val) { tag.textContent = '● ' + val; tag.classList.add('visivel'); }
+    else      { tag.classList.remove('visivel'); }
+    renderFeed();
+  }
+
+  function renderFeed() {
+    const lista = document.getElementById('msgList');
+    let msgs = getActiveMsgs();
+
+    if (filtroLocalidade) {
+      msgs = msgs.filter(m => (m.municipios || []).includes(filtroLocalidade));
+    } else if (filtroFeedAtual === 'RUPTURA') {
+      msgs = msgs.filter(m => m.temRuptura);
+    } else if (filtroFeedAtual === 'URGENTE') {
+      msgs = msgs.filter(m => m.temAcionamento && !m.lida);
+    } else if (filtroFeedAtual === 'NAOIDA') {
+      msgs = msgs.filter(m => !m.lida && (m.detectados||[]).length > 0);
+    } else if (filtroFeedAtual === 'FLAGGED') {
+      msgs = msgs.filter(m => m.flagged);
+    } else if (filtroFeedAtual === 'WANDERSON') {
+      msgs = msgs.filter(m => m.temWanderson);
+    } else if (['PA','MA','AP','AM'].includes(filtroFeedAtual)) {
+      msgs = msgs.filter(m => (m.uf || []).includes(filtroFeedAtual));
+    } else {
+      // TODOS: apenas mensagens com município/UF identificado
+      msgs = msgs.filter(m => (m.detectados||[]).length > 0);
+    }
+
+    const badge = document.getElementById('msgCount');
+    if (badge) {
+      const lbl = filtroFeedAtual === 'TODOS' && !filtroLocalidade ? 'hoje' : 'filtradas';
+      badge.textContent = msgs.length + ' ' + lbl;
+    }
+
+    if (!msgs.length) {
+      lista.innerHTML = '<p style="color:var(--muted);font-size:.78rem;text-align:center;padding:18px">Nenhuma mensagem.</p>';
+    } else {
+      lista.innerHTML = msgs.map(m => buildCard(m)).join('');
+    }
+    atualizarUFBlinks();
+  }
+
+  function buildCard(m) {
+    const urgente    = m.temAcionamento && !m.lida;
+    const selecionada = mensagemSelecionada && mensagemSelecionada.id === m.id;
+    let cls = ['msg-card'];
+    if (m.temRuptura) cls.push('ruptura');
+    else if (m.flagged) cls.push('flagged');
+    else if (urgente) cls.push('urgente');
+    else cls.push('normal');
+    if (m.lida)       cls.push('lida');
+    if (selecionada)  cls.push('selecionada');
+    if (m.duplicado)  cls.push('duplicado');
+
+    const icon = m.temRuptura ? '⚡' : urgente ? '🚨' : m.grupo ? '👥' : '👤';
+    const chipsUF  = (m.uf || []).map(u => `<span class="chip uf-${u.toLowerCase()}">${u}</span>`).join('');
+    const chipsSig = (m.siglas || []).slice(0,2).map(s => `<span class="chip sigla">${s}</span>`).join('');
+    const chipsMu  = (m.municipios || []).slice(0,1).map(mu => `<span class="chip muni">${escHtml(mu)}</span>`).join('');
+    const chipCh   = m.chamado ? `<span class="chip chamado">🎫 ${m.chamado.numero}</span>` : '';
+    const chipDup  = m.duplicado ? `<span class="chip dup">atualização</span>` : '';
+    const chipRup  = m.temRuptura ? `<span class="chip ruptura">⚡ RUPTURA</span>` : '';
+    const tipoCls  = { BDESK:'mas-tipo-bdesk', TOTAL:'mas-tipo-total', CONJUNTA:'mas-tipo-conjunta', RUPTURA:'mas-tipo-ruptura' };
+    const chipMas  = m.temMassivo && m.tipoMassivo ? `<span class="mas-item-tipo ${tipoCls[m.tipoMassivo]||''}">${m.tipoMassivo}</span>` : '';
+    const lidaBadge = m.lida ? `<span class="badge-lida">✓ ${m.lidaEm || ''}</span>` : '';
+    const flagCls  = m.flagged ? 'ativo' : '';
+
+    return `<div class="${cls.join(' ')}" onclick="selecionarMensagem('${escAttr(m.id)}')">
+      <div class="msg-topo">
+        <span class="msg-remetente">${icon} ${escHtml(m.nomeGrupo || m.de || 'Desconhecido')}</span>
+        <span class="msg-hora">${m.hora || ''}</span>
+        <button class="btn-flag ${flagCls}" onclick="event.stopPropagation();toggleFlag('${escAttr(m.id)}')" title="Sinalizar">⚑</button>
+      </div>
+      <div class="msg-text">${escHtml((m.texto||'').substring(0,180))}</div>
+      <div class="msg-footer">${chipMas}${chipRup}${chipsUF}${chipsSig}${chipsMu}${chipCh}${chipDup}${lidaBadge}</div>
+    </div>`;
+  }
+
+  // ── Flag (item 9) ─────────────────────────────────────────────────────────
+  function toggleFlag(id) {
+    apiFetch(`/api/mensagens/${encodeURIComponent(id)}/flag`, { method: 'POST' })
+      .then(r => r.json()).then(data => toggleFlagLocal(id, data.flagged)).catch(console.error);
+  }
+
+  function toggleFlagLocal(id, flagged) {
+    const m = todasMensagens.find(x => x.id === id);
+    if (m) m.flagged = flagged;
+    renderFeed();
+    if (mensagemSelecionada && mensagemSelecionada.id === id) renderDetalhe();
+  }
+
+  // ── Selecionar mensagem ───────────────────────────────────────────────────
+  function selecionarMensagem(id) {
+    mensagemSelecionada = todasMensagens.find(m => m.id === id);
+    const panel = document.getElementById('detalhePanel');
+    if (panel) {
+      // remove e reaplica a classe para re-disparar animação
+      panel.classList.remove('com-msg');
+      void panel.offsetWidth;
+      panel.classList.add('com-msg');
+    }
+    renderDetalhe();
+    // scroll do detail-body para o topo
+    const body = document.getElementById('detalheBody');
+    if (body) body.scrollTop = 0;
+    renderFeed();
+    if (mensagemSelecionada && !mensagemSelecionada.lida) marcarLida(id);
+  }
+
+  function fecharDetalhe() {
+    mensagemSelecionada = null;
+    const panel = document.getElementById('detalhePanel');
+    if (panel) panel.classList.remove('com-msg');
+    document.getElementById('detalheBody').innerHTML = '<div class="detalhe-vazio">Selecione uma mensagem</div>';
+    renderFeed();
+  }
+
+  function renderDetalhe() {
+    const body = document.getElementById('detalheBody');
+    if (!mensagemSelecionada) { body.innerHTML = '<div class="detalhe-vazio">Selecione uma mensagem</div>'; return; }
+    const m = mensagemSelecionada;
+    const chipsUF  = (m.uf || []).map(u => `<span class="chip uf-${u.toLowerCase()}">${u}</span>`).join('');
+    const chipsSig = (m.siglas || []).map(s => `<span class="chip sigla">${s}</span>`).join('');
+    const chipsMu  = (m.municipios || []).map(mu => `<span class="chip muni">${escHtml(mu)}</span>`).join('');
+    const chipsEps = [...new Set((m.detectados||[]).map(d=>d.eps).filter(Boolean))].map(e => `<span class="chip eps-${e.toLowerCase()}">${e}</span>`).join('');
+    const chipCh   = m.chamado ? `<span class="chip chamado">🎫 ${m.chamado.tipo.toUpperCase()} #${m.chamado.numero}</span>` : '';
+    const chipDup  = m.duplicado ? `<span class="chip dup">Atualização de chamado</span>` : '';
+
+    body.innerHTML = `
+      <div>
+        <div class="detalhe-de">${m.grupo?'👥':'👤'} ${escHtml(m.de || 'Desconhecido')}</div>
+        ${m.grupo && m.nomeGrupo ? `<div class="detalhe-grupo">Grupo: ${escHtml(m.nomeGrupo)}</div>` : ''}
+        <div class="detalhe-hora">🕐 ${m.hora || ''}  ·  ${m.dataDia || ''}</div>
+      </div>
+      <div class="detalhe-texto">${escHtml(m.texto || '')}</div>
+      <div class="detalhe-chips">${chipsUF}${chipsSig}${chipsMu}${chipsEps}${chipCh}${chipDup}</div>
+      <div>
+        <div class="reply-label">Enviar Resposta</div>
+        <textarea class="reply-textarea" id="replyText" placeholder="Digite sua resposta…"></textarea>
+        <div class="reply-status" id="replyStatus"></div>
+        <button class="btn-reply" onclick="enviarResposta()">▶ Enviar Resposta</button>
+      </div>`;
+  }
+
+  // item 7 — reply corrigido
+  async function enviarResposta() {
+    const texto  = document.getElementById('replyText').value.trim();
+    const status = document.getElementById('replyStatus');
+    if (!texto || !mensagemSelecionada) return;
+    status.textContent = 'Enviando…'; status.style.color = 'var(--subtext)';
+    try {
+      const r = await apiFetch('/api/reply', {
+        method: 'POST',
+        body: JSON.stringify({ numero: mensagemSelecionada.numero, texto })
+      });
+      const data = await r.json();
+      if (data.ok) {
+        document.getElementById('replyText').value = '';
+        status.textContent = '✓ Enviado com sucesso'; status.style.color = 'var(--verde)';
+        setTimeout(() => { if (status) status.textContent = ''; }, 3000);
+      } else { throw new Error(data.erro || 'Erro desconhecido'); }
+    } catch(e) {
+      status.textContent = '✗ ' + e.message; status.style.color = 'var(--vermelho)';
+    }
+  }
+
+  // ── Marcar lida ───────────────────────────────────────────────────────────
+  function marcarLida(id) {
+    apiFetch(`/api/mensagens/${encodeURIComponent(id)}/lida`, { method: 'POST' })
+      .then(r => r.json()).then(data => marcarLidaLocal(id, data.lidaEm)).catch(console.error);
+  }
+  function marcarLidaLocal(id, lidaEm) {
+    const m = todasMensagens.find(x => x.id === id);
+    if (m) { m.lida = true; if (lidaEm) m.lidaEm = lidaEm; }
+    renderFeed();
+    renderMassivo();
+    if (mensagemSelecionada && mensagemSelecionada.id === id) renderDetalhe();
+    atualizarUFBlinks();
+  }
+
+  // ── Reset ─────────────────────────────────────────────────────────────────
+  function resetDiario(c) {
+    todasMensagens = [];
+    Object.keys(timers).forEach(k => delete timers[k]);
+    alertedTimers.clear();
+    localStorage.removeItem('timerInicio');
+    mensagemSelecionada = null;
+    fecharDetalhe();
+    renderTimers(); renderFeed(); renderMassivo(); atualizarContadores(c);
+    atualizarDropdownLocalidades();
+  }
+
+  // ── Seleção de grupos (items 1, 2, 3, 8) ─────────────────────────────────
+  function toggleSel(chatId, checked) {
+    const c = _chatMap[chatId];
+    if (checked) {
+      selectedChats.add(chatId);
+      selectedChatsInfo[chatId] = c ? (c.nome || chatId) : chatId;
+    } else {
+      selectedChats.delete(chatId);
+      delete selectedChatsInfo[chatId];
+    }
+    rebuildTimers();
+    renderFeed();
+    atualizarContadoresDisplay();
+    atualizarBtnLimpar();
+  }
+
+  function rebuildTimers() {
+    Object.keys(timers).forEach(k => delete timers[k]);
+    alertedTimers.clear();
+    const msgs = selectedChats.size > 0
+      ? todasMensagens.filter(m => selectedChats.has(m.numero))
+      : todasMensagens;
+    msgs.forEach(m => {
+      if (m.temAcionamento && m.detectados && m.detectados.length > 0 && !m.lida) iniciarTimers(m, m.ts, m.texto);
+    });
+  }
+
+  function limparSel() {
+    selectedChats.clear();
+    selectedChatsInfo = {};
+    document.querySelectorAll('#chatList .chat-check').forEach(cb => {
+      cb.checked = false;
+      const item = cb.closest('.chat-item');
+      if (item) item.classList.remove('selecionado');
+    });
+    rebuildTimers();
+    renderFeed();
+    atualizarContadoresDisplay();
+    atualizarBtnLimpar();
+  }
+
+  // ── Timers (items 3, 9) ────────────────────────────────────────────────────
+  function iniciarTimers(msgOrDetectados, ts, textoMsg) {
+    let detectados, chatId;
+    if (Array.isArray(msgOrDetectados)) {
+      detectados = msgOrDetectados; chatId = null;
+    } else {
+      if (!msgOrDetectados.temAcionamento) return;  // só acionamentos geram timer
+      detectados = msgOrDetectados.detectados; chatId = msgOrDetectados.numero;
+    }
+    // quando grupos selecionados, só timer dos grupos selecionados
+    if (chatId && selectedChats.size > 0 && !selectedChats.has(chatId)) return;
+
+    const _savedInicio = JSON.parse(localStorage.getItem('timerInicio') || '{}');
+    for (const d of (detectados || [])) {
+      if (!d.sigla && !d.muni) continue;
+      // item 3: MA — só São Luís, Paço do Lumiar, São José de Ribamar
+      if (d.uf === 'MA') {
+        const muniNorm = (d.muni || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+        if (!MA_TIMER_MUNIS.some(a => a.normalize('NFD').replace(/[̀-ͯ]/g,'') === muniNorm)) continue;
+      }
+      const key = `${d.uf}-${d.sigla || d.muni}`;
+      if (!timers[key]) {
+        const inicio = _savedInicio[key] || null;
+        timers[key] = { muni:d.muni, uf:d.uf, sigla:d.sigla, eps:d.eps, inicio, pendente: !inicio, resumo:(textoMsg||'').substring(0,70), chatId };
+      }
+      break; // apenas o primeiro município válido por mensagem
+    }
+    renderTimers();
+  }
+
+  function iniciarContagem(key) {
+    if (timers[key]) {
+      timers[key].pendente = false;
+      timers[key].inicio   = Date.now();
+      const _saved = JSON.parse(localStorage.getItem('timerInicio') || '{}');
+      _saved[key] = timers[key].inicio;
+      localStorage.setItem('timerInicio', JSON.stringify(_saved));
+    }
+    renderTimers();
+  }
+
+  function liberarTimer(key) {
+    delete timers[key];
+    alertedTimers.delete(key);
+    const _saved = JSON.parse(localStorage.getItem('timerInicio') || '{}');
+    delete _saved[key];
+    localStorage.setItem('timerInicio', JSON.stringify(_saved));
+    renderTimers();
+  }
+
+  function fmtMs(ms) {
+    if (ms <= 0) return '00:00';
+    return String(Math.floor(ms/60000)).padStart(2,'0') + ':' + String(Math.floor((ms%60000)/1000)).padStart(2,'0');
+  }
+
+  let timerVisible = true;
+  function toggleTimer() {
+    timerVisible = !timerVisible;
+    document.getElementById('timerPanel').style.display = timerVisible ? '' : 'none';
+    document.getElementById('timerToggleIco').textContent = timerVisible ? '▾' : '▸';
+  }
+
+  function renderTimers() {
+    const panel = document.getElementById('timerPanel');
+    const badge = document.getElementById('timerBadge');
+    const keys  = Object.keys(timers);
+    if (!panel) return;
+
+    if (!keys.length) {
+      panel.innerHTML  = '<span class="timer-empty">Nenhum acionamento em andamento.</span>';
+      badge.textContent = 'Sem acionamentos'; badge.className = 'timer-badge';
+      return;
+    }
+
+    const now       = Date.now();
+    const pendentes = keys.filter(k => timers[k].pendente).length;
+    const ativos    = keys.filter(k => !timers[k].pendente).length;
+    const expirados = keys.filter(k => !timers[k].pendente && timers[k].inicio && (now - timers[k].inicio) >= TIMER_DURACAO).length;
+    const partes    = [];
+    if (ativos)    partes.push(`${ativos} em contagem`);
+    if (pendentes) partes.push(`${pendentes} aguardando`);
+    if (expirados) partes.push(`${expirados} COBRAR!`);
+    badge.textContent = partes.join(' · ') || 'Sem acionamentos';
+    badge.className   = 'timer-badge' + (expirados ? ' alerta' : '');
+
+    // item 9: toca alerta quando timer não-pendente chega a 0
+    keys.forEach(key => {
+      const t = timers[key];
+      if (!t.pendente && t.inicio && (now - t.inicio) >= TIMER_DURACAO && !alertedTimers.has(key)) {
+        alertedTimers.add(key);
+        playTimerAlert();
+      }
+    });
+
+    panel.innerHTML = keys.map(key => {
+      const t   = timers[key];
+      const cor = COR_UF[t.uf] || '#8888a0';
+
+      if (t.pendente) {
+        // Entrada aguardando início manual
+        return `<div class="timer-item">
+          <div class="timer-info">
+            <div class="timer-muni">${escHtml(t.muni)}</div>
+            ${t.resumo ? `<div class="timer-resumo">${escHtml(t.resumo)}</div>` : ''}
+            <div class="timer-tags">
+              <span class="tag-pill" style="background:${cor}">${t.uf}</span>
+              ${t.sigla ? `<span class="tag-pill" style="background:#15803d">${t.sigla}</span>` : ''}
+              ${t.eps   ? `<span class="tag-pill" style="background:${t.eps==='ADX'?'#dc2626':'#166534'}">${t.eps}</span>` : ''}
+            </div>
+            <div class="timer-bar"><div class="timer-bar-fill" style="width:100%;background:var(--border2)"></div></div>
+          </div>
+          <div class="timer-right">
+            <div class="timer-clock" style="color:var(--subtext);font-size:.7rem">AGUARDANDO</div>
+            <button class="btn-liberar" style="background:rgba(34,197,94,.18);color:var(--verde);border-color:rgba(34,197,94,.4)"
+              onclick="iniciarContagem('${key}')">▶ Iniciar</button>
+          </div>
+        </div>`;
+      }
+
+      // Entrada com contagem ativa
+      const decor = now - t.inicio;
+      const rest  = Math.max(0, TIMER_DURACAO - decor);
+      const pct   = Math.max(0, (rest / TIMER_DURACAO) * 100);
+      const exp   = rest <= 0;
+      const urg   = !exp && rest <= 10 * 60 * 1000;
+      const barC  = exp ? '#ef4444' : urg ? '#f97316' : '#22c55e';
+      const cls   = exp ? 'expirado' : urg ? 'urgente' : '';
+      const clkC  = exp ? 'alerta' : urg ? 'urgente' : 'ok';
+
+      return `<div class="timer-item ${cls}">
+        <div class="timer-info">
+          <div class="timer-muni">${escHtml(t.muni)}</div>
+          ${t.resumo ? `<div class="timer-resumo">${escHtml(t.resumo)}</div>` : ''}
+          <div class="timer-tags">
+            <span class="tag-pill" style="background:${cor}">${t.uf}</span>
+            ${t.sigla ? `<span class="tag-pill" style="background:#15803d">${t.sigla}</span>` : ''}
+            ${t.eps   ? `<span class="tag-pill" style="background:${t.eps==='ADX'?'#dc2626':'#166534'}">${t.eps}</span>` : ''}
+          </div>
+          <div class="timer-bar"><div class="timer-bar-fill" style="width:${pct}%;background:${barC}"></div></div>
+        </div>
+        <div class="timer-right">
+          <div class="timer-clock ${clkC}">${exp ? '⚠ COBRAR' : fmtMs(rest)}</div>
+          <button class="btn-liberar" onclick="liberarTimer('${key}')">Liberar</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  setInterval(renderTimers, 1000);
+
+  // ── Dropdown localidades ──────────────────────────────────────────────────
+  function atualizarDropdownLocalidades() {
+    const sel = document.getElementById('filtroLocalidade');
+    if (!sel) return;
+    const val = sel.value;
+    const seen = new Set();
+    todasMensagens.forEach(m => (m.municipios || []).forEach(mu => seen.add(mu)));
+    sel.innerHTML = '<option value="">Todas as localidades</option>';
+    [...seen].sort().forEach(mu => {
+      const opt = document.createElement('option');
+      opt.value = mu; opt.textContent = mu;
+      if (mu === val) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+
+  // ── UF blink bar (item 4) ─────────────────────────────────────────────────
+  function atualizarUFBlinks() {
+    const msgs = getActiveMsgs();
+    ['PA','MA','AP','AM'].forEach(uf => {
+      const blinkEl = document.getElementById('blink-' + uf);
+      const tabEl   = document.getElementById('ftab-' + uf);
+      const temNaoLida = msgs.some(m => !m.lida && !m.flagged && (m.uf||[]).includes(uf));
+      if (blinkEl) blinkEl.classList.toggle('blink-' + uf.toLowerCase(), temNaoLida);
+      if (tabEl)   tabEl.classList.toggle('blink-alert', temNaoLida && filtroFeedAtual !== uf);
+    });
+  }
+
+  // ── Tabela municípios ─────────────────────────────────────────────────────
+  let filtroTabelaAtual = 'TODOS', tabelaAberta = false;
+
+  function toggleTabela() {
+    tabelaAberta = !tabelaAberta;
+    document.getElementById('tableBody').style.display = tabelaAberta ? '' : 'none';
+    document.getElementById('tableToggleIcon').textContent = tabelaAberta ? '▲ Recolher' : '▼ Expandir';
+  }
+
+  function filtrarTabela(valor, btn) {
+    filtroTabelaAtual = valor;
+    document.querySelectorAll('#tableFilterBar .ftab').forEach(b => b.classList.remove('ativo'));
+    if (btn) btn.classList.add('ativo');
+    renderizarTabela(BASE);
+  }
+
+  function renderizarTabela(base) {
+    const tbody = document.getElementById('muniTbody');
+    if (!tbody) return;
+    const lista = filtroTabelaAtual === 'TODOS' ? base
+      : base.filter(r => r.uf === filtroTabelaAtual || r.eps === filtroTabelaAtual);
+    tbody.innerHTML = lista.map(r => `
+      <tr>
+        <td><strong style="color:${COR_UF[r.uf]||'var(--muted)'}">${r.uf}</strong></td>
+        <td style="color:var(--muted);font-size:.7rem">${r.cod || '—'}</td>
+        <td style="font-weight:600">${escHtml(r.muni)}</td>
+        <td>${r.sigla ? `<span class="chip sigla">${r.sigla}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
+        <td>${r.eps === 'SLN' ? '<span class="chip eps-sln">SLN</span>' : r.eps === 'ADX' ? '<span class="chip eps-adx">ADX</span>' : '—'}</td>
+      </tr>`).join('');
+  }
+
+  // ── Chamados Massivos (Q4) ────────────────────────────────────────────────
+  function renderMassivo() {
+    const lista = document.getElementById('massivoList');
+    if (!lista) return;
+
+    let msgs = getActiveMsgs().filter(m => m.temMassivo);
+
+    // Contadores por UF (antes dos filtros)
+    const cnt = { total: 0, PA: 0, MA: 0, AP: 0, AM: 0 };
+    msgs.forEach(m => {
+      cnt.total++;
+      (m.uf || []).forEach(u => { if (cnt[u] !== undefined) cnt[u]++; });
+    });
+    const _ids = { total:'mas-total', PA:'mas-PA', MA:'mas-MA', AP:'mas-AP', AM:'mas-AM' };
+    Object.entries(_ids).forEach(([k, id]) => { const el = document.getElementById(id); if (el) el.textContent = cnt[k]; });
+    const badge = document.getElementById('massivoCount');
+    if (badge) badge.textContent = cnt.total + ' hoje';
+
+    // Piscar contadores e abas com não lidos
+    atualizarMassivoBlinks(msgs);
+
+    // Filtro UF
+    if (filtroMassivoUFAtual !== 'TODOS') {
+      msgs = msgs.filter(m => (m.uf || []).includes(filtroMassivoUFAtual));
+    }
+    // Filtro tipo
+    if (filtroMassivoTipoAtual !== 'TODOS') {
+      msgs = msgs.filter(m => m.tipoMassivo === filtroMassivoTipoAtual);
+    }
+
+    if (!msgs.length) {
+      lista.innerHTML = '<p style="color:var(--muted);font-size:.78rem;text-align:center;padding:18px">Nenhum chamado massivo.</p>';
+      return;
+    }
+
+    lista.innerHTML = msgs.map(m => buildCard(m)).join('');
+  }
+
+  function atualizarMassivoBlinks(msgs) {
+    // pisca cartões UF quando há não lidos naquela UF
+    ['PA','MA','AP','AM'].forEach(uf => {
+      const card = document.getElementById('mas-card-' + uf);
+      const temNaoLida = msgs.some(m => !m.lida && (m.uf || []).includes(uf));
+      if (card) card.classList.toggle('blink-alert', temNaoLida && filtroMassivoUFAtual !== uf);
+    });
+    // pisca abas de tipo quando há não lidos daquele tipo
+    ['BDESK','TOTAL','CONJUNTA','RUPTURA'].forEach(tipo => {
+      const btn = document.getElementById('mas-ftab-' + tipo);
+      const temNaoLida = msgs.some(m => !m.lida && m.tipoMassivo === tipo);
+      if (btn) btn.classList.toggle('blink-alert', temNaoLida && filtroMassivoTipoAtual !== tipo);
+    });
+  }
+
+  function filtrarMassivoUF(uf, btn) {
+    filtroMassivoUFAtual = uf;
+    document.querySelectorAll('.massivo-stats .mas-card').forEach(c => c.classList.remove('ativo', 'blink-alert'));
+    if (btn) btn.classList.add('ativo');
+    renderMassivo();
+  }
+
+  function filtrarMassivoTipo(tipo, btn) {
+    filtroMassivoTipoAtual = tipo;
+    document.querySelectorAll('#massivoFilterBar .ftab').forEach(b => b.classList.remove('ativo', 'blink-alert'));
+    if (btn) btn.classList.add('ativo');
+    renderMassivo();
+  }
+
+  function atualizarBtnLimpar() {
+    const btn = document.getElementById('btnLimparSel');
+    if (btn) btn.classList.toggle('visivel', selectedChats.size > 0);
+  }
+
+  // ── Utils ─────────────────────────────────────────────────────────────────
+  function escHtml(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function escAttr(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    conectarWS();
+    apiFetch('/api/base').then(r => r.json()).then(b => { BASE = b; }).catch(() => {});
+    // Auto-abrir tabela no layout de quadrantes
+    tabelaAberta = true;
+    const tb = document.getElementById('tableBody');
+    if (tb) tb.style.display = '';
+    const ti = document.getElementById('tableToggleIcon');
+    if (ti) ti.textContent = '▲ Recolher';
+  });
+</script>
+</body>
+</html>

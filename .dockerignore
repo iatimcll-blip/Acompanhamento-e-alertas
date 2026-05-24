@@ -1,0 +1,6 @@
+node_modules
+.wpp-session
+data-*.json
+.env
+*.log
+.git

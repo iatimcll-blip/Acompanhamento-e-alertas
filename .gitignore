@@ -1,0 +1,8 @@
+node_modules/
+.wpp-session/
+data-*.json
+.env
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db

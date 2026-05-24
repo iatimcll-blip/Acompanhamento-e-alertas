@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "nome": "Administrador",
+    "email": "admin@mcll.com",
+    "senha": "$2b$10$lVXBf.WgSGfb0cxptPEbu.yK0gN0wa9/Qva4hS7x.ZDSDB36/R49q",
+    "perfil": "administrador"
+  },
+  {
+    "id": "2",
+    "nome": "Usuário",
+    "email": "usuario@mcll.com",
+    "senha": "$2b$10$bcZf0H8VbKkogA6FQgu2YeXs6rL.d0zbXOFotimMrO4/lXj3DcAIa",
+    "perfil": "usuario"
+  }
+]
