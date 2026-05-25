@@ -283,6 +283,27 @@ app.post('/api/chat-messages', autenticar, async (req, res) => {
   }
 });
 
+// Desconectar WhatsApp (admin) — limpa sessão e gera novo QR
+app.post('/api/whatsapp/desconectar', autenticar, apenasAdmin, async (req, res) => {
+  try {
+    statusWpp = 'desconectado';
+    broadcast('status', { status: 'desconectado' });
+    broadcast('qr_limpar', {});
+    try { await client.logout(); } catch (_) {}
+    try { await client.destroy(); } catch (_) {}
+    res.json({ ok: true });
+    // Reinicia cliente para gerar novo QR
+    setTimeout(async () => {
+      limparLockFilesChrome(WPP_SESSION_PATH);
+      client = criarCliente();
+      registrarEventos();
+      await iniciarWhatsApp();
+    }, 1500);
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});
+
 // Flag em mensagem (toggle)
 app.post('/api/mensagens/:id/flag', autenticar, (req, res) => {
   const msg = mensagens.find(m => m.id === req.params.id);
