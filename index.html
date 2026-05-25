@@ -1327,7 +1327,7 @@
     if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
     el.innerHTML = '<div class="chats-vazio">Carregando chats...<br><small>Pode levar até 45 segundos</small></div>';
     try {
-      const tok = localStorage.getItem('token');
+      const tok = localStorage.getItem('mcll_token');
       const r   = await fetch('/api/chats/refresh', { method: 'POST', headers: { Authorization: 'Bearer ' + tok } });
       if (!r.ok) {
         const j = await r.json();
