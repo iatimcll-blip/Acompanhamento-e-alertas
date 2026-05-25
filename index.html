@@ -582,6 +582,201 @@
     .btn-limpar-sel.visivel { display:inline-block; }
     /* blink nos cartões de contador do massivo */
     .mas-card.blink-alert { animation: uf-blink 1.1s infinite; background:rgba(239,68,68,.1); border-color:rgba(239,68,68,.4) !important; }
+
+    /* ══════════════════════════════════════════════════
+       BOTTOM NAV (desktop: oculta)
+    ══════════════════════════════════════════════════ */
+    .mob-bottom-nav { display: none; }
+
+    /* ══════════════════════════════════════════════════
+       MOBILE / TELAS VERTICAIS (≤ 800 px)
+    ══════════════════════════════════════════════════ */
+    @media (max-width: 800px) {
+      html { font-size: 13px; }
+      body { overflow: hidden; }
+
+      /* Topbar compacto */
+      .topbar { height: 50px; padding: 0 10px; }
+      .mcll-letters { font-size: 1.5rem; }
+      .mcll-sub-row { display: none; }
+      .date-pill    { display: none; }
+      .badge-live   { font-size: .52rem; padding: 2px 5px; }
+      .conn-pill    { padding: 3px 8px; font-size: .65rem; }
+      #userNome     { display: none; }
+      #userPerfil   { font-size: .52rem !important; padding: 2px 5px !important; }
+
+      /* Layout: coluna única, sem sidebar à esquerda */
+      .app-layout {
+        grid-template-columns: 1fr;
+        height: calc(100dvh - 50px - 52px);
+        overflow: hidden;
+      }
+
+      /* Sidebar → painel "Chats" via tab */
+      .sidebar {
+        display: none;
+        position: absolute;
+        inset: 0;
+        z-index: 200;
+        width: 100%;
+        border-right: none;
+      }
+      .app-layout[data-mob="chats"] .sidebar     { display: flex; }
+      .app-layout[data-mob="chats"] .main-content { display: none; }
+
+      /* Main content: coluna flex */
+      .main-content {
+        overflow: hidden !important;
+        padding: 0;
+        gap: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      /* Stats e UF blink → apenas no tab "stats" */
+      .stats-row, .uf-blink-bar { display: none; }
+      .app-layout[data-mob="stats"] .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px;
+        padding: 8px 8px 0;
+        flex-shrink: 0;
+      }
+      .app-layout[data-mob="stats"] .uf-blink-bar {
+        display: flex;
+        padding: 6px 8px;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .stat-card { padding: 7px 8px; }
+      .stat-num  { font-size: 1.4rem; }
+      .stat-sub  { display: none; }
+      .uf-blink-item { font-size: .62rem; padding: 4px 2px; }
+
+      /* Quadrant grid: um quadrante por vez, fullscreen */
+      .quadrant-grid {
+        display: block;
+        flex: 1;
+        overflow: hidden;
+        height: 100%;
+        min-height: 0;
+      }
+      .quadrant { display: none; height: 100%; }
+
+      .app-layout[data-mob="feed"]     .quadrant:nth-child(3) { display: flex; }
+      .app-layout[data-mob="timer"]    .quadrant:nth-child(1) { display: flex; }
+      .app-layout[data-mob="massivos"] .quadrant:nth-child(4) { display: flex; }
+      .app-layout[data-mob="stats"]    .quadrant              { display: none; }
+
+      /* Q2 (detalhe) sempre fora do fluxo no mobile */
+      .quadrant:nth-child(2) { display: none !important; }
+
+      /* Detalhe como overlay fullscreen quando aberto */
+      body.detail-mob-aberto .quadrant:nth-child(2) {
+        display: flex !important;
+        position: fixed !important;
+        inset: 50px 0 52px 0 !important;
+        width: 100% !important;
+        height: calc(100dvh - 50px - 52px) !important;
+        z-index: 400;
+        background: var(--card);
+      }
+
+      /* Filter bar scroll horizontal */
+      .filter-bar {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .filter-bar::-webkit-scrollbar { display: none; }
+
+      /* Timer: coluna única */
+      .quadrant .timer-body {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Localidade select */
+      .localidade-select { max-width: 120px; margin-left: 0; }
+
+      /* Modal chat fullscreen */
+      .chat-modal {
+        width: 100%;
+        max-width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+      }
+
+      /* ── Bottom Navigation ── */
+      .mob-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        height: 52px;
+        background: var(--surface);
+        border-top: 1px solid var(--border2);
+        z-index: 300;
+        box-shadow: 0 -4px 20px rgba(0,0,0,.6);
+      }
+      .mob-tab {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        cursor: pointer;
+        font-size: .48rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        color: var(--muted);
+        border: none;
+        background: transparent;
+        transition: color .13s;
+        position: relative;
+        padding: 4px 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .mob-tab .mob-icon { font-size: 1.2rem; line-height: 1; }
+      .mob-tab.ativo { color: var(--azul); }
+      .mob-tab.ativo .mob-icon { filter: drop-shadow(0 0 4px rgba(59,130,246,.5)); }
+      .mob-tab .mob-badge {
+        position: absolute;
+        top: 3px;
+        right: calc(50% - 16px);
+        background: var(--vermelho);
+        color: #fff;
+        font-size: .46rem;
+        font-weight: 800;
+        min-width: 14px;
+        height: 14px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 3px;
+        pointer-events: none;
+      }
+      .mob-badge.hidden { display: none; }
+
+      /* Botão voltar no detalhe mobile */
+      .mob-back-btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: none;
+        border: none;
+        color: var(--azul);
+        font-size: .8rem;
+        cursor: pointer;
+        padding: 2px 4px;
+      }
+    }
+    /* Desktop: oculta botão voltar mobile */
+    .mob-back-btn { display: none; }
   </style>
 </head>
 <body>
@@ -704,7 +899,7 @@
       <div class="quadrant">
         <div class="detail-wrap" id="detalhePanel">
           <div class="detail-hd">
-            <h3>📋 Detalhes</h3>
+            <h3><button class="mob-back-btn" onclick="fecharDetalhe()">‹ Voltar</button>📋 Detalhes</h3>
             <button class="btn-fechar" onclick="fecharDetalhe()">✕</button>
           </div>
           <div class="detail-body" id="detalheBody">
@@ -811,6 +1006,33 @@
   </div>
 </div>
 
+<!-- Mobile Bottom Navigation -->
+<nav class="mob-bottom-nav" id="mobNav" aria-label="Navegação mobile">
+  <button class="mob-tab ativo" data-tab="feed" onclick="mobTab('feed')">
+    <span class="mob-icon">💬</span>
+    <span>Feed</span>
+    <span class="mob-badge hidden" id="mobBadgeFeed"></span>
+  </button>
+  <button class="mob-tab" data-tab="timer" onclick="mobTab('timer')">
+    <span class="mob-icon">⏰</span>
+    <span>Monitor</span>
+    <span class="mob-badge hidden" id="mobBadgeTimer"></span>
+  </button>
+  <button class="mob-tab" data-tab="massivos" onclick="mobTab('massivos')">
+    <span class="mob-icon">🚨</span>
+    <span>Massivos</span>
+    <span class="mob-badge hidden" id="mobBadgeMas"></span>
+  </button>
+  <button class="mob-tab" data-tab="stats" onclick="mobTab('stats')">
+    <span class="mob-icon">📊</span>
+    <span>Stats</span>
+  </button>
+  <button class="mob-tab" data-tab="chats" onclick="mobTab('chats')">
+    <span class="mob-icon">📱</span>
+    <span>Chats</span>
+  </button>
+</nav>
+
 <script>
   // ── Auth ──────────────────────────────────────────────────────────────────
   (function() {
@@ -881,6 +1103,44 @@
   let _serverContadores = {};
   let filtroMassivoUFAtual   = 'TODOS';
   let filtroMassivoTipoAtual = 'TODOS';
+
+  // ── Mobile Navigation ─────────────────────────────────────────────────────
+  function mobIsMobile() { return window.innerWidth <= 800; }
+
+  function mobTab(tab) {
+    document.querySelectorAll('.mob-tab').forEach(t =>
+      t.classList.toggle('ativo', t.dataset.tab === tab));
+    const layout = document.querySelector('.app-layout');
+    if (layout) layout.dataset.mob = tab;
+  }
+
+  function atualizarMobBadges() {
+    if (!mobIsMobile()) return;
+    const naoLidas = todasMensagens.filter(m => !m.lida).length;
+    const bFeed = document.getElementById('mobBadgeFeed');
+    if (bFeed) { bFeed.textContent = naoLidas > 99 ? '99+' : naoLidas || ''; bFeed.classList.toggle('hidden', naoLidas === 0); }
+
+    const masNaoLidas = todasMensagens.filter(m => m.temMassivo && !m.lida).length;
+    const bMas = document.getElementById('mobBadgeMas');
+    if (bMas) { bMas.textContent = masNaoLidas || ''; bMas.classList.toggle('hidden', masNaoLidas === 0); }
+
+    const timerCount = Object.keys(timers).length;
+    const bTimer = document.getElementById('mobBadgeTimer');
+    if (bTimer) { bTimer.textContent = timerCount || ''; bTimer.classList.toggle('hidden', timerCount === 0); }
+  }
+
+  // Inicializa modo mobile na carga
+  if (mobIsMobile()) mobTab('feed');
+  window.addEventListener('resize', () => {
+    if (!mobIsMobile()) {
+      document.body.classList.remove('detail-mob-aberto');
+      const layout = document.querySelector('.app-layout');
+      if (layout) delete layout.dataset.mob;
+    } else {
+      const hasActive = document.querySelector('.mob-tab.ativo');
+      if (!hasActive) mobTab('feed');
+    }
+  });
 
   // ── Áudio (items 9, 10) ───────────────────────────────────────────────────
   let _audioCtx = null;
@@ -1005,6 +1265,7 @@
     document.getElementById('statAM').textContent    = c.AM       || 0;
     document.getElementById('statWAND').textContent  = c.WANDERSON|| 0;
     document.getElementById('msgCount').textContent  = (c.total || 0) + ' hoje';
+    atualizarMobBadges();
   }
 
   // ── Chat list (itens 2, 3, 6) — data-cid + event delegation ─────────────
@@ -1117,6 +1378,7 @@
     renderFeed();
     renderMassivo();
     atualizarContadoresDisplay();
+    atualizarMobBadges();
   }
 
   // item 8 — filtro + indicador visual no card e na tag
@@ -1268,10 +1530,12 @@
     if (body) body.scrollTop = 0;
     renderFeed();
     if (mensagemSelecionada && !mensagemSelecionada.lida) marcarLida(id);
+    if (mobIsMobile()) document.body.classList.add('detail-mob-aberto');
   }
 
   function fecharDetalhe() {
     mensagemSelecionada = null;
+    document.body.classList.remove('detail-mob-aberto');
     const panel = document.getElementById('detalhePanel');
     if (panel) panel.classList.remove('com-msg');
     document.getElementById('detalheBody').innerHTML = '<div class="detalhe-vazio">Selecione uma mensagem</div>';
@@ -1339,6 +1603,7 @@
     renderMassivo();
     if (mensagemSelecionada && mensagemSelecionada.id === id) renderDetalhe();
     atualizarUFBlinks();
+    atualizarMobBadges();
   }
 
   // ── Reset ─────────────────────────────────────────────────────────────────
@@ -1442,6 +1707,7 @@
     delete _saved[key];
     localStorage.setItem('timerInicio', JSON.stringify(_saved));
     renderTimers();
+    atualizarMobBadges();
   }
 
   function fmtMs(ms) {
