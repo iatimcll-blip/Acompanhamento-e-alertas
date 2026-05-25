@@ -350,7 +350,18 @@ function broadcast(tipo, dados) {
   });
 }
 
+// Heartbeat — mantém conexões vivas através do proxy do Railway (fecha ociosas após ~60s)
+setInterval(() => {
+  wss.clients.forEach(ws => {
+    if (ws.isAlive === false) { ws.terminate(); return; }
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, 25000);
+
 wss.on('connection', (ws, req) => {
+  ws.isAlive = true;
+  ws.on('pong', () => { ws.isAlive = true; });
   try {
     const params = new URL(req.url, 'http://localhost').searchParams;
     const token  = params.get('token') || '';

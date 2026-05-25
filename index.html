@@ -1197,11 +1197,27 @@
   }
 
   // ── WebSocket ─────────────────────────────────────────────────────────────
+  let _wsDelay = 3000;
   function conectarWS() {
     const token   = localStorage.getItem('mcll_token') || '';
+    if (!token) { window.location.href = '/'; return; }
     const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
     ws = new WebSocket(`${wsProto}://${location.host}?token=${encodeURIComponent(token)}`);
-    ws.onclose = () => { atualizarStatus('desconectado'); setTimeout(conectarWS, 3000); };
+    ws.onopen  = () => { _wsDelay = 3000; };
+    ws.onerror = () => {};
+    ws.onclose = (evt) => {
+      // Código 4001 = token inválido/expirado → redireciona para login
+      if (evt.code === 4001) {
+        localStorage.removeItem('mcll_token');
+        localStorage.removeItem('mcll_nome');
+        localStorage.removeItem('mcll_perfil');
+        window.location.href = '/';
+        return;
+      }
+      atualizarStatus('desconectado');
+      setTimeout(conectarWS, _wsDelay);
+      _wsDelay = Math.min(_wsDelay * 2, 30000); // backoff exponencial até 30s
+    };
     ws.onmessage = (evt) => {
       const { tipo, dados } = JSON.parse(evt.data);
       if      (tipo === 'init')         handleInit(dados);
@@ -1454,6 +1470,7 @@
 
   // ── Mensagens ─────────────────────────────────────────────────────────────
   function novaMensagem(m) {
+    if (todasMensagens.some(x => x.id === m.id)) return;
     todasMensagens.unshift(m);
     if (todasMensagens.length > 200) todasMensagens.pop();
     if (m.temAcionamento && m.detectados && m.detectados.length > 0) iniciarTimers(m, m.ts, m.texto);
