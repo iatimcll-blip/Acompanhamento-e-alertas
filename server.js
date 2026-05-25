@@ -458,10 +458,14 @@ function registrarEventos() {
     console.log('WhatsApp conectado!');
     statusWpp = 'conectado';
     broadcast('status', { status: 'conectado' });
-    // Carrega chats com delay para dar tempo ao WhatsApp Web estabilizar
+    // Carrega chats com delay generoso — operação cosmética, não afeta recebimento de mensagens
     const tentarCarregarChats = async (tentativa = 1) => {
       try {
-        const chats = await client.getChats();
+        // Timeout local de 30s por tentativa para não bloquear o protocolo Chrome indefinidamente
+        const chats = await Promise.race([
+          client.getChats(),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout local getChats')), 30000)),
+        ]);
         chatList = chats.slice(0, 60).map(c => ({
           id:       c.id._serialized,
           nome:     c.name || c.id.user || '',
@@ -472,12 +476,17 @@ function registrarEventos() {
         console.log(`${chatList.length} chats carregados`);
       } catch (e) {
         console.error(`Erro ao carregar chats (tentativa ${tentativa}):`, e.message);
-        if (tentativa < 4) {
-          setTimeout(() => tentarCarregarChats(tentativa + 1), 8000 * tentativa);
+        if (tentativa < 3) {
+          setTimeout(() => tentarCarregarChats(tentativa + 1), 30000);
+        } else {
+          console.log('Lista de chats indisponível — painel continua funcionando normalmente');
+          chatList = [];
+          broadcast('chats', chatList);
         }
       }
     };
-    setTimeout(() => tentarCarregarChats(), 10000);
+    // Aguarda 60s para o WhatsApp Web estabilizar completamente antes de carregar chats
+    setTimeout(() => tentarCarregarChats(), 60000);
   });
 
   client.on('disconnected', reason => {
