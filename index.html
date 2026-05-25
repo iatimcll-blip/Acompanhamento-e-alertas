@@ -610,6 +610,7 @@
         grid-template-columns: 1fr;
         height: calc(100dvh - 50px - 52px);
         overflow: hidden;
+        position: relative;
       }
 
       /* Sidebar → painel "Chats" via tab */
@@ -620,6 +621,7 @@
         z-index: 200;
         width: 100%;
         border-right: none;
+        overflow-y: auto;
       }
       .app-layout[data-mob="chats"] .sidebar     { display: flex; }
       .app-layout[data-mob="chats"] .main-content { display: none; }
@@ -708,6 +710,12 @@
         max-height: 100%;
         border-radius: 0;
       }
+
+      /* QR code maior no sidebar fullscreen mobile */
+      .qr-box { width: 200px !important; height: 200px !important; margin: 20px auto !important; }
+      .qr-box svg { width: 60px !important; height: 60px !important; }
+      #qrSection img { width: 200px !important; height: 200px !important; }
+      .wpp-connect { padding: 24px 13px; }
 
       /* ── Bottom Navigation ── */
       .mob-bottom-nav {
@@ -808,7 +816,7 @@
   </div>
 </header>
 
-<div class="app-layout">
+<div class="app-layout" data-mob="feed">
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -1210,6 +1218,7 @@
     renderFeed();
     renderMassivo();
     atualizarDropdownLocalidades();
+    atualizarMobBadges();
     apiFetch('/api/base').then(r => r.json()).then(b => { BASE = b; }).catch(() => {});
   }
 
