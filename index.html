@@ -842,10 +842,11 @@
       <div class="sidebar-chats-hd">
         <span>Grupos e Contatos</span>
         <button id="btnLimparSel" class="btn-limpar-sel" onclick="limparSel()">✕ Limpar</button>
+        <button id="btnRefreshChats" onclick="refreshChats()" title="Atualizar lista de chats" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.78rem;padding:2px 5px;border-radius:4px;transition:color .2s;" onmouseover="this.style.color='#4ade80'" onmouseout="this.style.color='var(--muted)'">🔄</button>
         <span id="chatCount" style="color:var(--subtext)">0</span>
       </div>
       <div id="chatList">
-        <div class="chats-vazio">Conecte o WhatsApp<br>para ver os grupos</div>
+        <div class="chats-vazio" id="chatsVazioMsg">Clique em 🔄 para carregar<br>grupos e contatos</div>
       </div>
     </div>
   </aside>
@@ -1211,6 +1212,7 @@
       else if (tipo === 'lida')         marcarLidaLocal(dados.id, dados.lidaEm);
       else if (tipo === 'flag')         toggleFlagLocal(dados.id, dados.flagged);
       else if (tipo === 'chats')        renderChatList(dados);
+      else if (tipo === 'chats_erro')   chatListErro(dados.erro);
       else if (tipo === 'reset_diario') resetDiario(dados.contadores);
       else if (tipo === 'qr_limpar')   mostrarQRPlaceholder();
     };
@@ -1318,11 +1320,43 @@
     atualizarMobBadges();
   }
 
+  // ── Carrega chats sob demanda ─────────────────────────────────────────────
+  async function refreshChats() {
+    const btn = document.getElementById('btnRefreshChats');
+    const el  = document.getElementById('chatList');
+    if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+    el.innerHTML = '<div class="chats-vazio">Carregando chats...<br><small>Pode levar até 45 segundos</small></div>';
+    try {
+      const tok = localStorage.getItem('token');
+      const r   = await fetch('/api/chats/refresh', { method: 'POST', headers: { Authorization: 'Bearer ' + tok } });
+      if (!r.ok) {
+        const j = await r.json();
+        el.innerHTML = `<div class="chats-vazio">Erro: ${escHtml(j.erro || 'falha')}</div>`;
+        if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
+      }
+      // resposta chega via WebSocket (evento 'chats' ou 'chats_erro')
+    } catch(e) {
+      el.innerHTML = `<div class="chats-vazio">Sem conexão: ${escHtml(e.message)}</div>`;
+      if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
+    }
+    // Reabilita botão após 50s (cobertura máxima do timeout do servidor)
+    setTimeout(() => { if (btn) { btn.textContent = '🔄'; btn.disabled = false; } }, 50000);
+  }
+
+  function chatListErro(msg) {
+    const btn = document.getElementById('btnRefreshChats');
+    const el  = document.getElementById('chatList');
+    el.innerHTML = `<div class="chats-vazio">Não foi possível carregar.<br><small>${escHtml(msg||'')}</small><br><button onclick="refreshChats()" style="margin-top:8px;font-size:.72rem;padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--silver);cursor:pointer;">Tentar novamente</button></div>`;
+    if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
+  }
+
   // ── Chat list (itens 2, 3, 6) — data-cid + event delegation ─────────────
   function renderChatList(chats) {
     const el  = document.getElementById('chatList');
     const cnt = document.getElementById('chatCount');
     _chatMap  = {};
+    const btn = document.getElementById('btnRefreshChats');
+    if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
     if (!chats || !chats.length) {
       el.innerHTML = '<div class="chats-vazio">Nenhum chat encontrado</div>';
       if (cnt) cnt.textContent = '0';
