@@ -9,10 +9,14 @@ const jwt         = require('jsonwebtoken');
 const bcrypt      = require('bcryptjs');
 
 // ── Configuração ────────────────────────────────────────────────────────────
-const JWT_SECRET      = process.env.JWT_SECRET || 'mcll-monitoramento-secret-2024';
-const PORT            = process.env.PORT || 3000;
+const JWT_SECRET       = process.env.JWT_SECRET || 'mcll-monitoramento-secret-2024';
+const PORT             = process.env.PORT || 3000;
 const WPP_SESSION_PATH = process.env.WPP_SESSION_PATH || path.join(__dirname, '.wpp-session');
-const USERS_FILE      = path.join(__dirname, 'users.json');
+
+// Diretório de dados persistente — usa /data (volume Railway) quando disponível,
+// senão cai para __dirname (desenvolvimento local)
+const DATA_DIR   = fs.existsSync('/data') ? '/data' : __dirname;
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
 
 // ── Usuários ────────────────────────────────────────────────────────────────
 function carregarUsuarios() {
@@ -158,10 +162,11 @@ function hoje() {
 
 // ── Persistência diária ─────────────────────────────────────────────────────
 function dataFile() {
-  return path.join(__dirname, `data-${hoje()}.json`);
+  return path.join(DATA_DIR, `data-${hoje()}.json`);
 }
 
 function carregarMensagens() {
+  console.log(`📁 Dados em: ${DATA_DIR}`);
   try {
     const raw = fs.readFileSync(dataFile(), 'utf8');
     const salvo = JSON.parse(raw);
@@ -177,7 +182,8 @@ function carregarMensagens() {
     });
     contadores.total = contadores.PA + contadores.MA + contadores.AP + contadores.AM;
     console.log(`✅ ${mensagens.length} mensagens do dia restauradas`);
-  } catch (_) {
+  } catch (e) {
+    if (e.code !== 'ENOENT') console.error('Aviso ao carregar mensagens:', e.message);
     // arquivo não existe ainda — começa do zero
   }
 }
@@ -524,94 +530,108 @@ function registrarEventos() {
 
   // ── Recebimento de mensagens ──────────────────────────────────────────────
   client.on('message', async msg => {
-  const texto = msg.body;
-  if (!texto || texto.trim() === '') return;
+  try {
+    const texto = msg.body;
 
-  // item 12: ignora respostas citadas
-  if (msg.hasQuotedMsg) return;
+    // Log de diagnóstico — toda mensagem recebida (visível nos logs do Railway)
+    console.log(`[MSG] de=${msg.from} grupo=${msg.from.includes('@g.us')} quoted=${!!msg.hasQuotedMsg} texto="${(texto||'').substring(0,80)}"`);
 
-  const { detectados, temAcionamento } = analisarMensagem(texto);
-  const temWanderson = WANDERSON_IDS.some(id =>
-    texto.toUpperCase().includes(id.toUpperCase())
-  );
+    if (!texto || texto.trim() === '') return;
 
-  // Somente mensagens com município/UF reconhecido OU menção ao Wanderson
-  if (detectados.length === 0 && !temWanderson) return;
+    // item 12: ignora respostas citadas
+    if (msg.hasQuotedMsg) return;
 
-  // item 12: ignora conteúdo repetido da mesma fonte no mesmo dia
-  const jaDuplicada = mensagens.some(m =>
-    m.numero === msg.from && m.texto === texto && m.dataDia === hoje()
-  );
-  if (jaDuplicada) return;
+    const { detectados, temAcionamento } = analisarMensagem(texto);
+    const temWanderson = WANDERSON_IDS.some(id =>
+      texto.toUpperCase().includes(id.toUpperCase())
+    );
 
-  // item 10: detecta RUPTURA
-  const temRuptura = /\bRUPTURA\b/i.test(texto);
-
-  // chamados massivos
-  let temMassivo = false, tipoMassivo = null;
-  for (const { tipo, re } of MASSIVO_RE) {
-    if (re.test(texto)) { temMassivo = true; tipoMassivo = tipoMassivo || tipo; }
-  }
-
-  // item 6: deduplicação por chamado + UF
-  const chamado = extrairChamado(texto);
-  let duplicado = false;
-  if (chamado) {
-    const ufStr = [...new Set(detectados.map(d => d.uf))].sort().join('-');
-    const chave = chamado.tipo + ':' + chamado.numero + (ufStr ? ':' + ufStr : '');
-    if (chamadosHoje[chave]) {
-      duplicado = true;
-      chamadosHoje[chave].atualizacoes = (chamadosHoje[chave].atualizacoes || 0) + 1;
-    } else {
-      chamadosHoje[chave] = { atualizacoes: 0 };
+    // Somente mensagens com município/UF reconhecido OU menção ao Wanderson
+    if (detectados.length === 0 && !temWanderson) {
+      console.log(`[FILTRADO] de=${msg.from} — nenhum município/Wanderson detectado`);
+      return;
     }
-  }
 
-  const chat    = await msg.getChat();
-  const contact = await msg.getContact();
-
-  const entrada = {
-    id:        msg.id._serialized,
-    de:        contact.pushname || contact.number || msg.from,
-    numero:    msg.from,
-    grupo:     chat.isGroup,
-    nomeGrupo: chat.isGroup ? chat.name : null,
-    texto,
-    detectados,
-    temAcionamento,
-    uf:        [...new Set(detectados.map(d => d.uf))],
-    siglas:    [...new Set(detectados.filter(d => d.sigla).map(d => d.sigla))],
-    municipios:[...new Set(detectados.map(d => d.muni))],
-    hora:      new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
-    dataDia:   hoje(),
-    ts:        Date.now(),
-    lida:         false,
-    lidaEm:       null,
-    flagged:      false,
-    temWanderson,
-    temRuptura,
-    temMassivo,
-    tipoMassivo,
-    chamado,
-    duplicado,
-  };
-
-  mensagens.unshift(entrada);
-  if (mensagens.length > 200) mensagens.pop();
-
-  // item 11: total = PA + MA + AP + AM
-  if (!duplicado) {
-    if (detectados.length > 0) {
-      entrada.uf.forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
-      contadores.total = contadores.PA + contadores.MA + contadores.AP + contadores.AM;
+    // item 12: ignora conteúdo repetido da mesma fonte no mesmo dia
+    const jaDuplicada = mensagens.some(m =>
+      m.numero === msg.from && m.texto === texto && m.dataDia === hoje()
+    );
+    if (jaDuplicada) {
+      console.log(`[DUPLICADO] de=${msg.from}`);
+      return;
     }
-    if (temWanderson) contadores.WANDERSON++;
-  }
 
-  salvarMensagens();
-  console.log(`[${entrada.hora}] ${entrada.de}: ${texto.substring(0,60)}…`);
-  broadcast('mensagem', entrada);
-  broadcast('contadores', contadores);
+    // item 10: detecta RUPTURA
+    const temRuptura = /\bRUPTURA\b/i.test(texto);
+
+    // chamados massivos
+    let temMassivo = false, tipoMassivo = null;
+    for (const { tipo, re } of MASSIVO_RE) {
+      if (re.test(texto)) { temMassivo = true; tipoMassivo = tipoMassivo || tipo; }
+    }
+
+    // item 6: deduplicação por chamado + UF
+    const chamado = extrairChamado(texto);
+    let duplicado = false;
+    if (chamado) {
+      const ufStr = [...new Set(detectados.map(d => d.uf))].sort().join('-');
+      const chave = chamado.tipo + ':' + chamado.numero + (ufStr ? ':' + ufStr : '');
+      if (chamadosHoje[chave]) {
+        duplicado = true;
+        chamadosHoje[chave].atualizacoes = (chamadosHoje[chave].atualizacoes || 0) + 1;
+      } else {
+        chamadosHoje[chave] = { atualizacoes: 0 };
+      }
+    }
+
+    const chat    = await msg.getChat();
+    const contact = await msg.getContact();
+
+    const entrada = {
+      id:        msg.id._serialized,
+      de:        contact.pushname || contact.number || msg.from,
+      numero:    msg.from,
+      grupo:     chat.isGroup,
+      nomeGrupo: chat.isGroup ? chat.name : null,
+      texto,
+      detectados,
+      temAcionamento,
+      uf:        [...new Set(detectados.map(d => d.uf))],
+      siglas:    [...new Set(detectados.filter(d => d.sigla).map(d => d.sigla))],
+      municipios:[...new Set(detectados.map(d => d.muni))],
+      hora:      new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
+      dataDia:   hoje(),
+      ts:        Date.now(),
+      lida:         false,
+      lidaEm:       null,
+      flagged:      false,
+      temWanderson,
+      temRuptura,
+      temMassivo,
+      tipoMassivo,
+      chamado,
+      duplicado,
+    };
+
+    mensagens.unshift(entrada);
+    if (mensagens.length > 200) mensagens.pop();
+
+    // item 11: total = PA + MA + AP + AM
+    if (!duplicado) {
+      if (detectados.length > 0) {
+        entrada.uf.forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
+        contadores.total = contadores.PA + contadores.MA + contadores.AP + contadores.AM;
+      }
+      if (temWanderson) contadores.WANDERSON++;
+    }
+
+    salvarMensagens();
+    console.log(`[ACEITO] ${entrada.hora} | ${entrada.de} | munis=${entrada.municipios.join(',')} | ${texto.substring(0,60)}`);
+    broadcast('mensagem', entrada);
+    broadcast('contadores', contadores);
+  } catch (err) {
+    console.error('[ERRO msg] ao processar mensagem de', msg?.from, ':', err.message);
+  }
   }); // fim client.on('message')
 } // fim registrarEventos()
 
