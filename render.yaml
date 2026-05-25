@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: mcll-painel-acionamentos
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: "3000"
+      - key: WPP_SESSION_PATH
+        value: "/data/.wpp-session"
+    disk:
+      name: wpp-session
+      mountPath: /data
+      sizeGB: 1
