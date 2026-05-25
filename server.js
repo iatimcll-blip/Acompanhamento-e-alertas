@@ -395,7 +395,8 @@ function criarCliente() {
     webVersionCache: { type: 'none' },
     puppeteer: {
       headless: true,
-      protocolTimeout: 120000,
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+      protocolTimeout: 180000,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -403,13 +404,14 @@ function criarCliente() {
         '--disable-accelerated-2d-canvas',
         '--no-first-run',
         '--no-zygote',
-        '--single-process',
         '--disable-gpu',
-        '--disable-web-security',
-        '--disable-features=IsolateOrigins,site-per-process,BlockInsecurePrivateNetworkRequests',
-        '--disable-site-isolation-trials',
-        '--ignore-certificate-errors',
-        '--allow-running-insecure-content',
+        '--disable-extensions',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+        '--disable-features=TranslateUI,BlinkGenPropertyTrees,IsolateOrigins,site-per-process',
+        '--disable-ipc-flooding-protection',
+        '--memory-pressure-off',
       ],
     }
   });
@@ -433,8 +435,8 @@ function registrarEventos() {
     console.log('WhatsApp conectado!');
     statusWpp = 'conectado';
     broadcast('status', { status: 'conectado' });
-    // Carrega chats com delay para dar tempo ao WhatsApp Web inicializar
-    setTimeout(async () => {
+    // Carrega chats com delay para dar tempo ao WhatsApp Web estabilizar
+    const tentarCarregarChats = async (tentativa = 1) => {
       try {
         const chats = await client.getChats();
         chatList = chats.slice(0, 60).map(c => ({
@@ -446,15 +448,30 @@ function registrarEventos() {
         broadcast('chats', chatList);
         console.log(`${chatList.length} chats carregados`);
       } catch (e) {
-        console.error('Erro ao carregar chats:', e.message);
+        console.error(`Erro ao carregar chats (tentativa ${tentativa}):`, e.message);
+        if (tentativa < 4) {
+          setTimeout(() => tentarCarregarChats(tentativa + 1), 8000 * tentativa);
+        }
       }
-    }, 5000);
+    };
+    setTimeout(() => tentarCarregarChats(), 10000);
   });
 
   client.on('disconnected', reason => {
     console.log('WhatsApp desconectado:', reason);
     statusWpp = 'desconectado';
     broadcast('status', { status: 'desconectado' });
+    if (!reiniciando) {
+      reiniciando = true;
+      console.log('Reconectando em 10 segundos...');
+      setTimeout(async () => {
+        try { await client.destroy(); } catch (_) {}
+        client = criarCliente();
+        registrarEventos();
+        reiniciando = false;
+        iniciarWhatsApp();
+      }, 10000);
+    }
   });
 
   client.on('auth_failure', () => {
