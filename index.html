@@ -1291,14 +1291,29 @@
     const btn = document.getElementById('btnDesconectar');
     if (!confirm('Desconectar o WhatsApp? Um novo QR Code será gerado para reconectar.')) return;
     if (btn) { btn.disabled = true; btn.textContent = '⏳ Desconectando…'; }
+    const reabilitar = () => { if (btn) { btn.disabled = false; btn.innerHTML = '🔌 Desconectar WhatsApp'; } };
     try {
-      const r = await apiFetch('/api/whatsapp/desconectar', { method: 'POST' });
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 10000);
+      const tok = localStorage.getItem('mcll_token') || '';
+      const r = await fetch('/api/whatsapp/desconectar', {
+        method: 'POST',
+        signal: ctrl.signal,
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok }
+      });
+      clearTimeout(timer);
       const data = await r.json();
-      if (!data.ok) throw new Error(data.erro || 'Erro');
+      if (!data.ok) throw new Error(data.erro || 'Erro do servidor');
       mostrarQRPlaceholder();
     } catch (e) {
-      alert('Erro ao desconectar: ' + e.message);
-      if (btn) { btn.disabled = false; btn.innerHTML = '🔌 Desconectar WhatsApp'; }
+      reabilitar();
+      if (e.name === 'AbortError') {
+        alert('O servidor demorou para responder. O WhatsApp pode ter desconectado mesmo assim — aguarde o novo QR.');
+      } else if (e.message === 'Failed to fetch') {
+        alert('Não foi possível alcançar o servidor. Verifique a conexão ou aguarde o servidor reiniciar e tente novamente.');
+      } else {
+        alert('Erro ao desconectar: ' + e.message);
+      }
     }
   }
 

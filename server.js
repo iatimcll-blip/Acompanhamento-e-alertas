@@ -319,14 +319,14 @@ app.post('/api/chats/refresh', autenticar, async (req, res) => {
 
 // Desconectar WhatsApp (admin) — limpa sessão e gera novo QR
 app.post('/api/whatsapp/desconectar', autenticar, apenasAdmin, async (req, res) => {
+  const comTimeout = (p, ms) => Promise.race([p, new Promise((_, r) => setTimeout(() => r(new Error('timeout')), ms))]);
   try {
     statusWpp = 'desconectado';
     broadcast('status', { status: 'desconectado' });
     broadcast('qr_limpar', {});
-    try { await client.logout(); } catch (_) {}
-    try { await client.destroy(); } catch (_) {}
+    try { await comTimeout(client.logout(),  5000); } catch (_) {}
+    try { await comTimeout(client.destroy(), 5000); } catch (_) {}
     res.json({ ok: true });
-    // Reinicia cliente para gerar novo QR
     setTimeout(async () => {
       limparLockFilesChrome(WPP_SESSION_PATH);
       client = criarCliente();
