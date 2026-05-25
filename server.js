@@ -41,6 +41,17 @@ function autenticar(req, res, next) {
     res.status(401).json({ erro: 'Token inválido ou expirado' });
   }
 }
+function autenticarPagina(req, res, next) {
+  const auth  = req.headers.authorization || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  if (!token) return res.redirect('/');
+  try {
+    req.usuario = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    res.redirect('/');
+  }
+}
 function apenasAdmin(req, res, next) {
   if (req.usuario?.perfil !== 'administrador') return res.status(403).json({ erro: 'Acesso restrito ao administrador' });
   next();
@@ -136,7 +147,7 @@ const wss    = new WebSocket.Server({ server });
 
 // Serve login.html na raiz, painel apenas autenticado
 app.get('/', (_, res) => res.sendFile(path.join(__dirname, 'login.html')));
-app.get('/painel', autenticar, (_, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/painel', (_, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.use(express.static(path.join(__dirname)));
 app.use(express.json());
 
