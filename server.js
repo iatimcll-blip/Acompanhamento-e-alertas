@@ -412,6 +412,8 @@ function criarCliente() {
         '--disable-features=TranslateUI,BlinkGenPropertyTrees,IsolateOrigins,site-per-process',
         '--disable-ipc-flooding-protection',
         '--memory-pressure-off',
+        '--disable-session-crashed-bubble',
+        '--disable-crash-reporter',
       ],
     }
   });
@@ -575,11 +577,30 @@ function registrarEventos() {
 carregarMensagens(); // restaura mensagens do dia ao reiniciar
 registrarEventos();
 
+// ── Remove lock files do Chrome (evita trava após redeploy) ─────────────────
+function limparLockFilesChrome(dir) {
+  if (!fs.existsSync(dir)) return;
+  const LOCKS = ['SingletonLock', 'SingletonSocket', 'SingletonCookie', 'lockfile'];
+  function walk(d) {
+    let entries;
+    try { entries = fs.readdirSync(d, { withFileTypes: true }); } catch { return; }
+    for (const e of entries) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (LOCKS.includes(e.name)) {
+        try { fs.unlinkSync(p); console.log('Lock removido:', p); } catch (_) {}
+      }
+    }
+  }
+  walk(dir);
+}
+
 // ── Inicia servidor ─────────────────────────────────────────────────────────
 let reiniciando = false;
 
 async function iniciarWhatsApp() {
   if (reiniciando) return;
+  limparLockFilesChrome(WPP_SESSION_PATH);
   try {
     await client.initialize();
   } catch (err) {
@@ -587,6 +608,7 @@ async function iniciarWhatsApp() {
     reiniciando = true;
     console.log('Reiniciando cliente em 8 segundos...');
     try { await client.destroy(); } catch (_) {}
+    limparLockFilesChrome(WPP_SESSION_PATH);
     client = criarCliente();
     registrarEventos();
     setTimeout(() => { reiniciando = false; iniciarWhatsApp(); }, 8000);
