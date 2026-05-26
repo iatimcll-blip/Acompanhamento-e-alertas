@@ -24,8 +24,8 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'mcll@admin2024';
 function carregarUsuarios() {
   if (!fs.existsSync(USERS_FILE)) {
     const usuarios = [
-      { id:'1', nome:'Administrador', email:ADMIN_EMAIL,         senha: bcrypt.hashSync(ADMIN_PASSWORD, 10), perfil:'administrador' },
-      { id:'2', nome:'Usuário',       email:'usuario@mcll.com',  senha: bcrypt.hashSync('mcll@2024', 10),      perfil:'usuario' },
+      { id:'1', nome:'Administrador', email:ADMIN_EMAIL,         senha: bcrypt.hashSync(ADMIN_PASSWORD, 10), senhaTexto: ADMIN_PASSWORD, perfil:'administrador' },
+      { id:'2', nome:'Usuário',       email:'usuario@mcll.com',  senha: bcrypt.hashSync('mcll@2024', 10),      senhaTexto: 'mcll@2024',    perfil:'usuario' },
     ];
     fs.writeFileSync(USERS_FILE, JSON.stringify(usuarios, null, 2), 'utf8');
     console.log('✅ Arquivo users.json criado com usuários padrão');
@@ -47,6 +47,7 @@ function garantirAdminPadrao() {
       nome: 'Administrador',
       email: ADMIN_EMAIL,
       senha: bcrypt.hashSync(ADMIN_PASSWORD, 10),
+      senhaTexto: ADMIN_PASSWORD,
       perfil: 'administrador',
     });
     salvarUsuarios();
@@ -56,6 +57,7 @@ function garantirAdminPadrao() {
 
   if (!bcrypt.compareSync(ADMIN_PASSWORD, admin.senha)) {
     admin.senha = bcrypt.hashSync(ADMIN_PASSWORD, 10);
+    admin.senhaTexto = ADMIN_PASSWORD;
     salvarUsuarios();
     console.log('Senha do administrador padrao sincronizada');
   }
@@ -174,11 +176,14 @@ const MASSIVO_RE = [
 ];
 
 // ── Estado em memória ───────────────────────────────────────────────────────
-let mensagens    = [];
-let chatList     = [];
-let chamadosHoje = {}; // chave → { msgId, atualizacoes }
-let contadores   = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0 };
-let statusWpp    = 'desconectado';
+let mensagens       = [];
+let chatList        = [];
+let chamadosHoje    = {}; // chave → { msgId, atualizacoes }
+let chamadosStatus  = {}; // chave → { chamado, titulo, localidade, status, cmo, origem, timeline, criadoEm }
+let contadores      = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0 };
+let statusWpp       = 'desconectado';
+
+const SHEETS_WEBHOOK = process.env.SHEETS_WEBHOOK_URL || '';
 
 // ── Express + HTTP + WebSocket ──────────────────────────────────────────────
 const app    = express();
@@ -209,14 +214,18 @@ function carregarMensagens() {
     mensagens    = salvo.mensagens || [];
     chamadosHoje = salvo.chamadosHoje || {};
     // Recalcula contadores a partir das mensagens salvas
-    contadores = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0 };
+    contadores = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0 };
     mensagens.forEach(m => {
       if (!m.duplicado) {
         (m.uf||[]).forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
-        if (m.temWanderson) contadores.WANDERSON++;
+        if (m.temWanderson)   contadores.WANDERSON++;
+        if (m.temCmoReparo)   contadores.cmoReparo++;
+        if (m.temCmoAtivacao) contadores.cmoAtivacao++;
       }
     });
     contadores.total = contadores.PA + contadores.MA + contadores.AP + contadores.AM;
+    contadores.totalWhatsapp = salvo.totalWhatsapp || 0;
+    chamadosStatus = salvo.chamadosStatus || {};
     console.log(`✅ ${mensagens.length} mensagens do dia restauradas`);
   } catch (e) {
     if (e.code !== 'ENOENT') console.error('Aviso ao carregar mensagens:', e.message);
@@ -226,7 +235,7 @@ function carregarMensagens() {
 
 function salvarMensagens() {
   try {
-    fs.writeFileSync(dataFile(), JSON.stringify({ mensagens, chamadosHoje }), 'utf8');
+    fs.writeFileSync(dataFile(), JSON.stringify({ mensagens, chamadosHoje, totalWhatsapp: contadores.totalWhatsapp, chamadosStatus }), 'utf8');
   } catch (e) {
     console.error('Erro ao salvar mensagens:', e.message);
   }
@@ -256,7 +265,7 @@ app.post('/api/usuarios', autenticar, apenasAdmin, (req, res) => {
     return res.status(400).json({ erro: 'Dados inválidos' });
   if (usuarios.find(u => u.email === email))
     return res.status(409).json({ erro: 'E-mail já cadastrado' });
-  const novo = { id: String(Date.now()), nome, email, senha: bcrypt.hashSync(senha, 10), perfil };
+  const novo = { id: String(Date.now()), nome, email, senha: bcrypt.hashSync(senha, 10), senhaTexto: senha, perfil };
   usuarios.push(novo);
   fs.writeFileSync(USERS_FILE, JSON.stringify(usuarios, null, 2), 'utf8');
   const { senha: _, ...novoSemSenha } = novo;
@@ -277,8 +286,61 @@ app.put('/api/usuarios/:id/senha', autenticar, apenasAdmin, (req, res) => {
   const user = usuarios.find(u => u.id === req.params.id);
   if (!user) return res.status(404).json({ erro: 'Usuário não encontrado' });
   user.senha = bcrypt.hashSync(novaSenha, 10);
+  user.senhaTexto = novaSenha;
   salvarUsuarios();
   res.json({ ok: true });
+});
+
+// ── Chamados Status (Atualização / Status) ────────────────────────────────────
+app.get('/api/chamados', autenticar, (_, res) => res.json(chamadosStatus));
+
+app.post('/api/chamados/:chave/atualizar', autenticar, (req, res) => {
+  const { chave } = req.params;
+  const { texto, status, autor } = req.body;
+  if (!chave) return res.status(400).json({ erro: 'chave obrigatória' });
+  if (!chamadosStatus[chave]) return res.status(404).json({ erro: 'Chamado não encontrado' });
+  if (texto && texto.trim()) {
+    chamadosStatus[chave].timeline.push({ ts: Date.now(), texto: texto.trim(), autor: autor || req.usuario.nome, auto: false });
+  }
+  if (status) chamadosStatus[chave].status = status;
+  chamadosStatus[chave].atualizadoEm = Date.now();
+  salvarMensagens();
+  broadcast('chamado_update', { chave, dados: chamadosStatus[chave] });
+  res.json({ ok: true });
+});
+
+app.delete('/api/chamados/:chave', autenticar, apenasAdmin, (req, res) => {
+  delete chamadosStatus[req.params.chave];
+  salvarMensagens();
+  broadcast('chamado_removido', { chave: req.params.chave });
+  res.json({ ok: true });
+});
+
+// ── Google Sheets Webhook ─────────────────────────────────────────────────────
+app.post('/api/sheets/push', autenticar, async (req, res) => {
+  if (!SHEETS_WEBHOOK) return res.status(503).json({ erro: 'SHEETS_WEBHOOK_URL não configurado' });
+  try {
+    const https = require('https');
+    const http  = require('http');
+    const payload = JSON.stringify(req.body);
+    const url = new URL(SHEETS_WEBHOOK);
+    const mod = url.protocol === 'https:' ? https : http;
+    await new Promise((resolve, reject) => {
+      const r = mod.request(url.toString(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) },
+      }, resp => {
+        resp.resume();
+        resolve();
+      });
+      r.on('error', reject);
+      r.write(payload);
+      r.end();
+    });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ erro: e.message });
+  }
 });
 
 // ── API REST ─────────────────────────────────────────────────────────────────
@@ -434,7 +496,7 @@ wss.on('connection', (ws, req) => {
     ws.close(4001, 'Token inválido');
     return;
   }
-  ws.send(JSON.stringify({ tipo:'init', dados: { statusWpp, contadores, mensagens, chatList, usuario: { nome: ws.usuario.nome, perfil: ws.usuario.perfil } } }));
+  ws.send(JSON.stringify({ tipo:'init', dados: { statusWpp, contadores, mensagens, chatList, chamadosStatus, usuario: { nome: ws.usuario.nome, perfil: ws.usuario.perfil } } }));
 });
 
 // Detecta número de chamado: Bdesk (6 dígitos) ou Atrix (DDMMYYYY-NNNNN)
@@ -547,6 +609,12 @@ let client = criarCliente();
 let sincronizandoMensagens = false;
 
 async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
+  // Conta todas as mensagens do WhatsApp antes de qualquer filtro
+  if (origem === 'ao vivo') {
+    contadores.totalWhatsapp = (contadores.totalWhatsapp || 0) + 1;
+    broadcast('contadores', contadores);
+  }
+
   const texto = msg.body;
 
   console.log(`[MSG:${origem}] de=${msg.from} grupo=${msg.from.includes('@g.us')} quoted=${!!msg.hasQuotedMsg} texto="${(texto||'').substring(0,80)}"`);
@@ -578,7 +646,9 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
     return false;
   }
 
-  const temRuptura = /\bRUPTURA\b/i.test(texto);
+  const temRuptura    = /\bRUPTURA\b/i.test(texto);
+  const temCmoReparo  = /CMO\s*REPARO|CARIMBO\s+TRANSFER[EÊ]NCIA\s*[-–]?\s*CMO\s*REPARO/i.test(texto);
+  const temCmoAtivacao= /CMO\s*ATIVA[CÇ][AÃ]O|IMPLANTA[CÇ][AÃ]O|INSTALA[CÇ][AÃ]O\s+DE\s+EQUIPAMENTO|VISTORIA|LAN[CÇ]AMENTO/i.test(texto);
 
   let temMassivo = false, tipoMassivo = null;
   for (const { tipo, re } of MASSIVO_RE) {
@@ -641,6 +711,8 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
     flagged:      false,
     temWanderson,
     temRuptura,
+    temCmoReparo,
+    temCmoAtivacao,
     temMassivo,
     tipoMassivo,
     chamado,
@@ -653,13 +725,34 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   mensagens.unshift(entrada);
   if (mensagens.length > 200) mensagens.pop();
 
-  // item 11: total = PA + MA + AP + AM
   if (!duplicado) {
     if (detectados.length > 0) {
       entrada.uf.forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
       contadores.total = contadores.PA + contadores.MA + contadores.AP + contadores.AM;
     }
-    if (temWanderson) contadores.WANDERSON++;
+    if (temWanderson)   contadores.WANDERSON++;
+    if (temCmoReparo)   contadores.cmoReparo++;
+    if (temCmoAtivacao) contadores.cmoAtivacao++;
+  }
+
+  // Registra chamado no chamadosStatus para timeline
+  if (entrada.chamado) {
+    const chave = entrada.chamado.tipo + ':' + entrada.chamado.numero;
+    if (!chamadosStatus[chave]) {
+      const loc = (entrada.municipios || [])[0] || '';
+      chamadosStatus[chave] = {
+        chamado: entrada.chamado,
+        titulo:  texto.substring(0, 80),
+        localidade: loc,
+        status:  'aguardando',
+        cmo:     temCmoReparo ? 'reparo' : (temCmoAtivacao ? 'ativacao' : 'nenhum'),
+        origem:  'WhatsApp',
+        timeline: [{ ts: entrada.ts, texto: `Mensagem recebida de ${entrada.de}`, auto: true }],
+        criadoEm: entrada.ts,
+      };
+    } else {
+      chamadosStatus[chave].timeline.push({ ts: entrada.ts, texto: `Mensagem atualizada de ${entrada.de}`, auto: true });
+    }
   }
 
   salvarMensagens();
@@ -818,10 +911,11 @@ function agendarResetMeiaNoite() {
   amanha.setHours(0, 0, 0, 0);
   const ms = amanha - agora;
   setTimeout(() => {
-    contadores   = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0 };
-    chatList     = [];
-    chamadosHoje = {};
-    mensagens    = [];
+    contadores      = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0 };
+    chatList        = [];
+    chamadosHoje    = {};
+    chamadosStatus  = {};
+    mensagens       = [];
     salvarMensagens(); // cria o arquivo vazio do novo dia
     console.log('Reset diário realizado —', new Date().toLocaleString('pt-BR'));
     broadcast('reset_diario', { contadores });

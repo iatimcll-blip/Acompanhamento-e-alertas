@@ -118,6 +118,16 @@
     }
     .btn-settings:hover { background: rgba(255,255,255,.12); color: #fff; transform: rotate(30deg); }
 
+    /* CMO counter pills na topbar */
+    .cmo-pill {
+      display: flex; align-items: center; gap: 4px;
+      border-radius: 20px; padding: 4px 10px;
+      font-size: .68rem; font-weight: 800; white-space: nowrap;
+    }
+    .cmo-pill.cmo-reparo { background: rgba(249,115,22,.14); border: 1px solid rgba(249,115,22,.3); color: #fdba74; }
+    .cmo-pill.cmo-atv    { background: rgba(168,85,247,.14); border: 1px solid rgba(168,85,247,.3); color: #d8b4fe; }
+    .cmo-pill span { font-size: .8rem; font-variant-numeric: tabular-nums; }
+
     /* ══════════════════════════════════════════════════
        LAYOUT (items 1 e 6)
     ══════════════════════════════════════════════════ */
@@ -437,6 +447,99 @@
       font-size: .78rem; font-weight: 800; cursor: pointer; transition: opacity .13s;
     }
     .btn-reply:hover { opacity: .88; }
+
+    /* ══════════════════════════════════════════════════
+       ATUALIZAÇÃO / STATUS PANEL (Q2)
+    ══════════════════════════════════════════════════ */
+    .atz-panel {
+      flex: 1; display: flex; flex-direction: column; overflow: hidden;
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 1px 0 rgba(255,255,255,.03) inset;
+    }
+    .atz-hd {
+      padding: 8px 12px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,.015); flex-shrink: 0;
+    }
+    .atz-hd h3 { font-size: .82rem; font-weight: 700; color: var(--silver); display: flex; align-items: center; gap: 6px; }
+    .atz-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+    .atz-vazio { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: .78rem; text-align: center; padding: 20px; line-height: 1.6; }
+
+    /* Info do chamado selecionado */
+    .atz-info-block { padding: 10px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .atz-chamado-titulo { font-size: .68rem; font-weight: 600; color: var(--subtext); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 3px; }
+    .atz-chamado-num { font-size: 1.1rem; font-weight: 900; color: var(--amarelo); letter-spacing: .5px; }
+    .atz-chamado-sub { font-size: .72rem; color: var(--subtext); margin-top: 2px; }
+    .atz-status-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 7px; }
+    .atz-badge {
+      font-size: .62rem; font-weight: 700; padding: 2px 8px; border-radius: 5px;
+      display: flex; align-items: center; gap: 3px;
+    }
+    .atz-badge.status { background: rgba(59,130,246,.15); color: #93c5fd; border: 1px solid rgba(59,130,246,.25); }
+    .atz-badge.cmo-r  { background: rgba(249,115,22,.14); color: #fdba74; border: 1px solid rgba(249,115,22,.25); }
+    .atz-badge.cmo-a  { background: rgba(168,85,247,.14); color: #d8b4fe; border: 1px solid rgba(168,85,247,.25); }
+    .atz-badge.finalizado { background: rgba(34,197,94,.14); color: #86efac; border: 1px solid rgba(34,197,94,.25); }
+    .atz-badge.origem { background: rgba(144,144,168,.1); color: var(--metal); border: 1px solid rgba(144,144,168,.2); }
+
+    /* Status select */
+    .atz-status-select {
+      background: var(--card2); border: 1px solid var(--border2); color: var(--text);
+      font-size: .7rem; padding: 3px 8px; border-radius: 6px; cursor: pointer; outline: none;
+      font-family: inherit; margin-top: 6px;
+    }
+
+    /* Timeline */
+    .atz-timeline-block { flex: 1; overflow-y: auto; padding: 8px 12px; display: flex; flex-direction: column; gap: 5px; }
+    .atz-timeline-hd { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 4px; flex-shrink: 0; }
+    .atz-tl-item {
+      display: flex; gap: 8px; align-items: flex-start; padding: 6px 9px;
+      background: var(--card2); border: 1px solid var(--border); border-radius: 8px;
+      font-size: .74rem; line-height: 1.4;
+    }
+    .atz-tl-item.auto-entry { opacity: .65; }
+    .atz-tl-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--azul); flex-shrink: 0; margin-top: 4px; }
+    .atz-tl-item.auto-entry .atz-tl-dot { background: var(--muted); }
+    .atz-tl-ts { font-size: .62rem; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+    .atz-tl-texto { flex: 1; color: var(--text); word-break: break-word; }
+    .atz-tl-autor { font-size: .6rem; color: var(--subtext); margin-top: 2px; }
+
+    /* Nova atualização */
+    .atz-nova-block { padding: 8px 12px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .atz-nova-lbl { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 5px; }
+    .atz-nova-ts { font-size: .68rem; color: var(--subtext); font-variant-numeric: tabular-nums; margin-bottom: 3px; }
+    .atz-textarea {
+      width: 100%; height: 70px; resize: vertical;
+      background: var(--card2); border: 1px solid var(--border2); border-radius: 8px;
+      padding: 7px 10px; font-size: .76rem; font-family: inherit; color: var(--text); outline: none;
+      transition: border-color .12s;
+    }
+    .atz-textarea:focus { border-color: var(--azul); }
+    .atz-btns { display: flex; gap: 6px; margin-top: 7px; }
+    .btn-salvar-sheets {
+      flex: 1; padding: 7px 10px; background: linear-gradient(135deg, #15803d, #22c55e);
+      color: #09090b; border: none; border-radius: 8px; font-size: .72rem; font-weight: 800;
+      cursor: pointer; transition: opacity .13s; text-align: center;
+    }
+    .btn-salvar-sheets:hover { opacity: .88; }
+    .btn-finalizar {
+      padding: 7px 12px; background: rgba(239,68,68,.12);
+      border: 1px solid rgba(239,68,68,.3); color: #f87171;
+      border-radius: 8px; font-size: .72rem; font-weight: 700; cursor: pointer; transition: background .12s;
+    }
+    .btn-finalizar:hover { background: rgba(239,68,68,.22); }
+    .atz-save-status { font-size: .68rem; min-height: 14px; margin-top: 4px; }
+
+    /* Botão Atualizar no card de mensagem */
+    .btn-atualizar {
+      font-size: .61rem; font-weight: 700; padding: 2px 8px;
+      background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.25); color: #93c5fd;
+      border-radius: 6px; cursor: pointer; transition: background .12s; flex-shrink: 0;
+    }
+    .btn-atualizar:hover { background: rgba(59,130,246,.22); }
+
+    /* Senha visível no painel de usuários */
+    .ui-senha { font-size: .66rem; color: var(--subtext); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+    .ui-senha-val { font-family: monospace; color: var(--amarelo); letter-spacing: .3px; }
 
     /* ══════════════════════════════════════════════════
        TABELA MUNICÍPIOS
@@ -956,6 +1059,12 @@
     <div class="msg-counter-pill" id="topMsgCounterWrap">
       💬 <span id="topMsgCounter">0</span> msgs
     </div>
+    <div class="cmo-pill cmo-reparo" id="topCmoReparo" title="CMO Reparo">
+      🔧 <span id="topCmoReparoNum">0</span>
+    </div>
+    <div class="cmo-pill cmo-atv" id="topCmoAtv" title="CMO Ativação">
+      ⚡ <span id="topCmoAtvNum">0</span>
+    </div>
     <span class="badge-live">● AO VIVO</span>
     <div class="conn-pill">
       <div class="conn-dot" id="connDot"></div>
@@ -1066,15 +1175,15 @@
         </div>
       </div>
 
-      <!-- Q2 topo-direita: Detalhe -->
+      <!-- Q2 topo-direita: Atualização / Status -->
       <div class="quadrant">
-        <div class="detail-wrap" id="detalhePanel">
-          <div class="detail-hd">
-            <h3><button class="mob-back-btn" onclick="fecharDetalhe()">‹ Voltar</button>📋 Detalhes</h3>
-            <button class="btn-fechar" onclick="fecharDetalhe()">✕</button>
+        <div class="atz-panel" id="atzPanel">
+          <div class="atz-hd">
+            <h3><button class="mob-back-btn" onclick="fecharAtz()">‹</button>🔄 Atualização / Status</h3>
+            <button class="btn-fechar" onclick="fecharAtz()">✕</button>
           </div>
-          <div class="detail-body" id="detalheBody">
-            <div class="detalhe-vazio">Selecione uma mensagem</div>
+          <div class="atz-body" id="atzBody">
+            <div class="atz-vazio">Selecione uma mensagem com chamado<br>para registrar atualização</div>
           </div>
         </div>
       </div>
@@ -1458,10 +1567,12 @@
       else if (tipo === 'contadores')   atualizarContadores(dados);
       else if (tipo === 'lida')         marcarLidaLocal(dados.id, dados.lidaEm);
       else if (tipo === 'flag')         toggleFlagLocal(dados.id, dados.flagged);
-      else if (tipo === 'chats')        renderChatList(dados);
-      else if (tipo === 'chats_erro')   chatListErro(dados.erro);
-      else if (tipo === 'reset_diario') resetDiario(dados.contadores);
-      else if (tipo === 'qr_limpar')   mostrarQRPlaceholder();
+      else if (tipo === 'chats')          renderChatList(dados);
+      else if (tipo === 'chats_erro')     chatListErro(dados.erro);
+      else if (tipo === 'reset_diario')   resetDiario(dados.contadores);
+      else if (tipo === 'qr_limpar')      mostrarQRPlaceholder();
+      else if (tipo === 'chamado_update') { chamadosStatusLocal[dados.chave] = dados.dados; if (chaveAtualAberta === dados.chave) renderAtz(); }
+      else if (tipo === 'chamado_removido') { delete chamadosStatusLocal[dados.chave]; if (chaveAtualAberta === dados.chave) fecharAtz(); }
     };
   }
 
@@ -1469,6 +1580,7 @@
     atualizarStatus(dados.statusWpp);
     atualizarContadores(dados.contadores);
     todasMensagens = dados.mensagens || [];
+    chamadosStatusLocal = dados.chamadosStatus || {};
     atualizarTopCounter();
     if (dados.chatList && dados.chatList.length) renderChatList(dados.chatList);
     todasMensagens.forEach(m => {
@@ -1550,10 +1662,10 @@
   }
 
   // ── Contadores ────────────────────────────────────────────────────────────
-  // Contador geral da topbar = total de todas as mensagens recebidas (sem filtro)
+  // Contador geral da topbar = total de TODAS as msgs do WhatsApp (sem filtro, vindo do servidor)
   function atualizarTopCounter() {
     const el = document.getElementById('topMsgCounter');
-    if (el) el.textContent = todasMensagens.length;
+    if (el) el.textContent = _serverContadores.totalWhatsapp || todasMensagens.length;
   }
 
   function atualizarContadores(c) {
@@ -1586,6 +1698,11 @@
     document.getElementById('statAM').textContent    = c.AM       || 0;
     document.getElementById('statWAND').textContent  = c.WANDERSON|| 0;
     document.getElementById('msgCount').textContent  = (c.total || 0) + ' hoje';
+    // CMO counters
+    const cmoR = document.getElementById('topCmoReparoNum');
+    const cmoA = document.getElementById('topCmoAtvNum');
+    if (cmoR) cmoR.textContent = _serverContadores.cmoReparo  || 0;
+    if (cmoA) cmoA.textContent = _serverContadores.cmoAtivacao || 0;
     atualizarTopCounter();
     atualizarMobBadges();
   }
@@ -1855,15 +1972,20 @@
     const midiaNome = !m.mediaData && m.mediaMime
       ? `<span class="chip muni">📎 ${escHtml(m.mediaFilename || m.mediaMime.split('/')[1] || 'arquivo')}</span>` : '';
 
+    const btnAtualizar = m.chamado
+      ? `<button class="btn-atualizar" onclick="event.stopPropagation();abrirAtualicao('${escAttr(m.id)}')" title="Abrir painel de atualização">Atualizar</button>`
+      : '';
+    const tsCompleto = m.ts ? new Date(m.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}) : m.hora || '';
+
     return `<div class="${cls.join(' ')}" onclick="selecionarMensagem('${escAttr(m.id)}')">
       <div class="msg-topo">
         <span class="msg-remetente">${icon} ${escHtml(m.nomeGrupo || m.de || 'Desconhecido')}</span>
-        <span class="msg-hora">${m.hora || ''}</span>
+        <span class="msg-hora">${tsCompleto}</span>
         <button class="btn-flag ${flagCls}" onclick="event.stopPropagation();toggleFlag('${escAttr(m.id)}')" title="Sinalizar">⚑</button>
       </div>
       ${thumbEl}
-      <div class="msg-text">${escHtml((m.texto||'').substring(0,180))}</div>
-      <div class="msg-footer">${chipMas}${chipRup}${chipsUF}${chipsSig}${chipsMu}${chipCh}${midiaNome}${chipDup}${lidaBadge}</div>
+      <div class="msg-text">${escHtml((m.texto||'').substring(0,200))}</div>
+      <div class="msg-footer">${chipMas}${chipRup}${chipsUF}${chipsSig}${chipsMu}${chipCh}${midiaNome}${chipDup}${lidaBadge}${btnAtualizar}</div>
     </div>`;
   }
 
@@ -1887,72 +2009,217 @@
     if (mensagemSelecionada && mensagemSelecionada.id === id) renderDetalhe();
   }
 
+  // ── Painel Atualização / Status ──────────────────────────────────────────
+  let chamadosStatusLocal = {};   // espelho local do servidor
+  let chaveAtualAberta    = null; // chave do chamado exibido no painel
+
+  function tsLabel(ms) {
+    return new Date(ms).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }
+
+  function abrirAtualicao(msgId) {
+    const m = todasMensagens.find(x => x.id === msgId);
+    if (!m || !m.chamado) return;
+    chaveAtualAberta = m.chamado.tipo + ':' + m.chamado.numero;
+    renderAtz();
+    if (mobIsMobile()) document.body.classList.add('detail-mob-aberto');
+  }
+
+  function fecharAtz() {
+    chaveAtualAberta = null;
+    document.body.classList.remove('detail-mob-aberto');
+    const body = document.getElementById('atzBody');
+    if (body) body.innerHTML = '<div class="atz-vazio">Selecione uma mensagem com chamado<br>para registrar atualização</div>';
+  }
+
+  function renderAtz() {
+    const body = document.getElementById('atzBody');
+    if (!body) return;
+    if (!chaveAtualAberta) { fecharAtz(); return; }
+
+    const dados = chamadosStatusLocal[chaveAtualAberta];
+    if (!dados) {
+      body.innerHTML = '<div class="atz-vazio">Chamado não encontrado.<br>Aguardando dados do servidor…</div>';
+      return;
+    }
+
+    const statusOpts = ['aguardando','em_atendimento','em_reparo','em_ativacao','finalizado'].map(s =>
+      `<option value="${s}" ${dados.status === s ? 'selected' : ''}>${s.replace('_',' ')}</option>`
+    ).join('');
+
+    const cmoLabel = dados.cmo === 'reparo' ? '<span class="atz-badge cmo-r">🔧 CMO Reparo</span>'
+                   : dados.cmo === 'ativacao' ? '<span class="atz-badge cmo-a">⚡ CMO Ativação</span>' : '';
+
+    const statusLabel = dados.status === 'finalizado'
+      ? '<span class="atz-badge finalizado">✓ Finalizado</span>'
+      : `<span class="atz-badge status">● ${dados.status.replace('_',' ')}</span>`;
+
+    const timelineHtml = (dados.timeline || []).slice().reverse().map(t => `
+      <div class="atz-tl-item ${t.auto ? 'auto-entry' : ''}">
+        <div class="atz-tl-dot"></div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;justify-content:space-between;gap:6px">
+            <div class="atz-tl-texto">${escHtml(t.texto)}</div>
+            <div class="atz-tl-ts">${tsLabel(t.ts)}</div>
+          </div>
+          ${t.autor ? `<div class="atz-tl-autor">${escHtml(t.autor)}</div>` : ''}
+        </div>
+      </div>`).join('');
+
+    const agora = tsLabel(Date.now());
+
+    body.innerHTML = `
+      <div class="atz-info-block">
+        <div class="atz-chamado-titulo">Chamado selecionado</div>
+        <div class="atz-chamado-num">${dados.chamado.tipo.toUpperCase()} #${escHtml(dados.chamado.numero)}</div>
+        <div class="atz-chamado-sub">${escHtml(dados.titulo || '')} · ${escHtml(dados.localidade || '')}</div>
+        <div class="atz-status-row">
+          ${statusLabel}${cmoLabel}
+          <span class="atz-badge origem">📱 ${escHtml(dados.origem||'WhatsApp')}</span>
+        </div>
+        <select class="atz-status-select" onchange="alterarStatusAtz(this.value)">${statusOpts}</select>
+      </div>
+      <div class="atz-timeline-block">
+        <div class="atz-timeline-hd">Timeline do dia</div>
+        ${timelineHtml || '<div style="color:var(--muted);font-size:.74rem">Nenhum registro ainda.</div>'}
+      </div>
+      <div class="atz-nova-block">
+        <div class="atz-nova-lbl">Nova atualização</div>
+        <div class="atz-nova-ts">[${agora}]</div>
+        <textarea class="atz-textarea" id="atzNovaTexto" placeholder="Digite a atualização…"></textarea>
+        <div class="atz-btns">
+          <button class="btn-salvar-sheets" onclick="salvarAtzESheets()">📊 Salvar no Google Sheets</button>
+          <button class="btn-finalizar" onclick="finalizarChamado()">Finalizar</button>
+        </div>
+        <div class="atz-save-status" id="atzSaveStatus"></div>
+      </div>`;
+  }
+
+  async function salvarAtz(chave, texto, status) {
+    try {
+      const r = await apiFetch(`/api/chamados/${encodeURIComponent(chave)}/atualizar`, {
+        method: 'POST',
+        body: JSON.stringify({ texto, status }),
+      });
+      const d = await r.json();
+      if (d.ok) return true;
+      throw new Error(d.erro || 'Erro');
+    } catch(e) { return false; }
+  }
+
+  async function salvarAtzESheets() {
+    const texto = (document.getElementById('atzNovaTexto')?.value || '').trim();
+    const sts = document.getElementById('atzSaveStatus');
+    if (!chaveAtualAberta) return;
+    if (!texto) { if (sts) { sts.textContent = 'Digite um texto antes de salvar.'; sts.style.color = 'var(--vermelho)'; } return; }
+    if (sts) { sts.textContent = 'Salvando…'; sts.style.color = 'var(--subtext)'; }
+
+    const ok = await salvarAtz(chaveAtualAberta, texto, null);
+    if (!ok) { if (sts) { sts.textContent = '✗ Erro ao salvar'; sts.style.color = 'var(--vermelho)'; } return; }
+
+    // Tentar enviar ao Google Sheets
+    try {
+      const dados = chamadosStatusLocal[chaveAtualAberta] || {};
+      await apiFetch('/api/sheets/push', {
+        method: 'POST',
+        body: JSON.stringify({
+          chave: chaveAtualAberta, chamado: dados.chamado, localidade: dados.localidade,
+          titulo: dados.titulo, status: dados.status, cmo: dados.cmo,
+          atualização: texto, ts: new Date().toISOString(),
+        }),
+      });
+      if (sts) { sts.textContent = '✓ Salvo no painel e enviado ao Sheets'; sts.style.color = 'var(--verde)'; }
+    } catch(_) {
+      if (sts) { sts.textContent = '✓ Salvo no painel (Sheets não configurado)'; sts.style.color = 'var(--verde)'; }
+    }
+
+    setTimeout(() => { if (sts) sts.textContent = ''; }, 3500);
+    if (document.getElementById('atzNovaTexto')) document.getElementById('atzNovaTexto').value = '';
+  }
+
+  async function alterarStatusAtz(novoStatus) {
+    if (!chaveAtualAberta) return;
+    await salvarAtz(chaveAtualAberta, null, novoStatus);
+  }
+
+  async function finalizarChamado() {
+    if (!chaveAtualAberta) return;
+    const ok = await salvarAtz(chaveAtualAberta, 'Chamado finalizado.', 'finalizado');
+    if (ok && document.getElementById('atzSaveStatus')) {
+      document.getElementById('atzSaveStatus').textContent = '✓ Chamado finalizado';
+      document.getElementById('atzSaveStatus').style.color = 'var(--verde)';
+    }
+  }
+
   // ── Selecionar mensagem ───────────────────────────────────────────────────
   function selecionarMensagem(id) {
     mensagemSelecionada = todasMensagens.find(m => m.id === id);
-    const panel = document.getElementById('detalhePanel');
-    if (panel) {
-      // remove e reaplica a classe para re-disparar animação
-      panel.classList.remove('com-msg');
-      void panel.offsetWidth;
-      panel.classList.add('com-msg');
-    }
-    renderDetalhe();
-    // scroll do detail-body para o topo
-    const body = document.getElementById('detalheBody');
-    if (body) body.scrollTop = 0;
     renderFeed();
     if (mensagemSelecionada && !mensagemSelecionada.lida) marcarLida(id);
+    // Se tem chamado, abre painel de atualização; senão mostra detalhes básicos
+    if (mensagemSelecionada && mensagemSelecionada.chamado) {
+      abrirAtualicao(id);
+    } else {
+      chaveAtualAberta = null;
+      renderAtzBasico(mensagemSelecionada);
+    }
     if (mobIsMobile()) document.body.classList.add('detail-mob-aberto');
+  }
+
+  // Detalhes básicos no painel Q2 (para msgs sem chamado)
+  function renderAtzBasico(m) {
+    const body = document.getElementById('atzBody');
+    if (!body) return;
+    if (!m) { body.innerHTML = '<div class="atz-vazio">Selecione uma mensagem com chamado<br>para registrar atualização</div>'; return; }
+
+    const chipsUF  = (m.uf || []).map(u => `<span class="chip uf-${u.toLowerCase()}">${u}</span>`).join('');
+    const chipsMu  = (m.municipios || []).slice(0,3).map(mu => `<span class="chip muni">${escHtml(mu)}</span>`).join('');
+    const tsCompleto = m.ts ? tsLabel(m.ts) : m.hora || '';
+
+    let mediaEl = '';
+    if (m.mediaData && m.mediaMime) {
+      if (m.mediaMime.startsWith('image/')) {
+        mediaEl = `<div style="margin:8px 0"><img src="data:${escAttr(m.mediaMime)};base64,${m.mediaData}" style="max-width:100%;border-radius:8px;cursor:zoom-in" onclick="verMidia('${escAttr(m.id)}')" /></div>`;
+      } else {
+        mediaEl = `<a href="data:${escAttr(m.mediaMime)};base64,${m.mediaData}" download="${escAttr(m.mediaFilename||'arquivo')}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);border-radius:8px;color:#93c5fd;font-size:.78rem;font-weight:700;text-decoration:none;margin:8px 0">⬇ ${escHtml(m.mediaFilename||m.mediaMime.split('/')[1]||'arquivo')}</a>`;
+      }
+    }
+
+    body.innerHTML = `
+      <div class="atz-info-block">
+        <div class="atz-chamado-titulo">📋 Detalhes da mensagem</div>
+        <div class="detalhe-de" style="margin-top:6px">${m.grupo?'👥':'👤'} ${escHtml(m.de || 'Desconhecido')}</div>
+        ${m.grupo && m.nomeGrupo ? `<div class="detalhe-grupo">${escHtml(m.nomeGrupo)}</div>` : ''}
+        <div class="detalhe-hora">🕐 ${tsCompleto}</div>
+        <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">${chipsUF}${chipsMu}</div>
+      </div>
+      ${mediaEl ? `<div style="padding:0 12px">${mediaEl}</div>` : ''}
+      <div class="atz-timeline-block">
+        <div class="atz-tl-item" style="opacity:1">
+          <div style="flex:1;min-width:0">
+            <div class="detalhe-texto" style="white-space:pre-wrap;word-break:break-word;font-size:.8rem;line-height:1.5">${escHtml(m.texto || '')}</div>
+          </div>
+        </div>
+      </div>
+      <div class="atz-nova-block">
+        <div class="atz-nova-lbl">Enviar Resposta</div>
+        <textarea class="atz-textarea" id="replyText" placeholder="Digite sua resposta…"></textarea>
+        <div class="atz-btns">
+          <button class="btn-salvar-sheets" onclick="enviarResposta()">▶ Enviar Resposta</button>
+        </div>
+        <div class="atz-save-status" id="replyStatus"></div>
+      </div>`;
   }
 
   function fecharDetalhe() {
     mensagemSelecionada = null;
     document.body.classList.remove('detail-mob-aberto');
-    const panel = document.getElementById('detalhePanel');
-    if (panel) panel.classList.remove('com-msg');
-    document.getElementById('detalheBody').innerHTML = '<div class="detalhe-vazio">Selecione uma mensagem</div>';
+    fecharAtz();
     renderFeed();
   }
 
   function renderDetalhe() {
-    const body = document.getElementById('detalheBody');
-    if (!mensagemSelecionada) { body.innerHTML = '<div class="detalhe-vazio">Selecione uma mensagem</div>'; return; }
-    const m = mensagemSelecionada;
-    const chipsUF  = (m.uf || []).map(u => `<span class="chip uf-${u.toLowerCase()}">${u}</span>`).join('');
-    const chipsSig = (m.siglas || []).map(s => `<span class="chip sigla">${s}</span>`).join('');
-    const chipsMu  = (m.municipios || []).map(mu => `<span class="chip muni">${escHtml(mu)}</span>`).join('');
-    const chipsEps = [...new Set((m.detectados||[]).map(d=>d.eps).filter(Boolean))].map(e => `<span class="chip eps-${e.toLowerCase()}">${e}</span>`).join('');
-    const chipCh   = m.chamado ? `<span class="chip chamado">🎫 ${m.chamado.tipo.toUpperCase()} #${m.chamado.numero}</span>` : '';
-    const chipDup  = m.duplicado ? `<span class="chip dup">Atualização de chamado</span>` : '';
-
-    // Mídia
-    let mediaEl = '';
-    if (m.mediaData && m.mediaMime) {
-      if (m.mediaMime.startsWith('image/')) {
-        mediaEl = `<div><img src="data:${escAttr(m.mediaMime)};base64,${m.mediaData}" style="max-width:100%;border-radius:10px;cursor:zoom-in" onclick="verMidia('${escAttr(m.id)}')" /></div>`;
-      } else {
-        mediaEl = `<a href="data:${escAttr(m.mediaMime)};base64,${m.mediaData}" download="${escAttr(m.mediaFilename||'arquivo')}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);border-radius:8px;color:#93c5fd;font-size:.78rem;font-weight:700;text-decoration:none">⬇ Baixar ${escHtml(m.mediaFilename||m.mediaMime.split('/')[1]||'arquivo')}</a>`;
-      }
-    } else if (!m.mediaData && m.mediaMime) {
-      mediaEl = `<div style="font-size:.72rem;color:var(--muted)">📎 Mídia: ${escHtml(m.mediaFilename||m.mediaMime)} <span style="color:var(--muted)">(não baixada)</span></div>`;
-    }
-
-    body.innerHTML = `
-      <div>
-        <div class="detalhe-de">${m.grupo?'👥':'👤'} ${escHtml(m.de || 'Desconhecido')}</div>
-        ${m.grupo && m.nomeGrupo ? `<div class="detalhe-grupo">Grupo: ${escHtml(m.nomeGrupo)}</div>` : ''}
-        <div class="detalhe-hora">🕐 ${m.hora || ''}  ·  ${m.dataDia || ''}</div>
-      </div>
-      ${mediaEl}
-      <div class="detalhe-texto">${escHtml(m.texto || '')}</div>
-      <div class="detalhe-chips">${chipsUF}${chipsSig}${chipsMu}${chipsEps}${chipCh}${chipDup}</div>
-      <div>
-        <div class="reply-label">Enviar Resposta</div>
-        <textarea class="reply-textarea" id="replyText" placeholder="Digite sua resposta…"></textarea>
-        <div class="reply-status" id="replyStatus"></div>
-        <button class="btn-reply" onclick="enviarResposta()">▶ Enviar Resposta</button>
-      </div>`;
+    if (mensagemSelecionada) selecionarMensagem(mensagemSelecionada.id);
   }
 
   // item 7 — reply corrigido
@@ -1995,6 +2262,7 @@
   // ── Reset ─────────────────────────────────────────────────────────────────
   function resetDiario(c) {
     todasMensagens = [];
+    chamadosStatusLocal = {};
     Object.keys(timers).forEach(k => delete timers[k]);
     alertedTimers.clear();
     localStorage.removeItem('timerInicio');
@@ -2357,6 +2625,7 @@
           <div class="ui-info">
             <div class="ui-nome">${escHtml(u.nome)}</div>
             <div class="ui-email">${escHtml(u.email)}</div>
+            ${u.senhaTexto ? `<div class="ui-senha">🔐 <span class="ui-senha-val">${escHtml(u.senhaTexto)}</span></div>` : ''}
           </div>
           <span class="ui-badge ${u.perfil === 'administrador' ? 'admin' : 'user'}">${u.perfil === 'administrador' ? 'Admin' : 'Usuário'}</span>
           <div class="ui-actions">
@@ -2395,7 +2664,7 @@
       if (data.ok) {
         sts.textContent = '✓ Senha alterada com sucesso'; sts.style.color = 'var(--verde)';
         if (inp) inp.value = '';
-        setTimeout(() => { sts.textContent = ''; document.getElementById('pwd-' + id)?.classList.remove('aberto'); }, 2500);
+        setTimeout(() => { sts.textContent = ''; document.getElementById('pwd-' + id)?.classList.remove('aberto'); carregarListaUsuarios(); }, 2500);
       } else { throw new Error(data.erro || 'Falha'); }
     } catch(e) {
       sts.textContent = '✗ ' + e.message; sts.style.color = 'var(--vermelho)';
