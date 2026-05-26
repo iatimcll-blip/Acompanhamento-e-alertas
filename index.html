@@ -93,7 +93,17 @@
     }
     .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
     .conn-dot.on { background: var(--verde); box-shadow: 0 0 0 3px rgba(34,197,94,.22); }
-    .date-pill { font-size: .73rem; color: var(--silver); font-weight: 500; letter-spacing: .2px; }
+    .date-pill {
+      display: flex; align-items: center; gap: 6px;
+      font-size: .78rem; color: var(--silver); font-weight: 500; letter-spacing: .2px;
+    }
+    .date-pill .dp-data { font-size: .76rem; }
+    .date-pill .dp-clock {
+      font-size: .84rem; font-weight: 700; font-variant-numeric: tabular-nums;
+      color: var(--text); letter-spacing: .5px;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 6px; padding: 2px 8px;
+    }
     .msg-counter-pill {
       display: flex; align-items: center; gap: 5px;
       background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.25);
@@ -227,24 +237,31 @@
     @keyframes blink-brd { 0%,100%{border-left-color:var(--vermelho)} 50%{border-left-color:rgba(239,68,68,.2)} }
 
     /* Linha 1: nome + tags + clock + botão */
-    .timer-line1 { display: flex; align-items: center; gap: 7px; }
-    .timer-muni  { font-size: .88rem; font-weight: 800; color: var(--text); white-space: nowrap; flex-shrink: 0; }
-    .timer-tags  { display: flex; gap: 3px; flex: 1; min-width: 0; }
-    .tag-pill    { font-size: .6rem; font-weight: 800; padding: 2px 7px; border-radius: 5px; color: rgba(0,0,0,.85); flex-shrink: 0; }
-    .timer-clock { font-size: .95rem; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0; }
+    .timer-line1 {
+      display: flex; align-items: center; gap: 6px;
+      overflow: hidden; /* impede que o conteúdo estoure o balão */
+    }
+    .timer-muni {
+      font-size: .85rem; font-weight: 800; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      min-width: 0; flex: 1;           /* ocupa o espaço disponível e trunca se necessário */
+    }
+    .timer-tags  { display: flex; gap: 3px; flex-shrink: 0; }
+    .tag-pill    { font-size: .58rem; font-weight: 800; padding: 2px 6px; border-radius: 5px; color: rgba(0,0,0,.85); flex-shrink: 0; }
+    .timer-clock { font-size: .92rem; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0; }
     .timer-clock.ok      { color: var(--verde); }
     .timer-clock.urgente { color: var(--laranja); }
-    .timer-clock.alerta  { color: var(--vermelho); font-size: .8rem; letter-spacing: -.3px; }
+    .timer-clock.alerta  { color: var(--vermelho); font-size: .78rem; }
 
     /* Linha 2: barra de progresso */
-    .timer-line2 { margin-top: 6px; }
+    .timer-line2 { margin-top: 5px; }
     .timer-bar { height: 3px; background: var(--border); border-radius: 3px; overflow: hidden; }
     .timer-bar-fill { height: 100%; border-radius: 3px; transition: width .5s linear; }
 
     .btn-liberar {
       background: rgba(22,163,74,.12); color: var(--verde);
-      border: 1px solid rgba(22,163,74,.28); border-radius: 10px;
-      padding: 3px 10px; font-size: .66rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all .12s; flex-shrink: 0;
+      border: 1px solid rgba(22,163,74,.28); border-radius: 8px;
+      padding: 3px 9px; font-size: .63rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all .12s; flex-shrink: 0;
     }
     .btn-liberar:hover { background: rgba(22,163,74,.22); }
     .timer-item.expirado .btn-liberar { background: rgba(239,68,68,.12); color: var(--vermelho); border-color: rgba(239,68,68,.28); }
@@ -538,10 +555,12 @@
        TIMER COMPACTO (overrides para quadrantes)
     ══════════════════════════════════════════════════ */
     .quadrant .timer-item  { padding: 6px 10px; border-radius: 8px; }
-    .quadrant .timer-muni  { font-size: .78rem; }
-    .quadrant .timer-clock { font-size: .85rem; }
-    .quadrant .timer-clock.alerta { font-size: .72rem; }
-    .quadrant .tag-pill { font-size: .55rem; padding: 1px 5px; }
+    .quadrant .timer-muni  { font-size: .80rem; }
+    .quadrant .timer-clock { font-size: .86rem; }
+    .quadrant .timer-clock.alerta { font-size: .70rem; }
+    .quadrant .tag-pill { font-size: .54rem; padding: 1px 5px; }
+    /* O body do timer no quadrante deve expandir para preencher o espaço disponível */
+    .quadrant .timer-body { max-height: none !important; }
 
     /* ══════════════════════════════════════════════════
        MODAL DE CONFIGURAÇÕES
@@ -930,7 +949,10 @@
     </div>
   </div>
   <div class="topbar-right">
-    <div class="date-pill">📅 <span id="dataHoje">—</span></div>
+    <div class="date-pill">
+      📅 <span class="dp-data" id="dataHoje">—</span>
+      <span class="dp-clock" id="relogioAgora">00:00:00</span>
+    </div>
     <div class="msg-counter-pill" id="topMsgCounterWrap">
       💬 <span id="topMsgCounter">0</span> msgs
     </div>
@@ -1277,6 +1299,16 @@
       `${dias[d.getDay()]}, ${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
   })();
 
+  // ── Relógio ao vivo (atualiza a cada segundo) ─────────────────────────────
+  (function() {
+    const el = document.getElementById('relogioAgora');
+    function tick() {
+      if (el) el.textContent = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    }
+    tick();
+    setInterval(tick, 1000);
+  })();
+
   // ── Estado ───────────────────────────────────────────────────────────────
   let ws, BASE = [], todasMensagens = [];
   let filtroFeedAtual  = 'TODOS';
@@ -1366,6 +1398,29 @@
     setTimeout(() => playBeep(1400, 0.18, 0.5), 660);
   }
 
+  // Som curto para nova mensagem que corresponde ao filtro ativo
+  function playMsgChime() {
+    playBeep(900, 0.13, 0.22);
+    setTimeout(() => playBeep(1200, 0.09, 0.16), 140);
+  }
+
+  // Verifica se a mensagem corresponde ao filtro/aba atualmente selecionado
+  function mensagemMatchesFiltro(m) {
+    if (filtroLocalidade) return (m.municipios||[]).includes(filtroLocalidade);
+    switch (filtroFeedAtual) {
+      case 'TODOS':    return (m.detectados||[]).length > 0 || m.temWanderson;
+      case 'PA':       return (m.uf||[]).includes('PA');
+      case 'MA':       return (m.uf||[]).includes('MA');
+      case 'AP':       return (m.uf||[]).includes('AP');
+      case 'AM':       return (m.uf||[]).includes('AM');
+      case 'URGENTE':  return !!m.temAcionamento;
+      case 'RUPTURA':  return !!m.temRuptura;
+      case 'NAOIDA':   return !m.lida && (m.detectados||[]).length > 0;
+      case 'WANDERSON':return !!m.temWanderson;
+      default:         return false;
+    }
+  }
+
   // ── Filtro por grupos selecionados (items 1, 2, 3) ────────────────────────
   function getActiveMsgs() {
     if (selectedChats.size === 0) return todasMensagens;
@@ -1414,6 +1469,7 @@
     atualizarStatus(dados.statusWpp);
     atualizarContadores(dados.contadores);
     todasMensagens = dados.mensagens || [];
+    atualizarTopCounter();
     if (dados.chatList && dados.chatList.length) renderChatList(dados.chatList);
     todasMensagens.forEach(m => {
       if (m.temAcionamento && m.detectados && m.detectados.length > 0 && !m.lida) iniciarTimers(m, m.ts, m.texto);
@@ -1493,7 +1549,13 @@
     }
   }
 
-  // ── Contadores (items 1, 5, 8, 11) ───────────────────────────────────────
+  // ── Contadores ────────────────────────────────────────────────────────────
+  // Contador geral da topbar = total de todas as mensagens recebidas (sem filtro)
+  function atualizarTopCounter() {
+    const el = document.getElementById('topMsgCounter');
+    if (el) el.textContent = todasMensagens.length;
+  }
+
   function atualizarContadores(c) {
     if (!c) return;
     _serverContadores = c;
@@ -1524,9 +1586,7 @@
     document.getElementById('statAM').textContent    = c.AM       || 0;
     document.getElementById('statWAND').textContent  = c.WANDERSON|| 0;
     document.getElementById('msgCount').textContent  = (c.total || 0) + ' hoje';
-    // Contador na topbar
-    const topCounter = document.getElementById('topMsgCounter');
-    if (topCounter) topCounter.textContent = c.total || 0;
+    atualizarTopCounter();
     atualizarMobBadges();
   }
 
@@ -1668,7 +1728,10 @@
     todasMensagens.unshift(m);
     if (todasMensagens.length > 200) todasMensagens.pop();
     if (m.temAcionamento && m.detectados && m.detectados.length > 0) iniciarTimers(m, m.ts, m.texto);
-    if (m.temRuptura) playRupturaAlert();  // item 10
+    // Sons: ruptura tem alerta próprio; demais: chime se combinar com filtro ativo
+    if (m.temRuptura) playRupturaAlert();
+    else if (mensagemMatchesFiltro(m)) playMsgChime();
+    atualizarTopCounter();
     atualizarDropdownLocalidades();
     renderFeed();
     renderMassivo();
