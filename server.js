@@ -17,12 +17,14 @@ const WPP_SESSION_PATH = process.env.WPP_SESSION_PATH || path.join(__dirname, '.
 // senão cai para __dirname (desenvolvimento local)
 const DATA_DIR   = fs.existsSync('/data') ? '/data' : __dirname;
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@mcll.com';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'mcll@admin2024';
 
 // ── Usuários ────────────────────────────────────────────────────────────────
 function carregarUsuarios() {
   if (!fs.existsSync(USERS_FILE)) {
     const usuarios = [
-      { id:'1', nome:'Administrador', email:'admin@mcll.com',    senha: bcrypt.hashSync('mcll@admin2024', 10), perfil:'administrador' },
+      { id:'1', nome:'Administrador', email:ADMIN_EMAIL,         senha: bcrypt.hashSync(ADMIN_PASSWORD, 10), perfil:'administrador' },
       { id:'2', nome:'Usuário',       email:'usuario@mcll.com',  senha: bcrypt.hashSync('mcll@2024', 10),      perfil:'usuario' },
     ];
     fs.writeFileSync(USERS_FILE, JSON.stringify(usuarios, null, 2), 'utf8');
@@ -32,6 +34,33 @@ function carregarUsuarios() {
   return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
 }
 let usuarios = carregarUsuarios();
+
+function salvarUsuarios() {
+  fs.writeFileSync(USERS_FILE, JSON.stringify(usuarios, null, 2), 'utf8');
+}
+
+function garantirAdminPadrao() {
+  const admin = usuarios.find(u => u.email === ADMIN_EMAIL);
+  if (!admin) {
+    usuarios.unshift({
+      id: '1',
+      nome: 'Administrador',
+      email: ADMIN_EMAIL,
+      senha: bcrypt.hashSync(ADMIN_PASSWORD, 10),
+      perfil: 'administrador',
+    });
+    salvarUsuarios();
+    console.log('Usuario administrador padrao criado');
+    return;
+  }
+
+  if (!bcrypt.compareSync(ADMIN_PASSWORD, admin.senha)) {
+    admin.senha = bcrypt.hashSync(ADMIN_PASSWORD, 10);
+    salvarUsuarios();
+    console.log('Senha do administrador padrao sincronizada');
+  }
+}
+garantirAdminPadrao();
 
 // ── Middleware de autenticação ───────────────────────────────────────────────
 function autenticar(req, res, next) {
@@ -127,7 +156,14 @@ const PALAVRAS_ACIONAMENTO = [
 ];
 
 // Identificadores do Wanderson para contagem especial
-const WANDERSON_IDS = ['WANDERSON MARCELLUS PENHA COSTA', '5586994944816'];
+const WANDERSON_IDS = [
+  'WANDERSON MARCELLUS PENHA COSTA',
+  '@WANDERSON',
+  '5586994944816',
+  '555586994944816',
+  '+5586994944816',
+  '86994944816',
+];
 
 // Padrões de chamados massivos
 const MASSIVO_RE = [
@@ -235,12 +271,31 @@ app.delete('/api/usuarios/:id', autenticar, apenasAdmin, (req, res) => {
   fs.writeFileSync(USERS_FILE, JSON.stringify(usuarios, null, 2), 'utf8');
   res.json({ ok: true });
 });
+app.put('/api/usuarios/:id/senha', autenticar, apenasAdmin, (req, res) => {
+  const { novaSenha } = req.body;
+  if (!novaSenha || novaSenha.length < 4) return res.status(400).json({ erro: 'Senha muito curta (mín. 4 caracteres)' });
+  const user = usuarios.find(u => u.id === req.params.id);
+  if (!user) return res.status(404).json({ erro: 'Usuário não encontrado' });
+  user.senha = bcrypt.hashSync(novaSenha, 10);
+  salvarUsuarios();
+  res.json({ ok: true });
+});
 
 // ── API REST ─────────────────────────────────────────────────────────────────
 app.get('/api/status',    autenticar, (_, res) => res.json({ status: statusWpp, contadores }));
 app.get('/api/mensagens', autenticar, (_, res) => res.json(mensagens.filter(m => m.dataDia === hoje())));
 app.get('/api/base',      autenticar, (_, res) => res.json(BASE));
 app.get('/api/chats',     autenticar, (_, res) => res.json(chatList));
+
+app.post('/api/sync/mensagens', autenticar, async (_, res) => {
+  if (statusWpp !== 'conectado') return res.status(503).json({ erro: 'WhatsApp nao conectado' });
+  if (sincronizandoMensagens) return res.status(202).json({ ok: true, msg: 'Sincronizacao ja em andamento' });
+
+  res.json({ ok: true, msg: 'Sincronizacao iniciada em segundo plano' });
+  sincronizarMensagensRecentes().catch(e => {
+    console.error('Erro ao sincronizar mensagens:', e.message);
+  });
+});
 
 // Marcar mensagem como lida
 app.post('/api/mensagens/:id/lida', autenticar, (req, res) => {
@@ -289,9 +344,9 @@ app.post('/api/chat-messages', autenticar, async (req, res) => {
   }
 });
 
-// Carrega lista de chats sob demanda (evita timeout no startup)
+// Carrega lista de chats sob demanda (evita timeout no startup) — apenas admin
 let carregandoChats = false;
-app.post('/api/chats/refresh', autenticar, async (req, res) => {
+app.post('/api/chats/refresh', autenticar, apenasAdmin, async (req, res) => {
   if (statusWpp !== 'conectado') return res.status(503).json({ erro: 'WhatsApp não conectado' });
   if (carregandoChats) return res.status(429).json({ erro: 'Carregamento já em andamento' });
   carregandoChats = true;
@@ -299,7 +354,7 @@ app.post('/api/chats/refresh', autenticar, async (req, res) => {
   try {
     const chats = await Promise.race([
       client.getChats(),
-      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 45000)),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 120000)),
     ]);
     chatList = chats.slice(0, 80).map(c => ({
       id:       c.id._serialized,
@@ -308,6 +363,9 @@ app.post('/api/chats/refresh', autenticar, async (req, res) => {
       naoLidas: c.unreadCount || 0,
     }));
     broadcast('chats', chatList);
+    sincronizarMensagensRecentes(chats).catch(e => {
+      console.error('Erro ao sincronizar mensagens apos refresh:', e.message);
+    });
     console.log(`${chatList.length} chats carregados via refresh`);
   } catch (e) {
     console.error('Erro ao carregar chats (refresh):', e.message);
@@ -486,6 +544,170 @@ function criarCliente() {
 }
 
 let client = criarCliente();
+let sincronizandoMensagens = false;
+
+async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
+  const texto = msg.body;
+
+  console.log(`[MSG:${origem}] de=${msg.from} grupo=${msg.from.includes('@g.us')} quoted=${!!msg.hasQuotedMsg} texto="${(texto||'').substring(0,80)}"`);
+
+  if (!texto || texto.trim() === '') return false;
+
+  const dataMsg = msg.timestamp
+    ? new Date(msg.timestamp * 1000).toISOString().slice(0, 10)
+    : hoje();
+  if (dataMsg !== hoje()) return false;
+
+  const { detectados, temAcionamento } = analisarMensagem(texto);
+  const temWanderson = WANDERSON_IDS.some(id =>
+    texto.toUpperCase().includes(id.toUpperCase())
+  );
+
+  // Somente mensagens com municipio/UF reconhecido OU mencao ao Wanderson
+  if (detectados.length === 0 && !temWanderson) {
+    console.log(`[FILTRADO:${origem}] de=${msg.from} - nenhum municipio/Wanderson detectado`);
+    return false;
+  }
+
+  const jaDuplicada = mensagens.some(m =>
+    (m.id === msg.id._serialized) ||
+    (m.numero === msg.from && m.texto === texto && m.dataDia === hoje())
+  );
+  if (jaDuplicada) {
+    console.log(`[DUPLICADO:${origem}] de=${msg.from}`);
+    return false;
+  }
+
+  const temRuptura = /\bRUPTURA\b/i.test(texto);
+
+  let temMassivo = false, tipoMassivo = null;
+  for (const { tipo, re } of MASSIVO_RE) {
+    if (re.test(texto)) { temMassivo = true; tipoMassivo = tipoMassivo || tipo; }
+  }
+
+  const chamado = extrairChamado(texto);
+  let duplicado = false;
+  if (chamado) {
+    const ufStr = [...new Set(detectados.map(d => d.uf))].sort().join('-');
+    const chave = chamado.tipo + ':' + chamado.numero + (ufStr ? ':' + ufStr : '');
+    if (chamadosHoje[chave]) {
+      duplicado = true;
+      chamadosHoje[chave].atualizacoes = (chamadosHoje[chave].atualizacoes || 0) + 1;
+    } else {
+      chamadosHoje[chave] = { atualizacoes: 0 };
+    }
+  }
+
+  let chat = null, contact = null;
+  try { chat = await msg.getChat(); } catch (_) {}
+  try { contact = await msg.getContact(); } catch (_) {}
+
+  // Baixa mídia quando disponível (imagens, arquivos, vídeos)
+  let mediaData = null, mediaMime = null, mediaFilename = null;
+  if (msg.hasMedia) {
+    try {
+      const media = await Promise.race([
+        msg.downloadMedia(),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000)),
+      ]);
+      if (media && media.data) {
+        mediaMime     = media.mimetype || '';
+        mediaFilename = media.filename || null;
+        if (mediaMime.startsWith('image/')) {
+          const sz = Buffer.from(media.data, 'base64').length;
+          if (sz < 2 * 1024 * 1024) mediaData = media.data; // máx 2 MB
+        }
+      }
+    } catch (_) {}
+  }
+
+  const entrada = {
+    id:        msg.id._serialized,
+    de:        contact?.pushname || contact?.number || msg._data?.notifyName || msg.author || msg.from,
+    numero:    msg.from,
+    grupo:     Boolean(chat?.isGroup || msg.from.includes('@g.us')),
+    nomeGrupo: chat?.isGroup ? chat.name : null,
+    texto,
+    detectados,
+    temAcionamento,
+    uf:        [...new Set(detectados.map(d => d.uf))],
+    siglas:    [...new Set(detectados.filter(d => d.sigla).map(d => d.sigla))],
+    municipios:[...new Set(detectados.map(d => d.muni))],
+    hora:      new Date((msg.timestamp || Math.floor(Date.now() / 1000)) * 1000).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
+    dataDia:   dataMsg,
+    ts:        (msg.timestamp || Math.floor(Date.now() / 1000)) * 1000,
+    lida:         false,
+    lidaEm:       null,
+    flagged:      false,
+    temWanderson,
+    temRuptura,
+    temMassivo,
+    tipoMassivo,
+    chamado,
+    duplicado,
+    mediaData,
+    mediaMime,
+    mediaFilename,
+  };
+
+  mensagens.unshift(entrada);
+  if (mensagens.length > 200) mensagens.pop();
+
+  // item 11: total = PA + MA + AP + AM
+  if (!duplicado) {
+    if (detectados.length > 0) {
+      entrada.uf.forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
+      contadores.total = contadores.PA + contadores.MA + contadores.AP + contadores.AM;
+    }
+    if (temWanderson) contadores.WANDERSON++;
+  }
+
+  salvarMensagens();
+  console.log(`[ACEITO:${origem}] ${entrada.hora} | ${entrada.de} | munis=${entrada.municipios.join(',')} | ${texto.substring(0,60)}`);
+  broadcast('mensagem', entrada);
+  broadcast('contadores', contadores);
+  return true;
+}
+
+async function sincronizarMensagensRecentes(chatsOrigem = null) {
+  if (statusWpp !== 'conectado') return { ok: false, erro: 'WhatsApp nao conectado' };
+  if (sincronizandoMensagens) return { ok: false, erro: 'Sincronizacao ja em andamento' };
+
+  sincronizandoMensagens = true;
+  let analisadas = 0, aceitas = 0;
+  try {
+    const chats = chatsOrigem || await Promise.race([
+      client.getChats(),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ao carregar chats')), 120000)),
+    ]);
+    const ordenados = chats
+      .slice()
+      .sort((a, b) => (b.unreadCount || 0) - (a.unreadCount || 0))
+      .slice(0, 80);
+
+    for (const chat of ordenados) {
+      try {
+        const msgs = await Promise.race([
+          chat.fetchMessages({ limit: 20 }),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 12000)),
+        ]);
+        for (const msg of msgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))) {
+          analisadas++;
+          if (await processarMensagemWhatsApp(msg, 'sync')) aceitas++;
+        }
+      } catch (e) {
+        console.error(`Erro ao sincronizar chat ${chat.name || chat.id?._serialized || ''}:`, e.message);
+      }
+    }
+
+    if (aceitas > 0) salvarMensagens();
+    broadcast('sync_status', { analisadas, aceitas });
+    console.log(`[SYNC] analisadas=${analisadas} aceitas=${aceitas}`);
+    return { ok: true, analisadas, aceitas };
+  } finally {
+    sincronizandoMensagens = false;
+  }
+}
 
 function registrarEventos() {
   client.on('qr', async (qr) => {
@@ -503,6 +725,11 @@ function registrarEventos() {
     console.log('WhatsApp conectado!');
     statusWpp = 'conectado';
     broadcast('status', { status: 'conectado' });
+    setTimeout(() => {
+      sincronizarMensagensRecentes().catch(e => {
+        console.error('Erro ao sincronizar mensagens no ready:', e.message);
+      });
+    }, 5000);
     // Chats são carregados sob demanda via POST /api/chats/refresh para não sobrecarregar o container
   });
 
@@ -530,108 +757,11 @@ function registrarEventos() {
 
   // ── Recebimento de mensagens ──────────────────────────────────────────────
   client.on('message', async msg => {
-  try {
-    const texto = msg.body;
-
-    // Log de diagnóstico — toda mensagem recebida (visível nos logs do Railway)
-    console.log(`[MSG] de=${msg.from} grupo=${msg.from.includes('@g.us')} quoted=${!!msg.hasQuotedMsg} texto="${(texto||'').substring(0,80)}"`);
-
-    if (!texto || texto.trim() === '') return;
-
-    // item 12: ignora respostas citadas
-    if (msg.hasQuotedMsg) return;
-
-    const { detectados, temAcionamento } = analisarMensagem(texto);
-    const temWanderson = WANDERSON_IDS.some(id =>
-      texto.toUpperCase().includes(id.toUpperCase())
-    );
-
-    // Somente mensagens com município/UF reconhecido OU menção ao Wanderson
-    if (detectados.length === 0 && !temWanderson) {
-      console.log(`[FILTRADO] de=${msg.from} — nenhum município/Wanderson detectado`);
-      return;
+    try {
+      await processarMensagemWhatsApp(msg, 'ao vivo');
+    } catch (err) {
+      console.error('[ERRO msg] ao processar mensagem de', msg?.from, ':', err.message);
     }
-
-    // item 12: ignora conteúdo repetido da mesma fonte no mesmo dia
-    const jaDuplicada = mensagens.some(m =>
-      m.numero === msg.from && m.texto === texto && m.dataDia === hoje()
-    );
-    if (jaDuplicada) {
-      console.log(`[DUPLICADO] de=${msg.from}`);
-      return;
-    }
-
-    // item 10: detecta RUPTURA
-    const temRuptura = /\bRUPTURA\b/i.test(texto);
-
-    // chamados massivos
-    let temMassivo = false, tipoMassivo = null;
-    for (const { tipo, re } of MASSIVO_RE) {
-      if (re.test(texto)) { temMassivo = true; tipoMassivo = tipoMassivo || tipo; }
-    }
-
-    // item 6: deduplicação por chamado + UF
-    const chamado = extrairChamado(texto);
-    let duplicado = false;
-    if (chamado) {
-      const ufStr = [...new Set(detectados.map(d => d.uf))].sort().join('-');
-      const chave = chamado.tipo + ':' + chamado.numero + (ufStr ? ':' + ufStr : '');
-      if (chamadosHoje[chave]) {
-        duplicado = true;
-        chamadosHoje[chave].atualizacoes = (chamadosHoje[chave].atualizacoes || 0) + 1;
-      } else {
-        chamadosHoje[chave] = { atualizacoes: 0 };
-      }
-    }
-
-    const chat    = await msg.getChat();
-    const contact = await msg.getContact();
-
-    const entrada = {
-      id:        msg.id._serialized,
-      de:        contact.pushname || contact.number || msg.from,
-      numero:    msg.from,
-      grupo:     chat.isGroup,
-      nomeGrupo: chat.isGroup ? chat.name : null,
-      texto,
-      detectados,
-      temAcionamento,
-      uf:        [...new Set(detectados.map(d => d.uf))],
-      siglas:    [...new Set(detectados.filter(d => d.sigla).map(d => d.sigla))],
-      municipios:[...new Set(detectados.map(d => d.muni))],
-      hora:      new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
-      dataDia:   hoje(),
-      ts:        Date.now(),
-      lida:         false,
-      lidaEm:       null,
-      flagged:      false,
-      temWanderson,
-      temRuptura,
-      temMassivo,
-      tipoMassivo,
-      chamado,
-      duplicado,
-    };
-
-    mensagens.unshift(entrada);
-    if (mensagens.length > 200) mensagens.pop();
-
-    // item 11: total = PA + MA + AP + AM
-    if (!duplicado) {
-      if (detectados.length > 0) {
-        entrada.uf.forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
-        contadores.total = contadores.PA + contadores.MA + contadores.AP + contadores.AM;
-      }
-      if (temWanderson) contadores.WANDERSON++;
-    }
-
-    salvarMensagens();
-    console.log(`[ACEITO] ${entrada.hora} | ${entrada.de} | munis=${entrada.municipios.join(',')} | ${texto.substring(0,60)}`);
-    broadcast('mensagem', entrada);
-    broadcast('contadores', contadores);
-  } catch (err) {
-    console.error('[ERRO msg] ao processar mensagem de', msg?.from, ':', err.message);
-  }
   }); // fim client.on('message')
 } // fim registrarEventos()
 

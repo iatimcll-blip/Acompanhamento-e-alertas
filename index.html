@@ -36,7 +36,7 @@
     }
 
     html { font-size: 14px; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow: hidden; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow: hidden; }
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
@@ -45,13 +45,15 @@
        TOPBAR / BANNER MCLL (item 5 — maior e destacado)
     ══════════════════════════════════════════════════ */
     .topbar {
-      background: linear-gradient(90deg, #0a0a0f 0%, #181826 40%, #0d0d18 100%);
-      border-bottom: 2px solid #2a2a3a;
+      background: rgba(9,9,14,0.92);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-bottom: 1px solid rgba(255,255,255,.07);
       padding: 0 20px;
       height: 62px;
       display: flex; align-items: center; justify-content: space-between;
       position: sticky; top: 0; z-index: 300;
-      box-shadow: 0 2px 24px rgba(0,0,0,.8);
+      box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 4px 32px rgba(0,0,0,.9);
     }
     .topbar-left { display: flex; align-items: center; gap: 0; }
     .topbar-right { display: flex; align-items: center; gap: 16px; }
@@ -84,13 +86,27 @@
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
     .conn-pill {
       display: flex; align-items: center; gap: 6px;
-      background: rgba(255,255,255,.05); border: 1px solid var(--border2);
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
       border-radius: 20px; padding: 5px 13px;
-      font-size: .76rem; color: var(--subtext);
+      font-size: .76rem; color: var(--silver);
+      font-weight: 500;
     }
     .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
     .conn-dot.on { background: var(--verde); box-shadow: 0 0 0 3px rgba(34,197,94,.22); }
-    .date-pill { font-size: .72rem; color: var(--muted); }
+    .date-pill { font-size: .73rem; color: var(--silver); font-weight: 500; letter-spacing: .2px; }
+    .msg-counter-pill {
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.25);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: .72rem; color: #93c5fd; font-weight: 700;
+    }
+    .btn-settings {
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 8px; color: var(--silver); font-size: 1rem;
+      width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all .15s; flex-shrink: 0;
+    }
+    .btn-settings:hover { background: rgba(255,255,255,.12); color: #fff; transform: rotate(30deg); }
 
     /* ══════════════════════════════════════════════════
        LAYOUT (items 1 e 6)
@@ -159,11 +175,12 @@
     ══════════════════════════════════════════════════ */
     .stats-row { display: grid; grid-template-columns: 1.2fr repeat(5,1fr); gap: 7px; flex-shrink: 0; }
     .stat-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
       padding: 10px 12px; cursor: pointer; position: relative; overflow: hidden;
-      transition: all .13s;
+      transition: all .15s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 1px 0 rgba(255,255,255,.03) inset;
     }
-    .stat-card:hover { background: var(--card2); transform: translateY(-1px); box-shadow: 0 4px 18px rgba(0,0,0,.5); }
+    .stat-card:hover { background: var(--card2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.04) inset; }
     .stat-card.ativo { border-color: var(--azul) !important; box-shadow: 0 0 0 2px rgba(59,130,246,.2); }
     .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
     .stat-total::before { background: linear-gradient(90deg, var(--verde-dk), var(--verde)); }
@@ -185,7 +202,7 @@
     /* ══════════════════════════════════════════════════
        TIMER COMPACTO (item 2)
     ══════════════════════════════════════════════════ */
-    .timer-section { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+    .timer-section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; flex-shrink: 0; box-shadow: 0 1px 0 rgba(255,255,255,.03) inset; }
     .timer-hd {
       padding: 7px 14px; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
@@ -199,37 +216,43 @@
     .timer-body { padding: 7px 11px; display: flex; flex-direction: column; gap: 5px; max-height: 160px; overflow-y: auto; }
     .timer-empty { color: var(--muted); font-size: .78rem; padding: 2px 0; }
 
-    /* Timer item compacto (item 2) */
+    /* Timer item — 2 linhas compactas */
     .timer-item {
-      display: flex; align-items: center; gap: 8px;
-      padding: 7px 11px;
+      padding: 8px 12px;
       background: var(--card2); border: 1px solid var(--border); border-left: 3px solid var(--border2);
-      border-radius: 7px;
+      border-radius: 10px;
     }
-    .timer-item.urgente { border-left-color: var(--laranja); }
+    .timer-item.urgente  { border-left-color: var(--laranja); }
     .timer-item.expirado { border-left-color: var(--vermelho); animation: blink-brd 1.2s infinite; }
     @keyframes blink-brd { 0%,100%{border-left-color:var(--vermelho)} 50%{border-left-color:rgba(239,68,68,.2)} }
 
-    .timer-info { flex: 1; min-width: 0; }
-    .timer-muni { font-size: .82rem; font-weight: 700; color: var(--text); }
-    .timer-resumo { font-size: .68rem; color: var(--subtext); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
-    .timer-tags { display: flex; gap: 3px; flex-wrap: nowrap; overflow: hidden; margin-top: 3px; }
-    .tag-pill { font-size: .6rem; font-weight: 800; padding: 1px 6px; border-radius: 4px; color: rgba(0,0,0,.85); flex-shrink: 0; }
-    .timer-bar { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 3px; }
-    .timer-bar-fill { height: 100%; border-radius: 2px; transition: width .5s linear; }
-
-    .timer-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .timer-clock { font-size: 1.1rem; font-weight: 900; font-variant-numeric: tabular-nums; text-align: center; white-space: nowrap; }
+    /* Linha 1: nome + tags + clock + botão */
+    .timer-line1 { display: flex; align-items: center; gap: 7px; }
+    .timer-muni  { font-size: .88rem; font-weight: 800; color: var(--text); white-space: nowrap; flex-shrink: 0; }
+    .timer-tags  { display: flex; gap: 3px; flex: 1; min-width: 0; }
+    .tag-pill    { font-size: .6rem; font-weight: 800; padding: 2px 7px; border-radius: 5px; color: rgba(0,0,0,.85); flex-shrink: 0; }
+    .timer-clock { font-size: .95rem; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0; }
     .timer-clock.ok      { color: var(--verde); }
     .timer-clock.urgente { color: var(--laranja); }
-    .timer-clock.alerta  { color: var(--vermelho); font-size: .85rem; }
+    .timer-clock.alerta  { color: var(--vermelho); font-size: .8rem; letter-spacing: -.3px; }
+
+    /* Linha 2: barra de progresso */
+    .timer-line2 { margin-top: 6px; }
+    .timer-bar { height: 3px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .timer-bar-fill { height: 100%; border-radius: 3px; transition: width .5s linear; }
+
     .btn-liberar {
       background: rgba(22,163,74,.12); color: var(--verde);
-      border: 1px solid rgba(22,163,74,.28); border-radius: 12px;
-      padding: 4px 11px; font-size: .7rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all .12s;
+      border: 1px solid rgba(22,163,74,.28); border-radius: 10px;
+      padding: 3px 10px; font-size: .66rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all .12s; flex-shrink: 0;
     }
     .btn-liberar:hover { background: rgba(22,163,74,.22); }
     .timer-item.expirado .btn-liberar { background: rgba(239,68,68,.12); color: var(--vermelho); border-color: rgba(239,68,68,.28); }
+
+    /* Campos legados não usados (mantidos para compatibilidade) */
+    .timer-info  { flex: 1; min-width: 0; }
+    .timer-resumo{ display: none; }
+    .timer-right { display: none; }
 
     /* ══════════════════════════════════════════════════
        FEED + DETALHE
@@ -238,7 +261,8 @@
 
     .feed-wrap {
       flex: 1; min-width: 0; background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; display: flex; flex-direction: column; overflow: hidden;
+      border-radius: 12px; display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 1px 0 rgba(255,255,255,.03) inset;
     }
     .feed-hd {
       padding: 8px 14px; border-bottom: 1px solid var(--border);
@@ -283,19 +307,40 @@
 
     .msg-list { flex: 1; overflow-y: auto; padding: 6px 10px; }
 
-    /* Mensagem card (itens 9 — flag) */
+    /* Mensagem card */
     .msg-card {
       padding: 9px 11px; border: 1px solid var(--border); border-left: 3px solid var(--border2);
-      border-radius: 8px; margin-bottom: 6px; background: var(--card2);
-      cursor: pointer; transition: all .11s; position: relative;
+      border-radius: 10px; margin-bottom: 6px; background: var(--card2);
+      cursor: pointer; transition: all .15s cubic-bezier(.4,0,.2,1); position: relative;
     }
-    .msg-card:hover { background: var(--card3); border-color: var(--border2); }
+    .msg-card:hover { background: var(--card3); border-color: var(--border2); transform: translateX(2px); }
     .msg-card.urgente { border-left-color: var(--vermelho); }
     .msg-card.normal  { border-left-color: var(--verde-dk); }
-    .msg-card.lida    { opacity: .4; }
+    .msg-card.lida    { opacity: .38; }
     .msg-card.selecionada { background: var(--card3); border-color: var(--azul); border-left-color: var(--azul); }
     .msg-card.flagged { border-left-color: var(--flag-cor); }
     .msg-card.duplicado { opacity: .65; }
+
+    /* Mensagens não lidas pulsam até serem lidas */
+    @keyframes msg-unread-pulse {
+      0%,100% { border-left-color: var(--azul); box-shadow: 0 0 0 1px rgba(59,130,246,.15) inset; }
+      50%      { border-left-color: rgba(59,130,246,.25); box-shadow: none; }
+    }
+    @keyframes msg-unread-pulse-red {
+      0%,100% { border-left-color: var(--vermelho); box-shadow: 0 0 0 1px rgba(239,68,68,.15) inset; }
+      50%      { border-left-color: rgba(239,68,68,.2); box-shadow: none; }
+    }
+    .msg-card.nao-lida:not(.urgente):not(.ruptura):not(.flagged):not(.lida) {
+      border-left-color: var(--azul);
+      animation: msg-unread-pulse 2.5s infinite;
+    }
+    .msg-card.urgente.nao-lida:not(.lida) {
+      animation: msg-unread-pulse-red 1.5s infinite;
+    }
+
+    /* Miniatura de mídia nos cards */
+    .msg-thumb { margin: 5px 0; }
+    .msg-thumb img { max-width: 100%; max-height: 100px; border-radius: 6px; object-fit: cover; cursor: pointer; }
 
     .msg-topo { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; gap: 6px; }
     .msg-remetente { font-size: .8rem; font-weight: 700; color: var(--text); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -490,13 +535,96 @@
     .painel-sel-feed { max-height: 250px; overflow-y: auto; padding: 5px 9px; }
 
     /* ══════════════════════════════════════════════════
-       TIMER COMPACTO
+       TIMER COMPACTO (overrides para quadrantes)
     ══════════════════════════════════════════════════ */
-    .timer-item  { padding: 5px 8px; border-radius: 6px; }
-    .timer-muni  { font-size: .73rem; }
-    .timer-resumo{ font-size: .6rem; }
-    .timer-clock { font-size: .9rem; }
-    .timer-clock.alerta { font-size: .75rem; }
+    .quadrant .timer-item  { padding: 6px 10px; border-radius: 8px; }
+    .quadrant .timer-muni  { font-size: .78rem; }
+    .quadrant .timer-clock { font-size: .85rem; }
+    .quadrant .timer-clock.alerta { font-size: .72rem; }
+    .quadrant .tag-pill { font-size: .55rem; padding: 1px 5px; }
+
+    /* ══════════════════════════════════════════════════
+       MODAL DE CONFIGURAÇÕES
+    ══════════════════════════════════════════════════ */
+    .settings-modal {
+      background: var(--card); border: 1px solid var(--border2); border-radius: 16px;
+      width: 520px; max-width: 95vw; max-height: 85vh;
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0,0,0,.9);
+    }
+    .settings-modal-hd {
+      padding: 14px 18px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,.02); flex-shrink: 0;
+    }
+    .settings-modal-title { font-size: .95rem; font-weight: 700; color: var(--silver); }
+    .settings-modal-sub   { font-size: .7rem; color: var(--muted); margin-top: 1px; }
+    .settings-modal-body  { flex: 1; overflow-y: auto; padding: 14px 18px; }
+
+    .stabs { display: flex; gap: 5px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .stab {
+      padding: 5px 14px; border-radius: 8px; border: 1px solid var(--border2);
+      font-size: .72rem; font-weight: 700; cursor: pointer;
+      background: transparent; color: var(--subtext); transition: all .12s;
+    }
+    .stab.ativo { background: var(--azul); color: #fff; border-color: var(--azul); }
+    .stab-content { display: none; }
+    .stab-content.ativo { display: block; }
+
+    .user-item-admin {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      background: var(--card2); border: 1px solid var(--border); border-radius: 10px;
+      margin-bottom: 7px;
+    }
+    .user-item-admin .ui-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.3);
+      display: flex; align-items: center; justify-content: center; font-size: .85rem; flex-shrink: 0;
+    }
+    .user-item-admin .ui-info { flex: 1; min-width: 0; }
+    .user-item-admin .ui-nome  { font-size: .82rem; font-weight: 700; color: var(--text); }
+    .user-item-admin .ui-email { font-size: .68rem; color: var(--muted); margin-top: 1px; }
+    .user-item-admin .ui-badge {
+      font-size: .58rem; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .ui-badge.admin { background: rgba(59,130,246,.18); color: #93c5fd; }
+    .ui-badge.user  { background: rgba(34,197,94,.13); color: #86efac; }
+    .ui-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .btn-reset-pwd {
+      font-size: .66rem; font-weight: 700; padding: 4px 10px;
+      background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.3); color: #93c5fd;
+      border-radius: 6px; cursor: pointer; transition: background .12s;
+    }
+    .btn-reset-pwd:hover { background: rgba(59,130,246,.2); }
+    .btn-del-user {
+      font-size: .66rem; font-weight: 700; padding: 4px 10px;
+      background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.25); color: #f87171;
+      border-radius: 6px; cursor: pointer; transition: background .12s;
+    }
+    .btn-del-user:hover { background: rgba(239,68,68,.2); }
+
+    .pwd-inline {
+      display: none; margin-top: 7px; padding: 9px 12px;
+      background: var(--card3); border-radius: 8px; border: 1px solid var(--border2);
+    }
+    .pwd-inline.aberto { display: block; }
+    .pwd-row { display: flex; gap: 6px; align-items: center; }
+
+    .settings-input {
+      width: 100%; background: var(--card2); border: 1px solid var(--border2);
+      border-radius: 8px; padding: 8px 11px; font-size: .78rem;
+      color: var(--text); outline: none; transition: border-color .12s;
+      font-family: inherit;
+    }
+    .settings-input:focus { border-color: var(--azul); }
+    .btn-settings-save {
+      padding: 8px 16px; background: linear-gradient(135deg, var(--verde-dk), var(--verde));
+      color: #09090b; border: none; border-radius: 8px; font-size: .76rem; font-weight: 800;
+      cursor: pointer; white-space: nowrap; transition: opacity .13s;
+    }
+    .btn-settings-save:hover { opacity: .88; }
+    .settings-status { font-size: .68rem; margin-top: 5px; min-height: 14px; }
     .btn-liberar { font-size: .61rem; padding: 3px 7px; }
     .timer-tags  { margin-top: 2px; }
     .timer-bar   { margin-top: 2px; }
@@ -803,15 +931,19 @@
   </div>
   <div class="topbar-right">
     <div class="date-pill">📅 <span id="dataHoje">—</span></div>
+    <div class="msg-counter-pill" id="topMsgCounterWrap">
+      💬 <span id="topMsgCounter">0</span> msgs
+    </div>
     <span class="badge-live">● AO VIVO</span>
     <div class="conn-pill">
       <div class="conn-dot" id="connDot"></div>
       <span id="connLabel">Desconectado</span>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-left:8px;border-left:1px solid var(--border2);padding-left:12px">
-      <span id="userNome" style="font-size:.7rem;color:var(--subtext)"></span>
+    <button id="btnSettings" class="btn-settings" onclick="abrirSettings()" title="Configurações" style="display:none">⚙</button>
+    <div style="display:flex;align-items:center;gap:8px;margin-left:8px;border-left:1px solid rgba(255,255,255,.08);padding-left:12px">
+      <span id="userNome" style="font-size:.72rem;color:var(--silver);font-weight:500"></span>
       <span id="userPerfil" style="font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:4px"></span>
-      <button onclick="logout()" style="font-size:.68rem;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:5px;padding:3px 9px;cursor:pointer">Sair</button>
+      <button onclick="logout()" style="font-size:.68rem;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:600">Sair</button>
     </div>
   </div>
 </header>
@@ -929,7 +1061,7 @@
       <div class="quadrant">
         <div class="feed-wrap">
           <div class="feed-hd">
-            <h2>💬 Feed <span class="filtro-ativo-tag" id="filtroAtivoTag"></span></h2>
+            <h2>💬 Mensagens <span class="filtro-ativo-tag" id="filtroAtivoTag"></span></h2>
             <span class="msg-count-badge" id="msgCount">0 hoje</span>
           </div>
           <div class="filter-bar" id="filterTabs">
@@ -1027,7 +1159,7 @@
 <nav class="mob-bottom-nav" id="mobNav" aria-label="Navegação mobile">
   <button class="mob-tab ativo" data-tab="feed" onclick="mobTab('feed')">
     <span class="mob-icon">💬</span>
-    <span>Feed</span>
+    <span>Mensagens</span>
     <span class="mob-badge hidden" id="mobBadgeFeed"></span>
   </button>
   <button class="mob-tab" data-tab="timer" onclick="mobTab('timer')">
@@ -1050,6 +1182,43 @@
   </button>
 </nav>
 
+<!-- MODAL CONFIGURAÇÕES (admin) -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="settings-modal">
+    <div class="settings-modal-hd">
+      <div>
+        <div class="settings-modal-title">⚙ Configurações</div>
+        <div class="settings-modal-sub">Gerenciamento de usuários e sistema</div>
+      </div>
+      <button class="btn-modal-close" onclick="fecharSettings()">✕</button>
+    </div>
+    <div class="settings-modal-body">
+      <div class="stabs">
+        <button class="stab ativo" id="stab-btn-usuarios" onclick="settingsTab('usuarios',this)">👥 Usuários</button>
+        <button class="stab" id="stab-btn-novo" onclick="settingsTab('novo',this)">➕ Novo Usuário</button>
+      </div>
+      <!-- Aba: lista de usuários -->
+      <div id="stab-usuarios" class="stab-content ativo">
+        <div id="userListAdmin"><p style="color:var(--muted);font-size:.78rem">Carregando…</p></div>
+      </div>
+      <!-- Aba: novo usuário -->
+      <div id="stab-novo" class="stab-content">
+        <div style="display:flex;flex-direction:column;gap:9px;padding:4px 0">
+          <input id="novoNome"   class="settings-input" type="text"     placeholder="Nome completo" />
+          <input id="novoEmail"  class="settings-input" type="email"    placeholder="E-mail" />
+          <input id="novaSenha"  class="settings-input" type="password" placeholder="Senha (mín. 4 caracteres)" />
+          <select id="novoPerfil" class="settings-input">
+            <option value="usuario">Usuário</option>
+            <option value="administrador">Administrador</option>
+          </select>
+          <button class="btn-settings-save" onclick="criarUsuario()">Criar Usuário</button>
+          <div id="novoStatus" class="settings-status"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   // ── Auth ──────────────────────────────────────────────────────────────────
   (function() {
@@ -1069,6 +1238,13 @@
     // Oculta botão de resposta para não-admin
     if (perfil !== 'administrador') {
       document.querySelectorAll('.btn-reply, .btn-modal-reply').forEach(el => el.style.display = 'none');
+      // Oculta seção Grupos e Contatos para não-admin
+      const chatsSection = document.querySelector('.sidebar-chats');
+      if (chatsSection) chatsSection.style.display = 'none';
+    } else {
+      // Mostra botão de configurações para admin
+      const btnSettings = document.getElementById('btnSettings');
+      if (btnSettings) btnSettings.style.display = 'flex';
     }
   })();
 
@@ -1348,6 +1524,9 @@
     document.getElementById('statAM').textContent    = c.AM       || 0;
     document.getElementById('statWAND').textContent  = c.WANDERSON|| 0;
     document.getElementById('msgCount').textContent  = (c.total || 0) + ' hoje';
+    // Contador na topbar
+    const topCounter = document.getElementById('topMsgCounter');
+    if (topCounter) topCounter.textContent = c.total || 0;
     atualizarMobBadges();
   }
 
@@ -1356,7 +1535,7 @@
     const btn = document.getElementById('btnRefreshChats');
     const el  = document.getElementById('chatList');
     if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
-    el.innerHTML = '<div class="chats-vazio">Carregando chats...<br><small>Pode levar até 45 segundos</small></div>';
+    el.innerHTML = '<div class="chats-vazio">Carregando chats...<br><small>Pode levar até 2 minutos</small></div>';
     try {
       const tok = localStorage.getItem('mcll_token');
       const r   = await fetch('/api/chats/refresh', { method: 'POST', headers: { Authorization: 'Bearer ' + tok } });
@@ -1371,7 +1550,7 @@
       if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
     }
     // Reabilita botão após 50s (cobertura máxima do timeout do servidor)
-    setTimeout(() => { if (btn) { btn.textContent = '🔄'; btn.disabled = false; } }, 50000);
+    setTimeout(() => { if (btn) { btn.textContent = '🔄'; btn.disabled = false; } }, 130000);
   }
 
   function chatListErro(msg) {
@@ -1590,6 +1769,7 @@
     else if (m.flagged) cls.push('flagged');
     else if (urgente) cls.push('urgente');
     else cls.push('normal');
+    if (!m.lida) cls.push('nao-lida');   // pulsa até ser lida
     if (m.lida)       cls.push('lida');
     if (selecionada)  cls.push('selecionada');
     if (m.duplicado)  cls.push('duplicado');
@@ -1597,7 +1777,7 @@
     const icon = m.temRuptura ? '⚡' : urgente ? '🚨' : m.grupo ? '👥' : '👤';
     const chipsUF  = (m.uf || []).map(u => `<span class="chip uf-${u.toLowerCase()}">${u}</span>`).join('');
     const chipsSig = (m.siglas || []).slice(0,2).map(s => `<span class="chip sigla">${s}</span>`).join('');
-    const chipsMu  = (m.municipios || []).slice(0,1).map(mu => `<span class="chip muni">${escHtml(mu)}</span>`).join('');
+    const chipsMu  = (m.municipios || []).slice(0,2).map(mu => `<span class="chip muni">${escHtml(mu)}</span>`).join('');
     const chipCh   = m.chamado ? `<span class="chip chamado">🎫 ${m.chamado.numero}</span>` : '';
     const chipDup  = m.duplicado ? `<span class="chip dup">atualização</span>` : '';
     const chipRup  = m.temRuptura ? `<span class="chip ruptura">⚡ RUPTURA</span>` : '';
@@ -1605,6 +1785,12 @@
     const chipMas  = m.temMassivo && m.tipoMassivo ? `<span class="mas-item-tipo ${tipoCls[m.tipoMassivo]||''}">${m.tipoMassivo}</span>` : '';
     const lidaBadge = m.lida ? `<span class="badge-lida">✓ ${m.lidaEm || ''}</span>` : '';
     const flagCls  = m.flagged ? 'ativo' : '';
+    // Miniatura de imagem (se houver mídia)
+    const thumbEl  = m.mediaData && m.mediaMime && m.mediaMime.startsWith('image/')
+      ? `<div class="msg-thumb"><img src="data:${escAttr(m.mediaMime)};base64,${m.mediaData}" onclick="event.stopPropagation();verMidia('${escAttr(m.id)}')" /></div>` : '';
+    // Indicador de mídia não-imagem
+    const midiaNome = !m.mediaData && m.mediaMime
+      ? `<span class="chip muni">📎 ${escHtml(m.mediaFilename || m.mediaMime.split('/')[1] || 'arquivo')}</span>` : '';
 
     return `<div class="${cls.join(' ')}" onclick="selecionarMensagem('${escAttr(m.id)}')">
       <div class="msg-topo">
@@ -1612,9 +1798,17 @@
         <span class="msg-hora">${m.hora || ''}</span>
         <button class="btn-flag ${flagCls}" onclick="event.stopPropagation();toggleFlag('${escAttr(m.id)}')" title="Sinalizar">⚑</button>
       </div>
+      ${thumbEl}
       <div class="msg-text">${escHtml((m.texto||'').substring(0,180))}</div>
-      <div class="msg-footer">${chipMas}${chipRup}${chipsUF}${chipsSig}${chipsMu}${chipCh}${chipDup}${lidaBadge}</div>
+      <div class="msg-footer">${chipMas}${chipRup}${chipsUF}${chipsSig}${chipsMu}${chipCh}${midiaNome}${chipDup}${lidaBadge}</div>
     </div>`;
+  }
+
+  function verMidia(id) {
+    const m = todasMensagens.find(x => x.id === id);
+    if (!m || !m.mediaData) return;
+    const w = window.open('', '_blank');
+    w.document.write(`<!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="data:${m.mediaMime};base64,${m.mediaData}" style="max-width:100%;max-height:100vh;object-fit:contain" /></body></html>`);
   }
 
   // ── Flag (item 9) ─────────────────────────────────────────────────────────
@@ -1669,12 +1863,25 @@
     const chipCh   = m.chamado ? `<span class="chip chamado">🎫 ${m.chamado.tipo.toUpperCase()} #${m.chamado.numero}</span>` : '';
     const chipDup  = m.duplicado ? `<span class="chip dup">Atualização de chamado</span>` : '';
 
+    // Mídia
+    let mediaEl = '';
+    if (m.mediaData && m.mediaMime) {
+      if (m.mediaMime.startsWith('image/')) {
+        mediaEl = `<div><img src="data:${escAttr(m.mediaMime)};base64,${m.mediaData}" style="max-width:100%;border-radius:10px;cursor:zoom-in" onclick="verMidia('${escAttr(m.id)}')" /></div>`;
+      } else {
+        mediaEl = `<a href="data:${escAttr(m.mediaMime)};base64,${m.mediaData}" download="${escAttr(m.mediaFilename||'arquivo')}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);border-radius:8px;color:#93c5fd;font-size:.78rem;font-weight:700;text-decoration:none">⬇ Baixar ${escHtml(m.mediaFilename||m.mediaMime.split('/')[1]||'arquivo')}</a>`;
+      }
+    } else if (!m.mediaData && m.mediaMime) {
+      mediaEl = `<div style="font-size:.72rem;color:var(--muted)">📎 Mídia: ${escHtml(m.mediaFilename||m.mediaMime)} <span style="color:var(--muted)">(não baixada)</span></div>`;
+    }
+
     body.innerHTML = `
       <div>
         <div class="detalhe-de">${m.grupo?'👥':'👤'} ${escHtml(m.de || 'Desconhecido')}</div>
         ${m.grupo && m.nomeGrupo ? `<div class="detalhe-grupo">Grupo: ${escHtml(m.nomeGrupo)}</div>` : ''}
         <div class="detalhe-hora">🕐 ${m.hora || ''}  ·  ${m.dataDia || ''}</div>
       </div>
+      ${mediaEl}
       <div class="detalhe-texto">${escHtml(m.texto || '')}</div>
       <div class="detalhe-chips">${chipsUF}${chipsSig}${chipsMu}${chipsEps}${chipCh}${chipDup}</div>
       <div>
@@ -1873,52 +2080,44 @@
     panel.innerHTML = keys.map(key => {
       const t   = timers[key];
       const cor = COR_UF[t.uf] || '#8888a0';
+      const tagsHtml = `
+        <span class="tag-pill" style="background:${cor}">${t.uf}</span>
+        ${t.sigla ? `<span class="tag-pill" style="background:#15803d">${t.sigla}</span>` : ''}
+        ${t.eps   ? `<span class="tag-pill" style="background:${t.eps==='ADX'?'#dc2626':'#166534'}">${t.eps}</span>` : ''}`;
 
       if (t.pendente) {
-        // Entrada aguardando início manual
         return `<div class="timer-item">
-          <div class="timer-info">
+          <div class="timer-line1">
             <div class="timer-muni">${escHtml(t.muni)}</div>
-            ${t.resumo ? `<div class="timer-resumo">${escHtml(t.resumo)}</div>` : ''}
-            <div class="timer-tags">
-              <span class="tag-pill" style="background:${cor}">${t.uf}</span>
-              ${t.sigla ? `<span class="tag-pill" style="background:#15803d">${t.sigla}</span>` : ''}
-              ${t.eps   ? `<span class="tag-pill" style="background:${t.eps==='ADX'?'#dc2626':'#166534'}">${t.eps}</span>` : ''}
-            </div>
-            <div class="timer-bar"><div class="timer-bar-fill" style="width:100%;background:var(--border2)"></div></div>
-          </div>
-          <div class="timer-right">
-            <div class="timer-clock" style="color:var(--subtext);font-size:.7rem">AGUARDANDO</div>
+            <div class="timer-tags">${tagsHtml}</div>
+            <div class="timer-clock" style="color:var(--subtext);font-size:.7rem">AGUARD.</div>
             <button class="btn-liberar" style="background:rgba(34,197,94,.18);color:var(--verde);border-color:rgba(34,197,94,.4)"
               onclick="iniciarContagem('${key}')">▶ Iniciar</button>
+          </div>
+          <div class="timer-line2">
+            <div class="timer-bar"><div class="timer-bar-fill" style="width:100%;background:var(--border2)"></div></div>
           </div>
         </div>`;
       }
 
-      // Entrada com contagem ativa
       const decor = now - t.inicio;
       const rest  = Math.max(0, TIMER_DURACAO - decor);
       const pct   = Math.max(0, (rest / TIMER_DURACAO) * 100);
       const exp   = rest <= 0;
       const urg   = !exp && rest <= 10 * 60 * 1000;
       const barC  = exp ? '#ef4444' : urg ? '#f97316' : '#22c55e';
-      const cls   = exp ? 'expirado' : urg ? 'urgente' : '';
+      const itemCls = exp ? 'expirado' : urg ? 'urgente' : '';
       const clkC  = exp ? 'alerta' : urg ? 'urgente' : 'ok';
 
-      return `<div class="timer-item ${cls}">
-        <div class="timer-info">
+      return `<div class="timer-item ${itemCls}">
+        <div class="timer-line1">
           <div class="timer-muni">${escHtml(t.muni)}</div>
-          ${t.resumo ? `<div class="timer-resumo">${escHtml(t.resumo)}</div>` : ''}
-          <div class="timer-tags">
-            <span class="tag-pill" style="background:${cor}">${t.uf}</span>
-            ${t.sigla ? `<span class="tag-pill" style="background:#15803d">${t.sigla}</span>` : ''}
-            ${t.eps   ? `<span class="tag-pill" style="background:${t.eps==='ADX'?'#dc2626':'#166534'}">${t.eps}</span>` : ''}
-          </div>
-          <div class="timer-bar"><div class="timer-bar-fill" style="width:${pct}%;background:${barC}"></div></div>
-        </div>
-        <div class="timer-right">
+          <div class="timer-tags">${tagsHtml}</div>
           <div class="timer-clock ${clkC}">${exp ? '⚠ COBRAR' : fmtMs(rest)}</div>
           <button class="btn-liberar" onclick="liberarTimer('${key}')">Liberar</button>
+        </div>
+        <div class="timer-line2">
+          <div class="timer-bar"><div class="timer-bar-fill" style="width:${pct}%;background:${barC}"></div></div>
         </div>
       </div>`;
     }).join('');
@@ -2062,6 +2261,118 @@
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
   function escAttr(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+  // ── Modal de Configurações (admin) ───────────────────────────────────────
+  function abrirSettings() {
+    document.getElementById('settingsModal').classList.add('aberto');
+    carregarListaUsuarios();
+  }
+  function fecharSettings() {
+    document.getElementById('settingsModal').classList.remove('aberto');
+  }
+  document.getElementById('settingsModal').addEventListener('click', function(e) {
+    if (e.target === this) fecharSettings();
+  });
+
+  function settingsTab(nome, btn) {
+    document.querySelectorAll('.stab').forEach(b => b.classList.remove('ativo'));
+    document.querySelectorAll('.stab-content').forEach(c => c.classList.remove('ativo'));
+    if (btn) btn.classList.add('ativo');
+    const c = document.getElementById('stab-' + nome);
+    if (c) c.classList.add('ativo');
+  }
+
+  async function carregarListaUsuarios() {
+    const el = document.getElementById('userListAdmin');
+    el.innerHTML = '<p style="color:var(--muted);font-size:.78rem">Carregando…</p>';
+    try {
+      const r = await apiFetch('/api/usuarios');
+      const users = await r.json();
+      el.innerHTML = users.map(u => `
+        <div class="user-item-admin" id="ui-${escAttr(u.id)}">
+          <div class="ui-avatar">${u.perfil === 'administrador' ? '👑' : '👤'}</div>
+          <div class="ui-info">
+            <div class="ui-nome">${escHtml(u.nome)}</div>
+            <div class="ui-email">${escHtml(u.email)}</div>
+          </div>
+          <span class="ui-badge ${u.perfil === 'administrador' ? 'admin' : 'user'}">${u.perfil === 'administrador' ? 'Admin' : 'Usuário'}</span>
+          <div class="ui-actions">
+            <button class="btn-reset-pwd" onclick="toggleResetPwd('${escAttr(u.id)}')">🔑 Reset</button>
+            ${u.perfil !== 'administrador' ? `<button class="btn-del-user" onclick="deletarUsuario('${escAttr(u.id)}','${escAttr(u.nome)}')">✕</button>` : ''}
+          </div>
+        </div>
+        <div class="pwd-inline" id="pwd-${escAttr(u.id)}">
+          <div class="pwd-row">
+            <input type="password" class="settings-input" id="pwd-input-${escAttr(u.id)}" placeholder="Nova senha (mín. 4 caracteres)" style="flex:1" />
+            <button class="btn-settings-save" onclick="resetarSenha('${escAttr(u.id)}')">Salvar</button>
+          </div>
+          <div class="settings-status" id="pwd-status-${escAttr(u.id)}"></div>
+        </div>`).join('');
+    } catch(e) {
+      el.innerHTML = `<p style="color:var(--vermelho);font-size:.78rem">Erro ao carregar usuários</p>`;
+    }
+  }
+
+  function toggleResetPwd(id) {
+    const el = document.getElementById('pwd-' + id);
+    if (el) el.classList.toggle('aberto');
+  }
+
+  async function resetarSenha(id) {
+    const inp = document.getElementById('pwd-input-' + id);
+    const sts = document.getElementById('pwd-status-' + id);
+    const novaSenha = inp ? inp.value.trim() : '';
+    if (!novaSenha) { sts.textContent = 'Digite a nova senha'; sts.style.color = 'var(--vermelho)'; return; }
+    sts.textContent = 'Salvando…'; sts.style.color = 'var(--subtext)';
+    try {
+      const r = await apiFetch(`/api/usuarios/${encodeURIComponent(id)}/senha`, {
+        method: 'PUT', body: JSON.stringify({ novaSenha })
+      });
+      const data = await r.json();
+      if (data.ok) {
+        sts.textContent = '✓ Senha alterada com sucesso'; sts.style.color = 'var(--verde)';
+        if (inp) inp.value = '';
+        setTimeout(() => { sts.textContent = ''; document.getElementById('pwd-' + id)?.classList.remove('aberto'); }, 2500);
+      } else { throw new Error(data.erro || 'Falha'); }
+    } catch(e) {
+      sts.textContent = '✗ ' + e.message; sts.style.color = 'var(--vermelho)';
+    }
+  }
+
+  async function deletarUsuario(id, nome) {
+    if (!confirm(`Remover o usuário "${nome}"? Esta ação não pode ser desfeita.`)) return;
+    try {
+      const r = await apiFetch(`/api/usuarios/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      const data = await r.json();
+      if (data.ok) { carregarListaUsuarios(); }
+      else alert(data.erro || 'Erro ao remover');
+    } catch(e) { alert('Erro: ' + e.message); }
+  }
+
+  async function criarUsuario() {
+    const nome   = document.getElementById('novoNome').value.trim();
+    const email  = document.getElementById('novoEmail').value.trim();
+    const senha  = document.getElementById('novaSenha').value.trim();
+    const perfil = document.getElementById('novoPerfil').value;
+    const sts    = document.getElementById('novoStatus');
+    if (!nome || !email || !senha) { sts.textContent = 'Preencha todos os campos'; sts.style.color = 'var(--vermelho)'; return; }
+    sts.textContent = 'Criando…'; sts.style.color = 'var(--subtext)';
+    try {
+      const r = await apiFetch('/api/usuarios', {
+        method: 'POST', body: JSON.stringify({ nome, email, senha, perfil })
+      });
+      const data = await r.json();
+      if (data.id) {
+        sts.textContent = '✓ Usuário criado!'; sts.style.color = 'var(--verde)';
+        document.getElementById('novoNome').value = '';
+        document.getElementById('novoEmail').value = '';
+        document.getElementById('novaSenha').value = '';
+        setTimeout(() => { sts.textContent = ''; settingsTab('usuarios', document.getElementById('stab-btn-usuarios')); carregarListaUsuarios(); }, 1800);
+      } else { throw new Error(data.erro || 'Falha'); }
+    } catch(e) {
+      sts.textContent = '✗ ' + e.message; sts.style.color = 'var(--vermelho)';
+    }
+  }
 
   // ── Init ─────────────────────────────────────────────────────────────────
   window.addEventListener('DOMContentLoaded', () => {
