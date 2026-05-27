@@ -164,11 +164,15 @@ const PALAVRAS_ACIONAMENTO = [
 // Identificadores do Wanderson para contagem especial
 const WANDERSON_IDS = [
   'WANDERSON MARCELLUS PENHA COSTA',
+  'MARCELLUS PENHA COSTA',
   '@WANDERSON',
   '5586994944816',
   '555586994944816',
   '+5586994944816',
   '86994944816',
+  '86994944812',
+  '5586994944812',
+  '555586994944812',
 ];
 
 // Padrões de chamados massivos

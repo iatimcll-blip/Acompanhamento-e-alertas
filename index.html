@@ -97,7 +97,7 @@
       display: flex; align-items: center; gap: 8px;
       font-size: .76rem; color: #c8ccd8; font-weight: 500; letter-spacing: .2px;
     }
-    .date-pill .dp-data { font-size: .74rem; color: #9090a8; display: none; }
+    .date-pill .dp-data { font-size: .74rem; color: #b0b0c8; display: inline; }
     .date-pill .dp-clock {
       font-size: .98rem; font-weight: 800; font-variant-numeric: tabular-nums;
       color: #e8e8f0; letter-spacing: 1px;
@@ -210,9 +210,9 @@
       display: flex; align-items: center; justify-content: center;
       font-size: .82rem; flex-shrink: 0;
     }
-    .chat-info { flex: 1; min-width: 0; }
-    .chat-nome { font-size: .76rem; font-weight: 600; word-break: break-word; line-height: 1.3; }
-    .chat-tipo { font-size: .62rem; color: var(--muted); }
+    .chat-info { flex: 1; min-width: 0; overflow: hidden; }
+    .chat-nome { font-size: .76rem; font-weight: 600; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .chat-tipo { font-size: .62rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .chat-badge { background: var(--verde); color: #000; font-size: .58rem; font-weight: 800; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 3px; flex-shrink: 0; }
     .chats-vazio { padding: 16px 13px; text-align: center; color: var(--muted); font-size: .74rem; }
 
@@ -396,9 +396,9 @@
     .ftab {
       padding: 3px 10px; border-radius: 12px; border: 1px solid var(--border2);
       font-size: .66rem; font-weight: 700; cursor: pointer;
-      background: transparent; color: var(--subtext); transition: all .1s;
+      background: var(--card2); color: var(--subtext); transition: all .1s;
     }
-    .ftab:hover { border-color: var(--metal); color: var(--text); background: rgba(0,0,0,.07); }
+    .ftab:hover { border-color: var(--metal); color: var(--text); background: var(--card3); }
     .ftab.ativo { color: #fff !important; border-color: transparent !important; font-weight: 800; }
     .ftab.f-todos.ativo  { background: var(--metal); }
     .ftab.f-pa.ativo     { background: var(--azul); }
@@ -597,7 +597,6 @@
     /* Mensagem completa no modal Atz */
     .atz-msg-completo {
       padding: 8px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0;
-      max-height: 160px; overflow-y: auto;
     }
     .atz-msg-lbl {
       font-size: .6rem; font-weight: 700; text-transform: uppercase;
@@ -608,6 +607,9 @@
       white-space: pre-wrap; word-break: break-word;
       background: var(--card2); border: 1px solid var(--border);
       border-radius: 7px; padding: 7px 9px;
+      resize: vertical; min-height: 70px; max-height: 50vh;
+      overflow-y: auto; display: block; width: 100%;
+      font-family: inherit;
     }
     .atz-panel {
       flex: 1; display: flex; flex-direction: column; overflow: hidden;
@@ -1006,9 +1008,9 @@
     .chamados-ftab {
       padding: 2px 8px; border-radius: 10px; border: 1px solid var(--border2);
       font-size: .6rem; font-weight: 700; cursor: pointer;
-      background: transparent; color: var(--subtext); transition: all .1s;
+      background: var(--card2); color: var(--subtext); transition: all .1s;
     }
-    .chamados-ftab:hover { background: rgba(0,0,0,.07); color: var(--text); }
+    .chamados-ftab:hover { background: var(--card3); color: var(--text); }
     .chamados-ftab.ativo { color: #fff !important; border-color: transparent !important; font-weight: 800; }
     .chamados-ftab.cf-todos.ativo  { background: var(--metal); }
     .chamados-ftab.cf-ag.ativo     { background: var(--muted); }
@@ -1230,6 +1232,25 @@
       #qrSection img { width: 200px !important; height: 200px !important; }
       .wpp-connect { padding: 24px 13px; }
 
+        /* CMO pills — compactos no mobile */
+      .cmo-pill { font-size: .62rem !important; padding: 3px 8px !important; }
+      .msg-counter-pill { font-size: .62rem !important; padding: 3px 8px !important; }
+      #topMsgCounter { font-size: .78rem !important; }
+
+      /* Tela portrait (vertical) — ajustes extras */
+      @media (orientation: portrait) {
+        .topbar { height: 56px; }
+        .app-layout { height: calc(100dvh - 56px - 52px); }
+        .stats-row { grid-template-columns: repeat(3, 1fr) !important; }
+        .stat-card { padding: 6px 7px; }
+        .stat-num  { font-size: 1.3rem; }
+        .mob-bottom-nav { height: 56px; }
+        body.detail-mob-aberto .quadrant:nth-child(2) {
+          inset: 56px 0 56px 0 !important;
+          height: calc(100dvh - 56px - 56px) !important;
+        }
+      }
+
       /* ── Bottom Navigation ── */
       .mob-bottom-nav {
         display: flex;
@@ -1315,11 +1336,11 @@
     </div>
   </div>
   <div class="topbar-right">
-    <div class="date-pill">
-      📅 <span class="dp-data" id="dataHoje">—</span>
+    <div class="date-pill" style="flex-direction:column;align-items:flex-end;gap:1px">
+      <span class="dp-data" id="dataHoje">—</span>
       <span class="dp-clock" id="relogioAgora">00:00:00</span>
     </div>
-    <div class="msg-counter-pill" id="topMsgCounterWrap">
+    <div class="msg-counter-pill" id="topMsgCounterWrap" style="cursor:pointer" title="Ver não lidas" onclick="filtrarFeed('NAOIDA', document.getElementById('ftab-NAOIDA'))">
       💬 Não lidas: <span id="topMsgCounter">0</span>
     </div>
     <div class="cmo-pill cmo-reparo" id="topCmoReparo" title="Ver chamados CMO Reparo" onclick="filtrarCmo('reparo')" style="cursor:pointer">
@@ -1493,6 +1514,7 @@
             <button class="chamados-ftab cf-rep"  onclick="filtrarChamadosStatus('em_reparo',this)">Reparo</button>
             <button class="chamados-ftab cf-atv"  onclick="filtrarChamadosStatus('em_ativacao',this)">Ativação</button>
             <button class="chamados-ftab cf-fin"  onclick="filtrarChamadosStatus('finalizado',this)">Finalizados</button>
+            <button class="chamados-ftab cf-cmor" id="chamadosFtabCmoR" onclick="filtrarChamadosCmo('reparo',this)" style="color:#7c2d12;border-color:rgba(194,65,12,.4)">🔧 CMO Reparo</button>
           </div>
           <div class="chamados-list" id="chamadosList">
             <div class="chamados-vazio"><span>📋</span>Nenhum chamado registrado.<br>Aguardando acionamentos…</div>
@@ -1723,13 +1745,13 @@
     });
   }
 
-  // ── Data ─────────────────────────────────────────────────────────────────
+  // ── Data completa ─────────────────────────────────────────────────────────
   (function() {
-    const d = new Date();
-    const dias  = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
-    const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-    document.getElementById('dataHoje').textContent =
-      `${dias[d.getDay()]}, ${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
+    const d    = new Date();
+    const dias  = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+    const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    const el    = document.getElementById('dataHoje');
+    if (el) el.textContent = `${dias[d.getDay()]}, ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
   })();
 
   // ── Relógio ao vivo (atualiza a cada segundo) ─────────────────────────────
@@ -1863,6 +1885,21 @@
     setTimeout(() => playBeep(1200, 0.09, 0.16), 140);
   }
 
+  // Detecta Wanderson pelo remetente ou menção no texto (IDs sincronizados com server.js)
+  const _WAND_IDS = ['wanderson marcellus penha costa','marcellus penha costa','@wanderson',
+    '5586994944816','555586994944816','+5586994944816','86994944816',
+    '86994944812','5586994944812','555586994944812'];
+  function _clientIsWanderson(m) {
+    const deNorm  = (m.de     || '').toLowerCase().replace(/\s+/g,' ').trim();
+    const numNorm = (m.numero || '').toLowerCase().replace(/\D/g,'');
+    const texNorm = (m.texto  || '').toLowerCase();
+    return _WAND_IDS.some(id => {
+      const n = id.replace(/\D/g,'');
+      if (n.length >= 8) return numNorm.includes(n) || texNorm.includes(n);
+      return deNorm.includes(id) || texNorm.includes(id);
+    });
+  }
+
   // Verifica se a mensagem corresponde ao filtro/aba atualmente selecionado
   function mensagemMatchesFiltro(m) {
     if (filtroLocalidade) return (m.municipios||[]).includes(filtroLocalidade);
@@ -1874,9 +1911,9 @@
       case 'AM':         return (m.uf||[]).includes('AM');
       case 'URGENTE':    return !!m.temAcionamento;
       case 'RUPTURA':    return !!m.temRuptura;
-      case 'NAOIDA':     return !m.lida && (m.detectados||[]).length > 0;
+      case 'NAOIDA':     return !m.lida;
       case 'FLAGGED':    return !!m.flagged;
-      case 'WANDERSON':  return !!m.temWanderson;
+      case 'WANDERSON':  return !!m.temWanderson || _clientIsWanderson(m);
       case 'CMO_REPARO': return msgMatchCmoReparo(m);
       case 'CMO_ATIVACAO': return msgMatchCmoAtivacao(m);
       default:           return false;
@@ -1893,6 +1930,14 @@
     const tag = document.getElementById('filtroAtivoTag');
     if (tag) { tag.textContent = label; tag.classList.add('visivel'); }
     renderFeed();
+    // Também filtra o painel de Chamados Ativos
+    if (tipo === 'reparo') {
+      filtroChamadoCmo = 'reparo';
+      document.querySelectorAll('.chamados-ftab').forEach(b => b.classList.remove('ativo'));
+      const cmoBtn = document.getElementById('chamadosFtabCmoR');
+      if (cmoBtn) cmoBtn.classList.add('ativo');
+      renderChamadosPanel();
+    }
     // scroll ao feed
     const fw = document.querySelector('.feed-wrap');
     if (fw) fw.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -2068,7 +2113,7 @@
           m.uf.forEach(u => { if (c[u] !== undefined) c[u]++; });
           c.total = c.PA + c.MA + c.AP + c.AM;
         }
-        if (m.temWanderson) c.WANDERSON++;
+        if (m.temWanderson || _clientIsWanderson(m)) c.WANDERSON++;
       });
       document.querySelectorAll('.stat-card').forEach(el => el.classList.add('sel-ativo'));
     } else {
@@ -2318,7 +2363,7 @@
     } else if (filtroFeedAtual === 'FLAGGED') {
       msgs = msgs.filter(m => m.flagged);
     } else if (filtroFeedAtual === 'WANDERSON') {
-      msgs = msgs.filter(m => m.temWanderson);
+      msgs = msgs.filter(m => m.temWanderson || _clientIsWanderson(m));
     } else if (['PA','MA','AP','AM'].includes(filtroFeedAtual)) {
       msgs = msgs.filter(m => (m.uf || []).includes(filtroFeedAtual));
     } else {
@@ -2515,7 +2560,7 @@
       </div>
       <div class="atz-msg-completo">
         <div class="atz-msg-lbl">Mensagem recebida</div>
-        <div class="atz-msg-texto">${escHtml(textoCompleto)}</div>
+        <textarea class="atz-msg-texto" readonly>${escHtml(textoCompleto)}</textarea>
       </div>
       <div class="atz-timeline-block">
         <div class="atz-timeline-hd">Timeline do dia</div>
@@ -2526,7 +2571,7 @@
         <div class="atz-nova-ts">[${agora}]</div>
         <textarea class="atz-textarea" id="atzNovaTexto" placeholder="Digite a atualização…"></textarea>
         <div class="atz-btns">
-          <button class="btn-salvar-sheets" onclick="salvarAtzESheets()">📊 Salvar no Google Sheets</button>
+          <button class="btn-salvar-sheets" onclick="salvarAtzESheets()">📊 Atualização</button>
           <button class="btn-finalizar" onclick="finalizarChamado()">Finalizar</button>
         </div>
         <div class="atz-save-status" id="atzSaveStatus"></div>
@@ -3029,6 +3074,7 @@
 
   // ── Painel de Chamados (Q5 — coluna direita) ─────────────────────────────
   let filtroChamadoStatus = 'ATIVOS';
+  let filtroChamadoCmo    = null; // 'reparo' | 'ativacao' | null
 
   function renderChamadosPanel() {
     const list  = document.getElementById('chamadosList');
@@ -3052,6 +3098,10 @@
       filtradas = entradas.filter(([, d]) => d.status === 'finalizado');
     } else {
       filtradas = entradas.filter(([, d]) => d.status === filtroChamadoStatus);
+    }
+    // Filtro CMO
+    if (filtroChamadoCmo) {
+      filtradas = filtradas.filter(([, d]) => d.cmo === filtroChamadoCmo);
     }
 
     if (!filtradas.length) {
@@ -3102,8 +3152,20 @@
 
   function filtrarChamadosStatus(status, btn) {
     filtroChamadoStatus = status;
+    filtroChamadoCmo    = null;
     document.querySelectorAll('.chamados-ftab').forEach(b => b.classList.remove('ativo'));
     if (btn) btn.classList.add('ativo');
+    renderChamadosPanel();
+  }
+
+  function filtrarChamadosCmo(tipo, btn) {
+    filtroChamadoCmo = filtroChamadoCmo === tipo ? null : tipo;
+    document.querySelectorAll('.chamados-ftab').forEach(b => b.classList.remove('ativo'));
+    if (filtroChamadoCmo && btn) btn.classList.add('ativo');
+    if (!filtroChamadoCmo) {
+      const dflt = document.querySelector('.chamados-ftab.cf-todos');
+      if (dflt) dflt.classList.add('ativo');
+    }
     renderChamadosPanel();
   }
 
@@ -3331,6 +3393,20 @@
   const _GR_MINR = 60;   // min row px
   let   _grState = null;
   let   _grDrag  = null;
+
+  // ── Zoom / viewport auto-adjust ──────────────────────────────────────────
+  function onViewportChange() {
+    const grid = document.querySelector('.quadrant-grid');
+    if (!grid || window.innerWidth < 700) return;
+    // Reset to default sizes when viewport changes significantly (e.g. zoom)
+    _grState = _grDefaultSizes(grid);
+    _grApply(grid);
+    _grPlaceHandles(grid);
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', onViewportChange, { passive: true });
+  }
+  window.addEventListener('resize', onViewportChange, { passive: true });
 
   function initGridResize() {
     const grid = document.querySelector('.quadrant-grid');
