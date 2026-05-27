@@ -51,20 +51,12 @@ function garantirAdminPadrao() {
       nome: 'Administrador',
       email: ADMIN_EMAIL,
       senha: bcrypt.hashSync(ADMIN_PASSWORD, 10),
-      senhaTexto: ADMIN_PASSWORD,
       perfil: 'administrador',
     });
     salvarUsuarios();
     console.log('Usuario administrador padrao criado');
-    return;
   }
-
-  if (!bcrypt.compareSync(ADMIN_PASSWORD, admin.senha)) {
-    admin.senha = bcrypt.hashSync(ADMIN_PASSWORD, 10);
-    admin.senhaTexto = ADMIN_PASSWORD;
-    salvarUsuarios();
-    console.log('Senha do administrador padrao sincronizada');
-  }
+  // Não reseta senha já existente — preserva mudanças feitas via interface
 }
 garantirAdminPadrao();
 
@@ -185,7 +177,7 @@ let mensagens       = [];
 let chatList        = [];
 let chamadosHoje    = {}; // chave → { msgId, atualizacoes }
 let chamadosStatus  = {}; // chave → { chamado, titulo, localidade, status, cmo, origem, timeline, criadoEm }
-let contadores      = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0 };
+let contadores      = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
 let statusWpp       = 'desconectado';
 
 const SHEETS_WEBHOOK = process.env.SHEETS_WEBHOOK_URL || '';
@@ -329,7 +321,7 @@ app.post('/api/usuarios', autenticar, apenasAdmin, (req, res) => {
     return res.status(400).json({ erro: 'Senha muito curta (mín. 4 caracteres)' });
   if (usuarios.find(u => u.email === email))
     return res.status(409).json({ erro: 'E-mail já cadastrado' });
-  const novo = { id: String(Date.now()), nome, email, senha: bcrypt.hashSync(senha, 10), senhaTexto: senha, perfil };
+  const novo = { id: String(Date.now()), nome, email, senha: bcrypt.hashSync(senha, 10), perfil };
   usuarios.push(novo);
   salvarUsuarios();
   const { senha: _, ...novoSemSenha } = novo;
@@ -350,7 +342,7 @@ app.put('/api/usuarios/:id/senha', autenticar, apenasAdmin, (req, res) => {
   const user = usuarios.find(u => u.id === req.params.id);
   if (!user) return res.status(404).json({ erro: 'Usuário não encontrado' });
   user.senha = bcrypt.hashSync(novaSenha, 10);
-  user.senhaTexto = novaSenha;
+  delete user.senhaTexto;
   salvarUsuarios();
   res.json({ ok: true });
 });
@@ -1004,8 +996,9 @@ async function sincronizarMensagensRecentes(chatsOrigem = null) {
     ]);
     // Ordena por mensagem mais recente (inclui chats sem não-lidas mas com msgs de hoje)
     const agora = Date.now() / 1000;
-    const inicioHoje = new Date(); inicioHoje.setHours(0,0,0,0);
-    const tsHoje = inicioHoje.getTime() / 1000;
+    // Início do dia no timezone configurado (evita usar timezone do SO que pode ser UTC no Railway)
+    const _hojeParts = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date()).split('-').map(Number);
+    const tsHoje = new Date(`${_hojeParts[0]}-${String(_hojeParts[1]).padStart(2,'0')}-${String(_hojeParts[2]).padStart(2,'0')}T00:00:00`).getTime() / 1000;
     const ordenados = chats
       .slice()
       .sort((a, b) => (b.lastMessage?.timestamp || 0) - (a.lastMessage?.timestamp || 0))
@@ -1163,23 +1156,30 @@ process.on('unhandledRejection', (reason) => {
 
 // ── Reset diário à meia-noite ───────────────────────────────────────────────
 function agendarResetMeiaNoite() {
-  const agora   = new Date();
-  const amanha  = new Date(agora);
-  amanha.setDate(amanha.getDate() + 1);
-  amanha.setHours(0, 0, 0, 0);
-  const ms = amanha - agora;
+  // Calcula meia-noite no timezone configurado (TZ_APP), não do SO
+  const agora  = new Date();
+  const agoraLocal = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year:'numeric', month:'2-digit', day:'2-digit' }).format(agora);
+  const [y, m, d] = agoraLocal.split('-').map(Number);
+  // Meia-noite de amanhã em TZ_APP convertida para UTC
+  const amanhaTZ   = new Date(Date.UTC(y, m - 1, d + 1)); // aproximação inicial
+  // Ajusta para meia-noite exata no TZ
+  const offsetMs   = amanhaTZ - new Date(new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false }).format(amanhaTZ).replace(/(\d{4}-\d{2}-\d{2}), (\d{2}:\d{2}:\d{2})/, '$1T$2'));
+  const meiaNoite  = new Date(amanhaTZ.getTime() + offsetMs);
+  const ms         = meiaNoite - agora;
+  const msAjustado = ms > 0 ? ms : ms + 86400000; // fallback: nunca negativo
   setTimeout(() => {
-    contadores      = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0 };
+    contadores      = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
     chatList        = [];
     chamadosHoje    = {};
     chamadosStatus  = {};
     mensagens       = [];
-    salvarMensagens(); // cria o arquivo vazio do novo dia
-    console.log('Reset diário realizado —', new Date().toLocaleString('pt-BR'));
+    salvarMensagens();
+    console.log('Reset diário realizado —', dataHoraLocal());
     broadcast('reset_diario', { contadores });
     agendarResetMeiaNoite();
-  }, ms);
-  console.log(`Reset diário agendado para ${amanha.toLocaleTimeString('pt-BR')}`);
+  }, msAjustado);
+  const proxima = new Date(agora.getTime() + msAjustado);
+  console.log(`Reset diário agendado para ${proxima.toLocaleString('pt-BR', { timeZone: TZ })}`);
 }
 
 server.listen(PORT, () => {

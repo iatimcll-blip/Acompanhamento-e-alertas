@@ -2350,6 +2350,7 @@
     atualizarDropdownLocalidades();
     renderFeed();
     renderMassivo();
+    if (m.chamado) renderChamadosPanel();
     atualizarContadoresDisplay();
     atualizarMobBadges();
   }
@@ -2833,15 +2834,18 @@
       .then(r => r.json()).then(data => marcarLidaLocal(id, data.lidaEm)).catch(console.error);
   }
   function marcarLidaLocal(id, lidaEm) {
-    const jáLida = todasMensagens.find(x => x.id === id && x.lida);
-    if (!jáLida && _chatListTotalUnread > 0) {
+    const m = todasMensagens.find(x => x.id === id);
+    if (!m) return;
+    const jaEraLida = m.lida;
+    m.lida = true;
+    if (lidaEm) m.lidaEm = lidaEm;
+    if (!jaEraLida && _chatListTotalUnread > 0) {
       _chatListTotalUnread--;
       atualizarTopCounter();
     }
-    const m = todasMensagens.find(x => x.id === id);
-    if (m) { m.lida = true; if (lidaEm) m.lidaEm = lidaEm; }
     renderFeed();
     renderMassivo();
+    atualizarContadoresDisplay();
     if (mensagemSelecionada && mensagemSelecionada.id === id) renderDetalhe();
     atualizarUFBlinks();
     atualizarMobBadges();
