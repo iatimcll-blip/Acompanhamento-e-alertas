@@ -2142,10 +2142,12 @@
       c = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, fechado:0 };
       getActiveMsgs().forEach(m => {
         if (m.duplicado) return;
-        if (_clientIsFechado(m)) { c.fechado++; }
-        else if ((m.uf||[]).length > 0) {
-          m.uf.forEach(u => { if (c[u] !== undefined) c[u]++; });
-          c.total++;
+        if ((m.uf||[]).length > 0) {
+          if (_clientIsFechado(m)) { c.fechado++; }
+          else {
+            m.uf.forEach(u => { if (c[u] !== undefined) c[u]++; });
+            c.total++;
+          }
         }
         if (m.temWanderson || _clientIsWanderson(m)) c.WANDERSON++;
       });
@@ -2405,7 +2407,7 @@
     } else if (filtroFeedAtual === 'WANDERSON') {
       msgs = msgs.filter(m => m.temWanderson || _clientIsWanderson(m));
     } else if (filtroFeedAtual === 'FECHADO') {
-      msgs = msgs.filter(m => _clientIsFechado(m));
+      msgs = msgs.filter(m => _clientIsFechado(m) && (m.uf||[]).length > 0);
     } else if (['PA','MA','AP','AM'].includes(filtroFeedAtual)) {
       msgs = msgs.filter(m => (m.uf || []).includes(filtroFeedAtual));
     } else {

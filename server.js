@@ -274,11 +274,13 @@ function carregarMensagens() {
         m.temFechado = _FECH_RE.test(t);
       }
       if (!m.duplicado) {
-        if (m.temFechado) {
-          contadores.fechado++;
-        } else if ((m.uf||[]).length > 0) {
-          (m.uf||[]).forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
-          contadores.total++; // conta mensagem uma única vez, independente de quantas UFs
+        if ((m.uf||[]).length > 0) {
+          if (m.temFechado) {
+            contadores.fechado++;
+          } else {
+            (m.uf||[]).forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
+            contadores.total++; // conta mensagem uma única vez, independente de quantas UFs
+          }
         }
         if (m.temWanderson)   contadores.WANDERSON++;
         if (m.temCmoReparo)   contadores.cmoReparo++;
@@ -772,10 +774,10 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   const _textoFech = texto.normalize('NFD').replace(/[̀-ͯ]/g, '');
   const temFechado = /\bvalidad[oa]\b|\bnormalizad[oa]\b|\benvi(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bmand(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bcancelad[oa]\b|\bcancelamento\b/i.test(_textoFech);
 
-  // Descarta mensagens sem município/UF, sem Wanderson e sem status fechado
-  // (inclui mensagens com apenas Bdesk/Atrix sem localização — não poluem contadores)
-  if (detectados.length === 0 && !temWanderson && !temFechado) {
-    console.log(`[FILTRADO:${origem}] de=${msg.from} - nenhum municipio/Wanderson/Fechado detectado`);
+  // Descarta mensagens sem município/UF e sem Wanderson
+  // Fechado sem município também é descartado — só conta com localização identificada
+  if (detectados.length === 0 && !temWanderson) {
+    console.log(`[FILTRADO:${origem}] de=${msg.from} - nenhum municipio/Wanderson detectado`);
     return false;
   }
 
@@ -867,11 +869,13 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   if (mensagens.length > 200) mensagens.pop();
 
   if (!duplicado) {
-    if (temFechado) {
-      contadores.fechado++;
-    } else if (detectados.length > 0) {
-      entrada.uf.forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
-      contadores.total++;
+    if (detectados.length > 0) {
+      if (temFechado) {
+        contadores.fechado++;
+      } else {
+        entrada.uf.forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
+        contadores.total++;
+      }
     }
     if (temWanderson)   contadores.WANDERSON++;
     if (cmoReparoConfigurado || temCmoReparo)   contadores.cmoReparo++;
