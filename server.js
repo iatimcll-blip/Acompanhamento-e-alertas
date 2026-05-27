@@ -170,9 +170,6 @@ const WANDERSON_IDS = [
   '555586994944816',
   '+5586994944816',
   '86994944816',
-  '86994944812',
-  '5586994944812',
-  '555586994944812',
 ];
 
 // Padrões de chamados massivos
@@ -269,7 +266,13 @@ function carregarMensagens() {
     chamadosHoje = salvo.chamadosHoje || {};
     // Recalcula contadores a partir das mensagens salvas
     contadores = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
+    const _FECH_RE = /\bvalidad[oa]\b|\bnormalizad[oa]\b|\benvi(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bmand(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bcancelad[oa]\b|\bcancelamento\b/i;
     mensagens.forEach(m => {
+      // Re-detecta temFechado para mensagens salvas antes do campo existir
+      if (m.temFechado === undefined) {
+        const t = (m.texto || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
+        m.temFechado = _FECH_RE.test(t);
+      }
       if (!m.duplicado) {
         if (m.temFechado) {
           contadores.fechado++;
@@ -758,20 +761,25 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   if (dataMsg !== hoje()) return false;
 
   const { detectados, temAcionamento } = analisarMensagem(texto);
-  const temWanderson = WANDERSON_IDS.some(id =>
-    texto.toUpperCase().includes(id.toUpperCase())
-  );
+  // Detecta Wanderson: pelo texto (menção) OU pelo número do remetente (msg enviada por ele)
+  const _wSenderNum = ((msg.author || msg.from || '')).replace(/\D/g, '');
+  const temWanderson = WANDERSON_IDS.some(id => {
+    const n = id.replace(/\D/g, '');
+    if (n.length >= 8) return _wSenderNum.includes(n) || texto.toUpperCase().includes(id.toUpperCase());
+    return texto.toUpperCase().includes(id.toUpperCase());
+  });
+  // Detecta fechado ANTES do filtro para não descartar mensagens sem município
+  const _textoFech = texto.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const temFechado = /\bvalidad[oa]\b|\bnormalizad[oa]\b|\benvi(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bmand(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bcancelad[oa]\b|\bcancelamento\b/i.test(_textoFech);
 
-  // Somente mensagens com municipio/UF reconhecido OU mencao ao Wanderson
-  if (detectados.length === 0 && !temWanderson) {
-    console.log(`[FILTRADO:${origem}] de=${msg.from} - nenhum municipio/Wanderson detectado`);
+  // Descarta mensagens sem município/UF, sem Wanderson e sem status fechado
+  // (inclui mensagens com apenas Bdesk/Atrix sem localização — não poluem contadores)
+  if (detectados.length === 0 && !temWanderson && !temFechado) {
+    console.log(`[FILTRADO:${origem}] de=${msg.from} - nenhum municipio/Wanderson/Fechado detectado`);
     return false;
   }
 
   const temRuptura    = /\bRUPTURA\b/i.test(texto);
-  // Normaliza texto (remove acentos) para detectar variações como validação/validacao
-  const _textoFech = texto.normalize('NFD').replace(/[̀-ͯ]/g, '');
-  const temFechado = /\bvalidad[oa]\b|\bnormalizad[oa]\b|\benvi(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bmand(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bcancelad[oa]\b|\bcancelamento\b/i.test(_textoFech);
   const cmoReparoConfigurado = contemFiltro(texto, CMO_REPARO_FILTRO);
   const cmoAtivacaoConfigurado = contemFiltro(texto, CMO_ATIVACAO_FILTRO);
   const temCmoReparo  = /CMO\s*REPARO|CARIMBO\s+TRANSFER[EÊ]NCIA\s*[-–]?\s*CMO\s*REPARO/i.test(texto);
