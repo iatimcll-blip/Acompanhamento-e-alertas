@@ -139,13 +139,13 @@
     ══════════════════════════════════════════════════ */
     .app-layout {
       display: grid;
-      grid-template-columns: 168px 1fr;
+      grid-template-columns: 210px 1fr;
       height: calc(100vh - 64px);
       overflow: hidden;
     }
 
     /* ══════════════════════════════════════════════════
-       SIDEBAR ESQUERDO (WhatsApp — 170px)
+       SIDEBAR ESQUERDO (WhatsApp — 210px)
     ══════════════════════════════════════════════════ */
     .sidebar { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
 
@@ -225,7 +225,7 @@
        STATS (item 8 — clicável + indicador ativo)
     ══════════════════════════════════════════════════ */
     /* Stats row */
-    .stats-row { display: grid; grid-template-columns: 1.3fr repeat(5,1fr); gap: 5px; flex-shrink: 0; height: 90px; }
+    .stats-row { display: grid; grid-template-columns: 1.3fr repeat(6,1fr); gap: 5px; flex-shrink: 0; height: 90px; }
     .stat-card {
       background: var(--card); border: 1px solid var(--border); border-radius: 10px;
       padding: 6px 10px; cursor: pointer; position: relative; overflow: hidden;
@@ -244,7 +244,9 @@
     .stat-ma::before    { background: var(--laranja); }
     .stat-ap::before    { background: var(--esmeralda); }
     .stat-am::before    { background: var(--roxo); }
-    .stat-wand::before  { background: var(--wanderson); }
+    .stat-wand::before    { background: var(--wanderson); }
+    .stat-fechado::before { background: var(--verde); }
+    .stat-fechado .stat-num { color: var(--verde); }
     .stat-lbl { font-size: .57rem; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin-bottom: 1px; }
     .stat-num { font-size: 1.75rem; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
     .stat-total .stat-num { color: var(--verde); }
@@ -392,6 +394,18 @@
     .filtro-ativo-tag.visivel { display: inline-block; }
     .msg-count-badge { font-size: .66rem; font-weight: 700; padding: 2px 9px; border-radius: 8px; background: var(--card2); color: var(--subtext); }
 
+    /* Search box no feed */
+    .feed-search-wrap { flex: 1; min-width: 0; padding: 0 8px; }
+    .feed-search {
+      width: 100%; height: 26px;
+      background: var(--card2); border: 1px solid var(--border2);
+      border-radius: 8px; padding: 0 8px;
+      font-size: .72rem; color: var(--text); outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .feed-search:focus { border-color: var(--azul); box-shadow: 0 0 0 2px rgba(29,78,216,.18); }
+    .feed-search::placeholder { color: var(--muted); }
+
     .filter-bar { padding: 5px 12px; border-bottom: 1px solid var(--border); display: flex; gap: 4px; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
     .ftab {
       padding: 3px 10px; border-radius: 12px; border: 1px solid var(--border2);
@@ -458,6 +472,9 @@
     }
     .msg-card.lida    { opacity: .32; }
     .msg-card.duplicado { opacity: .6; border-left-style: dashed; }
+    .msg-card.fechado { border-left-color: var(--verde) !important; background: rgba(21,128,61,.10) !important; }
+    .msg-card.fechado .msg-text { color: var(--verde-dk); }
+    .chip.fechado-chip { background: rgba(21,128,61,.18); color: var(--verde); border: 1px solid rgba(21,128,61,.4); }
 
     /* Não lidas pulsam */
     @keyframes msg-unread-pulse {
@@ -824,7 +841,7 @@
     .quadrant .timer-clock.alerta { font-size: .70rem; }
     .quadrant .tag-pill { font-size: .54rem; padding: 1px 5px; }
     /* O body do timer no quadrante expande e rola quando há mais de 4 acionamentos */
-    .quadrant .timer-body { max-height: none !important; height: 100%; overflow-y: auto; }
+    .quadrant .timer-body { max-height: none !important; overflow-y: auto; min-height: 0; }
 
     /* ══════════════════════════════════════════════════
        MODAL DE CONFIGURAÇÕES
@@ -958,8 +975,8 @@
       display:grid !important;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       grid-template-rows: repeat(2, minmax(0, 1fr));
-      gap:5px; flex:1; max-height:none !important;
-      padding:6px; overflow:hidden; align-content:stretch;
+      gap:5px; flex:1; min-height:0; max-height:none !important;
+      padding:6px; overflow-y:auto; align-content:stretch;
     }
     /* Q1 compact — timer cards mais densos */
     .quadrant:nth-child(1) .timer-item { padding: 5px 8px; border-radius: 7px; }
@@ -1428,6 +1445,11 @@
         <div class="stat-num" id="statAM">0</div>
         <div class="stat-sub">Parintins · ADX</div>
       </div>
+      <div class="stat-card stat-fechado" id="card-FECHADO" onclick="filtrarFeed('FECHADO',null)">
+        <div class="stat-lbl">Fechado</div>
+        <div class="stat-num" id="statFechado">0</div>
+        <div class="stat-sub">validado/cancelado</div>
+      </div>
       <div class="stat-card stat-wand" id="card-WANDERSON" onclick="filtrarFeed('WANDERSON',null)">
         <div class="stat-lbl">Wanderson</div>
         <div class="stat-num" id="statWAND">0</div>
@@ -1477,6 +1499,9 @@
         <div class="feed-wrap">
           <div class="feed-hd">
             <h2>💬 Mensagens <span class="filtro-ativo-tag" id="filtroAtivoTag"></span></h2>
+            <div class="feed-search-wrap">
+              <input type="search" id="feedBusca" class="feed-search" placeholder="🔍 Buscar chamado, texto, grupo…" oninput="setBusca(this.value)" autocomplete="off">
+            </div>
             <span class="msg-count-badge" id="msgCount">0 hoje</span>
           </div>
           <div class="filter-bar" id="filterTabs">
@@ -1489,6 +1514,7 @@
             <button class="ftab"       id="ftab-RUPTURA"  onclick="filtrarFeed('RUPTURA',this)"  style="color:var(--vermelho);border-color:rgba(185,28,28,.35)">⚡ Ruptura</button>
             <button class="ftab"       id="ftab-NAOIDA"   onclick="filtrarFeed('NAOIDA',this)"   style="color:var(--subtext)">🔔 Não lidas</button>
             <button class="ftab"       id="ftab-FLAGGED"  onclick="filtrarFeed('FLAGGED',this)"  style="color:var(--flag-cor);border-color:rgba(146,64,14,.35)">⚑ Sinalizadas</button>
+            <button class="ftab"       id="ftab-FECHADO"   onclick="filtrarFeed('FECHADO',this)"  style="color:var(--verde);border-color:rgba(21,128,61,.35)">✅ Fechados</button>
             <button class="ftab"       id="ftab-WANDERSON" onclick="filtrarFeed('WANDERSON',this)" style="color:var(--wanderson);border-color:rgba(180,83,9,.35)">@W</button>
             <select class="localidade-select" id="filtroLocalidade" onchange="filtrarPorLocalidade(this.value)">
               <option value="">Todas as localidades</option>
@@ -1769,6 +1795,7 @@
   let wppConectado = false;
   let filtroFeedAtual  = 'TODOS';
   let filtroLocalidade = '';
+  let buscaTexto       = '';
   let mensagemSelecionada = null;
   let chatModalId = null;
   const timers = {};
@@ -1899,6 +1926,9 @@
       return deNorm.includes(id) || texNorm.includes(id);
     });
   }
+
+  const _FECHADO_RE = /\bvalidado\b|\bnormalizado\b|envia\s+a\s+rfo|manda\s+a\s+rfo|\bcancelado\b/i;
+  function _clientIsFechado(m) { return m.temFechado || _FECHADO_RE.test(m.texto || ''); }
 
   // Verifica se a mensagem corresponde ao filtro/aba atualmente selecionado
   function mensagemMatchesFiltro(m) {
@@ -2106,12 +2136,13 @@
   function atualizarContadoresDisplay() {
     let c;
     if (selectedChats.size > 0) {
-      c = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0 };
+      c = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, fechado:0 };
       getActiveMsgs().forEach(m => {
         if (m.duplicado) return;
-        if ((m.uf||[]).length > 0) {
+        if (_clientIsFechado(m)) { c.fechado++; }
+        else if ((m.uf||[]).length > 0) {
           m.uf.forEach(u => { if (c[u] !== undefined) c[u]++; });
-          c.total++; // conta cada mensagem uma vez, não soma PA+MA+AP+AM
+          c.total++;
         }
         if (m.temWanderson || _clientIsWanderson(m)) c.WANDERSON++;
       });
@@ -2120,13 +2151,14 @@
       c = _serverContadores;
       document.querySelectorAll('.stat-card').forEach(el => el.classList.remove('sel-ativo'));
     }
-    document.getElementById('statTotal').textContent = c.total    || 0;
-    document.getElementById('statPA').textContent    = c.PA       || 0;
-    document.getElementById('statMA').textContent    = c.MA       || 0;
-    document.getElementById('statAP').textContent    = c.AP       || 0;
-    document.getElementById('statAM').textContent    = c.AM       || 0;
-    document.getElementById('statWAND').textContent  = c.WANDERSON|| 0;
-    document.getElementById('msgCount').textContent  = (c.total || 0) + ' hoje';
+    document.getElementById('statTotal').textContent  = c.total    || 0;
+    document.getElementById('statPA').textContent     = c.PA       || 0;
+    document.getElementById('statMA').textContent     = c.MA       || 0;
+    document.getElementById('statAP').textContent     = c.AP       || 0;
+    document.getElementById('statAM').textContent     = c.AM       || 0;
+    document.getElementById('statFechado').textContent= c.fechado  || 0;
+    document.getElementById('statWAND').textContent   = c.WANDERSON|| 0;
+    document.getElementById('msgCount').textContent   = (c.total || 0) + ' hoje';
     // CMO counters — contagem via multi-keywords
     const cmoR = document.getElementById('topCmoReparoNum');
     const cmoA = document.getElementById('topCmoAtvNum');
@@ -2325,7 +2357,7 @@
 
     // Tag de filtro ativo
     const tag = document.getElementById('filtroAtivoTag');
-    const nomes = { TODOS:'Todos', PA:'Pará (PA)', MA:'Maranhão (MA)', AP:'Amapá (AP)', AM:'Amazonas (AM)', WANDERSON:'@Wanderson', URGENTE:'Urgentes', RUPTURA:'Ruptura', NAOIDA:'Não lidas', FLAGGED:'Sinalizadas' };
+    const nomes = { TODOS:'Todos', PA:'Pará (PA)', MA:'Maranhão (MA)', AP:'Amapá (AP)', AM:'Amazonas (AM)', WANDERSON:'@Wanderson', URGENTE:'Urgentes', RUPTURA:'Ruptura', NAOIDA:'Não lidas', FLAGGED:'Sinalizadas', FECHADO:'Fechados' };
     if (valor !== 'TODOS') {
       tag.textContent = '● ' + (nomes[valor] || valor);
       tag.classList.add('visivel');
@@ -2336,6 +2368,11 @@
     renderFeed();
     // Scroll suave até o feed
     document.querySelector('.feed-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function setBusca(val) {
+    buscaTexto = (val || '').trim().toLowerCase();
+    renderFeed();
   }
 
   function filtrarPorLocalidade(val) {
@@ -2364,11 +2401,25 @@
       msgs = msgs.filter(m => m.flagged);
     } else if (filtroFeedAtual === 'WANDERSON') {
       msgs = msgs.filter(m => m.temWanderson || _clientIsWanderson(m));
+    } else if (filtroFeedAtual === 'FECHADO') {
+      msgs = msgs.filter(m => _clientIsFechado(m));
     } else if (['PA','MA','AP','AM'].includes(filtroFeedAtual)) {
       msgs = msgs.filter(m => (m.uf || []).includes(filtroFeedAtual));
     } else {
       // TODOS: apenas mensagens com município/UF identificado
       msgs = msgs.filter(m => (m.detectados||[]).length > 0);
+    }
+
+    // Filtro de busca livre (chamado, texto, grupo, município)
+    if (buscaTexto) {
+      msgs = msgs.filter(m => {
+        const haystack = [
+          m.texto || '', m.de || '', m.nomeGrupo || '',
+          m.chamado?.numero || m.chamado?.tipo || '',
+          (m.municipios || []).join(' '), (m.siglas || []).join(' '),
+        ].join(' ').toLowerCase();
+        return haystack.includes(buscaTexto);
+      });
     }
 
     const badge = document.getElementById('msgCount');
@@ -2386,25 +2437,28 @@
   }
 
   function buildCard(m) {
-    const urgente    = m.temAcionamento && !m.lida;
+    const fechado    = _clientIsFechado(m);
+    const urgente    = m.temAcionamento && !m.lida && !fechado;
     const selecionada = mensagemSelecionada && mensagemSelecionada.id === m.id;
     let cls = ['msg-card'];
-    if (m.temRuptura) cls.push('ruptura');
+    if (fechado) cls.push('fechado');
+    else if (m.temRuptura) cls.push('ruptura');
     else if (m.flagged) cls.push('flagged');
     else if (urgente) cls.push('urgente');
     else cls.push('normal');
-    if (!m.lida) cls.push('nao-lida');   // pulsa até ser lida
+    if (!m.lida) cls.push('nao-lida');
     if (m.lida)       cls.push('lida');
     if (selecionada)  cls.push('selecionada');
     if (m.duplicado)  cls.push('duplicado');
 
-    const icon = m.temRuptura ? '⚡' : urgente ? '🚨' : m.grupo ? '👥' : '👤';
+    const icon = m.temRuptura ? '⚡' : urgente ? '🚨' : fechado ? '✅' : m.grupo ? '👥' : '👤';
     const chipsUF  = (m.uf || []).map(u => `<span class="chip uf-${u.toLowerCase()}">${u}</span>`).join('');
     const chipsSig = (m.siglas || []).slice(0,2).map(s => `<span class="chip sigla">${s}</span>`).join('');
     const chipsMu  = (m.municipios || []).slice(0,2).map(mu => `<span class="chip muni">${escHtml(mu)}</span>`).join('');
     const chipCh   = m.chamado ? `<span class="chip chamado">🎫 ${m.chamado.numero}</span>` : '';
     const chipDup  = m.duplicado ? `<span class="chip dup">atualização</span>` : '';
     const chipRup  = m.temRuptura ? `<span class="chip ruptura">⚡ RUPTURA</span>` : '';
+    const chipFech = fechado ? `<span class="chip fechado-chip">✅ Fechado</span>` : '';
     const tipoCls  = { BDESK:'mas-tipo-bdesk', TOTAL:'mas-tipo-total', CONJUNTA:'mas-tipo-conjunta', RUPTURA:'mas-tipo-ruptura' };
     const chipMas  = m.temMassivo && m.tipoMassivo ? `<span class="mas-item-tipo ${tipoCls[m.tipoMassivo]||''}">${m.tipoMassivo}</span>` : '';
     const lidaBadge = m.lida ? `<span class="badge-lida">✓ ${m.lidaEm || ''}</span>` : '';
@@ -2434,7 +2488,7 @@
       </div>
       ${thumbEl}
       <div class="msg-text" id="mt-${escAttr(m.id)}">${escHtml(m.texto||'')}</div>
-      <div class="msg-footer">${chipMas}${chipRup}${chipsUF}${chipsSig}${chipsMu}${chipCh}${midiaNome}${chipDup}${lidaBadge}${btnExpand}${btnAtualizar}${btnCopiar}</div>
+      <div class="msg-footer">${chipFech}${chipMas}${chipRup}${chipsUF}${chipsSig}${chipsMu}${chipCh}${midiaNome}${chipDup}${lidaBadge}${btnExpand}${btnAtualizar}${btnCopiar}</div>
     </div>`;
   }
 

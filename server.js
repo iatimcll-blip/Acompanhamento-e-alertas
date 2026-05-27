@@ -152,7 +152,7 @@ const BASE = [
   // ── AMAPÁ ───────────────────────────────────────────────────────────────
   { uf:'AP', cod:'96000', muni:'MACAPA',                     sigla:'MPA',  eps:'ADX' },
   // ── AMAZONAS ────────────────────────────────────────────────────────────
-  { uf:'AM', cod:'92050', muni:'PARINTINS',                  sigla:'PAR',  eps:'ADX' },
+  { uf:'AM', cod:'92050', muni:'PARINTINS',                  sigla:'',     eps:'ADX' },
 ];
 
 // Palavras-chave adicionais que indicam acionamento
@@ -199,9 +199,9 @@ const server = http.createServer(app);
 const wss    = new WebSocket.Server({ server });
 
 // Serve login.html na raiz, painel apenas autenticado
-app.get('/', (_, res) => res.sendFile(path.join(__dirname, 'login.html')));
-app.get('/painel', (_, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.use(express.static(path.join(__dirname)));
+app.get('/', (_, res) => { res.setHeader('Cache-Control','no-store'); res.sendFile(path.join(__dirname, 'login.html')); });
+app.get('/painel', (_, res) => { res.setHeader('Cache-Control','no-store'); res.sendFile(path.join(__dirname, 'index.html')); });
+app.use(express.static(path.join(__dirname), { etag: false, lastModified: false }));
 app.use(express.json());
 
 // Retorna data de hoje no formato YYYY-MM-DD
@@ -268,10 +268,12 @@ function carregarMensagens() {
     mensagens    = salvo.mensagens || [];
     chamadosHoje = salvo.chamadosHoje || {};
     // Recalcula contadores a partir das mensagens salvas
-    contadores = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0 };
+    contadores = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
     mensagens.forEach(m => {
       if (!m.duplicado) {
-        if ((m.uf||[]).length > 0) {
+        if (m.temFechado) {
+          contadores.fechado++;
+        } else if ((m.uf||[]).length > 0) {
           (m.uf||[]).forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
           contadores.total++; // conta mensagem uma única vez, independente de quantas UFs
         }
@@ -757,6 +759,7 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   }
 
   const temRuptura    = /\bRUPTURA\b/i.test(texto);
+  const temFechado    = /\bvalidado\b|\bnormalizado\b|envia\s+a\s+rfo|manda\s+a\s+rfo|\bcancelado\b/i.test(texto);
   const cmoReparoConfigurado = contemFiltro(texto, CMO_REPARO_FILTRO);
   const cmoAtivacaoConfigurado = contemFiltro(texto, CMO_ATIVACAO_FILTRO);
   const temCmoReparo  = /CMO\s*REPARO|CARIMBO\s+TRANSFER[EÊ]NCIA\s*[-–]?\s*CMO\s*REPARO/i.test(texto);
@@ -825,6 +828,7 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
     flagged:      false,
     temWanderson,
     temRuptura,
+    temFechado,
     temCmoReparo: cmoReparoConfigurado || temCmoReparo,
     temCmoAtivacao: cmoAtivacaoConfigurado || temCmoAtivacao,
     temMassivo,
@@ -843,9 +847,11 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   if (mensagens.length > 200) mensagens.pop();
 
   if (!duplicado) {
-    if (detectados.length > 0) {
+    if (temFechado) {
+      contadores.fechado++;
+    } else if (detectados.length > 0) {
       entrada.uf.forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
-      contadores.total++; // uma mensagem = um ponto no total, independente de quantas UFs
+      contadores.total++;
     }
     if (temWanderson)   contadores.WANDERSON++;
     if (cmoReparoConfigurado || temCmoReparo)   contadores.cmoReparo++;
