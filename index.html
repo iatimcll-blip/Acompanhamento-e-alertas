@@ -1937,7 +1937,7 @@
   function mensagemMatchesFiltro(m) {
     if (filtroLocalidade) return (m.municipios||[]).includes(filtroLocalidade);
     switch (filtroFeedAtual) {
-      case 'TODOS':      return (m.detectados||[]).length > 0 || m.temWanderson;
+      case 'TODOS':      return (m.uf||[]).length > 0 && !_clientIsFechado(m) && !m.duplicado;
       case 'PA':         return (m.uf||[]).includes('PA');
       case 'MA':         return (m.uf||[]).includes('MA');
       case 'AP':         return (m.uf||[]).includes('AP');
@@ -2020,6 +2020,10 @@
       else if (tipo === 'chamado_update') { chamadosStatusLocal[dados.chave] = dados.dados; if (chaveAtualAberta === dados.chave) renderAtz(); renderChamadosPanel(); }
       else if (tipo === 'chamado_removido') { delete chamadosStatusLocal[dados.chave]; if (chaveAtualAberta === dados.chave) fecharAtz(); renderChamadosPanel(); }
       else if (tipo === 'atualizar-mensagem') { atualizarMensagemLocal(dados); }
+      else if (tipo === 'sync_status') {
+        if (dados.em_andamento) console.log('[SYNC] Sincronização em andamento...');
+        else console.log(`[SYNC] Concluído — analisadas:${dados.analisadas} aceitas:${dados.aceitas} erros:${dados.erros||0}`);
+      }
     };
   }
 
@@ -2147,6 +2151,10 @@
 
   function atualizarContadoresDisplay() {
     let c;
+    const _baseMsgs = selectedChats.size > 0 ? getActiveMsgs() : todasMensagens;
+    const naoLidas = _baseMsgs.filter(m =>
+      !m.duplicado && !m.lida && (m.uf||[]).length > 0 && !_clientIsFechado(m)
+    ).length;
     if (selectedChats.size > 0) {
       c = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, fechado:0 };
       getActiveMsgs().forEach(m => {
@@ -2165,14 +2173,14 @@
       c = _serverContadores;
       document.querySelectorAll('.stat-card').forEach(el => el.classList.remove('sel-ativo'));
     }
-    document.getElementById('statTotal').textContent  = c.total    || 0;
+    document.getElementById('statTotal').textContent  = naoLidas;
     document.getElementById('statPA').textContent     = c.PA       || 0;
     document.getElementById('statMA').textContent     = c.MA       || 0;
     document.getElementById('statAP').textContent     = c.AP       || 0;
     document.getElementById('statAM').textContent     = c.AM       || 0;
     document.getElementById('statFechado').textContent= c.fechado  || 0;
     document.getElementById('statWAND').textContent   = c.WANDERSON|| 0;
-    document.getElementById('msgCount').textContent   = (c.total || 0) + ' hoje';
+    document.getElementById('msgCount').textContent   = naoLidas + ' não lidas';
     // CMO counters — contagem via multi-keywords
     const cmoR = document.getElementById('topCmoReparoNum');
     const cmoA = document.getElementById('topCmoAtvNum');
@@ -2420,8 +2428,8 @@
     } else if (['PA','MA','AP','AM'].includes(filtroFeedAtual)) {
       msgs = msgs.filter(m => (m.uf || []).includes(filtroFeedAtual));
     } else {
-      // TODOS: apenas mensagens com município/UF identificado
-      msgs = msgs.filter(m => (m.detectados||[]).length > 0);
+      // TODOS: apenas mensagens com município/UF identificado e não fechadas
+      msgs = msgs.filter(m => (m.uf||[]).length > 0 && !_clientIsFechado(m) && !m.duplicado);
     }
 
     // Filtro de busca livre (chamado, texto, grupo, município)
@@ -2438,8 +2446,12 @@
 
     const badge = document.getElementById('msgCount');
     if (badge) {
-      const lbl = filtroFeedAtual === 'TODOS' && !filtroLocalidade ? 'hoje' : 'filtradas';
-      badge.textContent = msgs.length + ' ' + lbl;
+      if (filtroFeedAtual === 'TODOS' && !filtroLocalidade) {
+        const naoLidasFeed = msgs.filter(m => !m.lida).length;
+        badge.textContent = naoLidasFeed + ' não lidas';
+      } else {
+        badge.textContent = msgs.length + ' filtradas';
+      }
     }
 
     if (!msgs.length) {
@@ -2927,6 +2939,7 @@
           inicio,
           pendente:       !inicio,
           chatId,
+          msgId:          Array.isArray(msgOrDetectados) ? null : (msgOrDetectados.id || null),
         };
       }
       renderTimers();
@@ -2950,10 +2963,11 @@
           muni:          d.muni,
           uf:            d.uf,
           sigla:         d.sigla,
-          eps:           d.eps,
+          eps:            d.eps,
           inicio,
           pendente:      !inicio,
           chatId,
+          msgId:         Array.isArray(msgOrDetectados) ? null : (msgOrDetectados.id || null),
         };
       }
       break; // apenas o primeiro município válido
@@ -3059,14 +3073,15 @@
         : `<div class="timer-line2-loc" style="font-size:.72rem;color:var(--muted)">${escHtml((t.titulo||'').substring(0,50))}</div>`;
 
       // Linha 3 — controle do cronômetro
+      const _clkClick = t.msgId ? `onclick="abrirAtualicao('${escAttr(t.msgId)}')" title="Ver histórico" style="cursor:pointer"` : '';
       const linha3 = t.pendente
         ? `<div class="timer-line3">
              <button class="btn-liberar" style="background:rgba(34,197,94,.18);color:var(--verde);border-color:rgba(34,197,94,.4)"
                onclick="iniciarContagem('${escAttr(key)}')">▶ Iniciar</button>
-             <div class="timer-clock" style="color:var(--subtext)">00:00:00</div>
+             <div class="timer-clock" style="color:var(--subtext)" ${_clkClick}>00:00:00</div>
            </div>`
         : `<div class="timer-line3">
-             <div class="timer-clock ${clkC}">${clkTxt}</div>
+             <div class="timer-clock ${clkC}" ${_clkClick}>${clkTxt}</div>
              <button class="btn-liberar" onclick="liberarTimer('${escAttr(key)}')">Liberar</button>
            </div>`;
 

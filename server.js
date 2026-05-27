@@ -325,11 +325,13 @@ app.post('/api/usuarios', autenticar, apenasAdmin, (req, res) => {
   const { nome, email, senha, perfil } = req.body;
   if (!nome || !email || !senha || !['administrador','usuario'].includes(perfil))
     return res.status(400).json({ erro: 'Dados inválidos' });
+  if (senha.length < 4)
+    return res.status(400).json({ erro: 'Senha muito curta (mín. 4 caracteres)' });
   if (usuarios.find(u => u.email === email))
     return res.status(409).json({ erro: 'E-mail já cadastrado' });
   const novo = { id: String(Date.now()), nome, email, senha: bcrypt.hashSync(senha, 10), senhaTexto: senha, perfil };
   usuarios.push(novo);
-  fs.writeFileSync(USERS_FILE, JSON.stringify(usuarios, null, 2), 'utf8');
+  salvarUsuarios();
   const { senha: _, ...novoSemSenha } = novo;
   res.json(novoSemSenha);
 });
@@ -339,7 +341,7 @@ app.delete('/api/usuarios/:id', autenticar, apenasAdmin, (req, res) => {
   if (usuarios[idx].perfil === 'administrador' && usuarios.filter(u => u.perfil === 'administrador').length === 1)
     return res.status(400).json({ erro: 'Não é possível remover o único administrador' });
   usuarios.splice(idx, 1);
-  fs.writeFileSync(USERS_FILE, JSON.stringify(usuarios, null, 2), 'utf8');
+  salvarUsuarios();
   res.json({ ok: true });
 });
 app.put('/api/usuarios/:id/senha', autenticar, apenasAdmin, (req, res) => {
@@ -993,39 +995,68 @@ async function sincronizarMensagensRecentes(chatsOrigem = null) {
   if (sincronizandoMensagens) return { ok: false, erro: 'Sincronizacao ja em andamento' };
 
   sincronizandoMensagens = true;
-  let analisadas = 0, aceitas = 0;
+  let analisadas = 0, aceitas = 0, erros = 0;
+  broadcast('sync_status', { em_andamento: true, analisadas: 0, aceitas: 0 });
   try {
     const chats = chatsOrigem || await Promise.race([
       client.getChats(),
-      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ao carregar chats')), 120000)),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ao carregar chats')), 90000)),
     ]);
+    // Ordena por mensagem mais recente (inclui chats sem não-lidas mas com msgs de hoje)
+    const agora = Date.now() / 1000;
+    const inicioHoje = new Date(); inicioHoje.setHours(0,0,0,0);
+    const tsHoje = inicioHoje.getTime() / 1000;
     const ordenados = chats
       .slice()
-      .sort((a, b) => (b.unreadCount || 0) - (a.unreadCount || 0))
-      .slice(0, 80);
+      .sort((a, b) => (b.lastMessage?.timestamp || 0) - (a.lastMessage?.timestamp || 0))
+      .filter(c => (c.lastMessage?.timestamp || 0) >= tsHoje) // apenas chats com msgs hoje
+      .slice(0, 120);
 
     for (const chat of ordenados) {
       try {
         const msgs = await Promise.race([
-          chat.fetchMessages({ limit: 20 }),
-          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 12000)),
+          chat.fetchMessages({ limit: 40 }),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000)),
         ]);
         for (const msg of msgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))) {
           analisadas++;
           if (await processarMensagemWhatsApp(msg, 'sync')) aceitas++;
         }
       } catch (e) {
-        console.error(`Erro ao sincronizar chat ${chat.name || chat.id?._serialized || ''}:`, e.message);
+        erros++;
+        console.error(`[SYNC] Erro no chat ${chat.name || chat.id?._serialized || ''}:`, e.message);
+        // Aguarda brevemente antes de continuar (evita sobrecarregar API)
+        await new Promise(r => setTimeout(r, 500));
       }
     }
 
-    if (aceitas > 0) salvarMensagens();
-    broadcast('sync_status', { analisadas, aceitas });
-    console.log(`[SYNC] analisadas=${analisadas} aceitas=${aceitas}`);
-    return { ok: true, analisadas, aceitas };
+    if (aceitas > 0) {
+      salvarMensagens();
+      broadcast('contadores', contadores);
+    }
+    broadcast('sync_status', { em_andamento: false, analisadas, aceitas, erros });
+    console.log(`[SYNC] analisadas=${analisadas} aceitas=${aceitas} erros=${erros}`);
+    return { ok: true, analisadas, aceitas, erros };
+  } catch (e) {
+    broadcast('sync_status', { em_andamento: false, erro: e.message });
+    throw e;
   } finally {
     sincronizandoMensagens = false;
   }
+}
+
+// Rotina de sincronização periódica automática (a cada 30 min)
+let _syncPeriodico = null;
+function iniciarSyncPeriodico() {
+  if (_syncPeriodico) clearInterval(_syncPeriodico);
+  _syncPeriodico = setInterval(() => {
+    if (statusWpp === 'conectado' && !sincronizandoMensagens) {
+      console.log('[SYNC PERIÓDICO] Iniciando sincronização automática...');
+      sincronizarMensagensRecentes().catch(e =>
+        console.error('[SYNC PERIÓDICO] Erro:', e.message)
+      );
+    }
+  }, 30 * 60 * 1000);
 }
 
 function registrarEventos() {
@@ -1049,6 +1080,7 @@ function registrarEventos() {
         console.error('Erro ao sincronizar mensagens no ready:', e.message);
       });
     }, 5000);
+    iniciarSyncPeriodico();
     // Chats são carregados sob demanda via POST /api/chats/refresh para não sobrecarregar o container
   });
 
