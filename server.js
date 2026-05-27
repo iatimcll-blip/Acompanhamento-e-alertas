@@ -271,13 +271,15 @@ function carregarMensagens() {
     contadores = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0 };
     mensagens.forEach(m => {
       if (!m.duplicado) {
-        (m.uf||[]).forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
+        if ((m.uf||[]).length > 0) {
+          (m.uf||[]).forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
+          contadores.total++; // conta mensagem uma única vez, independente de quantas UFs
+        }
         if (m.temWanderson)   contadores.WANDERSON++;
         if (m.temCmoReparo)   contadores.cmoReparo++;
         if (m.temCmoAtivacao) contadores.cmoAtivacao++;
       }
     });
-    contadores.total = contadores.PA + contadores.MA + contadores.AP + contadores.AM;
     contadores.totalWhatsapp = salvo.totalWhatsapp || 0;
     chamadosStatus = salvo.chamadosStatus || {};
     console.log(`✅ ${mensagens.length} mensagens do dia restauradas`);
@@ -843,7 +845,7 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   if (!duplicado) {
     if (detectados.length > 0) {
       entrada.uf.forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
-      contadores.total = contadores.PA + contadores.MA + contadores.AP + contadores.AM;
+      contadores.total++; // uma mensagem = um ponto no total, independente de quantas UFs
     }
     if (temWanderson)   contadores.WANDERSON++;
     if (cmoReparoConfigurado || temCmoReparo)   contadores.cmoReparo++;

@@ -1504,17 +1504,17 @@
       <div class="quadrant">
         <div class="chamados-painel">
           <div class="chamados-hd">
-            <h2>📋 Chamados Ativos</h2>
+            <h2>🔧 Chamados CMO Reparos</h2>
             <span class="chamados-badge" id="chamadosBadge">0</span>
           </div>
           <div class="chamados-filter">
-            <button class="chamados-ftab cf-todos ativo" onclick="filtrarChamadosStatus('ATIVOS',this)">Ativos</button>
+            <button class="chamados-ftab cf-todos" onclick="filtrarChamadosStatus('ATIVOS',this)">Todos</button>
             <button class="chamados-ftab cf-ag"   onclick="filtrarChamadosStatus('aguardando',this)">Aguardando</button>
             <button class="chamados-ftab cf-at"   onclick="filtrarChamadosStatus('em_atendimento',this)">Atendimento</button>
             <button class="chamados-ftab cf-rep"  onclick="filtrarChamadosStatus('em_reparo',this)">Reparo</button>
             <button class="chamados-ftab cf-atv"  onclick="filtrarChamadosStatus('em_ativacao',this)">Ativação</button>
             <button class="chamados-ftab cf-fin"  onclick="filtrarChamadosStatus('finalizado',this)">Finalizados</button>
-            <button class="chamados-ftab cf-cmor" id="chamadosFtabCmoR" onclick="filtrarChamadosCmo('reparo',this)" style="color:#7c2d12;border-color:rgba(194,65,12,.4)">🔧 CMO Reparo</button>
+            <button class="chamados-ftab cf-cmor ativo" id="chamadosFtabCmoR" onclick="filtrarChamadosCmo('reparo',this)" style="color:#fff;background:rgba(194,65,12,.8);border-color:rgba(194,65,12,.6)">🔧 CMO Reparo</button>
           </div>
           <div class="chamados-list" id="chamadosList">
             <div class="chamados-vazio"><span>📋</span>Nenhum chamado registrado.<br>Aguardando acionamentos…</div>
@@ -2111,7 +2111,7 @@
         if (m.duplicado) return;
         if ((m.uf||[]).length > 0) {
           m.uf.forEach(u => { if (c[u] !== undefined) c[u]++; });
-          c.total = c.PA + c.MA + c.AP + c.AM;
+          c.total++; // conta cada mensagem uma vez, não soma PA+MA+AP+AM
         }
         if (m.temWanderson || _clientIsWanderson(m)) c.WANDERSON++;
       });
@@ -2416,8 +2416,8 @@
     const midiaNome = !m.mediaData && m.mediaMime
       ? `<span class="chip muni">📎 ${escHtml(m.mediaFilename || m.mediaMime.split('/')[1] || 'arquivo')}</span>` : '';
 
-    const btnAtualizar = m.chamado
-      ? `<button class="btn-atualizar" onclick="event.stopPropagation();abrirAtualicao('${escAttr(m.id)}')" title="Abrir painel de atualização">Atualizar</button>`
+    const btnAtualizar = (m.chamado || m.temMassivo)
+      ? `<button class="btn-atualizar" onclick="event.stopPropagation();abrirAtualicaoMassivo('${escAttr(m.id)}')" title="Abrir painel de atualização">Atualizar</button>`
       : '';
     const tsCompleto = m.recebidoEm || (m.ts ? new Date(m.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}) : m.hora || '');
     const btnCopiar = `<button class="btn-atualizar" onclick="event.stopPropagation();copiarMensagem('${escAttr(m.id)}')" title="Copiar mensagem">Copiar</button>`;
@@ -3074,7 +3074,7 @@
 
   // ── Painel de Chamados (Q5 — coluna direita) ─────────────────────────────
   let filtroChamadoStatus = 'ATIVOS';
-  let filtroChamadoCmo    = null; // 'reparo' | 'ativacao' | null
+  let filtroChamadoCmo    = 'reparo'; // padrão: mostra Chamados CMO Reparos
 
   function renderChamadosPanel() {
     const list  = document.getElementById('chamadosList');
@@ -3167,6 +3167,33 @@
       if (dflt) dflt.classList.add('ativo');
     }
     renderChamadosPanel();
+  }
+
+  // Abre modal de atualização para qualquer mensagem (inclusive massivos sem chamado)
+  function abrirAtualicaoMassivo(msgId) {
+    const m = todasMensagens.find(x => x.id === msgId);
+    if (!m) return;
+    if (m.chamado) { abrirAtualicao(msgId); return; }
+    // Massivo sem número de chamado: cria entrada sintética no local
+    const chave = 'massivo:' + msgId;
+    if (!chamadosStatusLocal[chave]) {
+      chamadosStatusLocal[chave] = {
+        chamado:   { tipo: 'massivo', numero: m.id.substring(0,10) },
+        titulo:    (m.texto || '').substring(0, 80),
+        localidade: (m.municipios || []).join(', ') || (m.uf || []).join('/'),
+        status:    'aguardando',
+        cmo:       m.temCmoReparo ? 'reparo' : m.temCmoAtivacao ? 'ativacao' : 'nenhum',
+        origem:    'Massivo',
+        chatId:    m.numero,
+        nomeGrupo: m.nomeGrupo || null,
+        timeline:  [{ ts: m.ts || Date.now(), texto: `Mensagem recebida de ${m.de || 'Desconhecido'}`, auto: true }],
+        criadoEm:  m.ts || Date.now(),
+      };
+    }
+    chaveAtualAberta = chave;
+    renderAtz();
+    const overlay = document.getElementById('atzModal');
+    if (overlay) overlay.classList.add('aberto');
   }
 
   function abrirChamadoDoPainel(chave) {
