@@ -1928,8 +1928,11 @@
     });
   }
 
-  const _FECHADO_RE = /\bvalidado\b|\bnormalizado\b|envia\s+a\s+rfo|manda\s+a\s+rfo|\bcancelado\b/i;
-  function _clientIsFechado(m) { return m.temFechado || _FECHADO_RE.test(m.texto || ''); }
+  const _FECHADO_RE = /\bvalidad[oa]\b|\bnormalizad[oa]\b|\benvi(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bmand(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bcancelad[oa]\b|\bcancelamento\b/i;
+  function _clientIsFechado(m) {
+    const t = (m.texto || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
+    return m.temFechado || _FECHADO_RE.test(t);
+  }
 
   // Verifica se a mensagem corresponde ao filtro/aba atualmente selecionado
   function mensagemMatchesFiltro(m) {

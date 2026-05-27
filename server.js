@@ -769,7 +769,9 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   }
 
   const temRuptura    = /\bRUPTURA\b/i.test(texto);
-  const temFechado    = /\bvalidado\b|\bnormalizado\b|envia\s+a\s+rfo|manda\s+a\s+rfo|\bcancelado\b/i.test(texto);
+  // Normaliza texto (remove acentos) para detectar variações como validação/validacao
+  const _textoFech = texto.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const temFechado = /\bvalidad[oa]\b|\bnormalizad[oa]\b|\benvi(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bmand(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bcancelad[oa]\b|\bcancelamento\b/i.test(_textoFech);
   const cmoReparoConfigurado = contemFiltro(texto, CMO_REPARO_FILTRO);
   const cmoAtivacaoConfigurado = contemFiltro(texto, CMO_ATIVACAO_FILTRO);
   const temCmoReparo  = /CMO\s*REPARO|CARIMBO\s+TRANSFER[EÊ]NCIA\s*[-–]?\s*CMO\s*REPARO/i.test(texto);
