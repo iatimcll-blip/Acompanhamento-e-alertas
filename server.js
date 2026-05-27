@@ -274,13 +274,12 @@ function carregarMensagens() {
         m.temFechado = _FECH_RE.test(t);
       }
       if (!m.duplicado) {
-        if ((m.uf||[]).length > 0) {
-          if (m.temFechado) {
-            contadores.fechado++;
-          } else {
-            (m.uf||[]).forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
-            contadores.total++; // conta mensagem uma única vez, independente de quantas UFs
-          }
+        const _mTemChamado = !!(m.bdesk || m.atrix);
+        if (m.temFechado && ((m.uf||[]).length > 0 || _mTemChamado)) {
+          contadores.fechado++;
+        } else if (!m.temFechado && (m.uf||[]).length > 0) {
+          (m.uf||[]).forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
+          contadores.total++; // conta mensagem uma única vez, independente de quantas UFs
         }
         if (m.temWanderson)   contadores.WANDERSON++;
         if (m.temCmoReparo)   contadores.cmoReparo++;
@@ -770,14 +769,15 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
     if (n.length >= 8) return _wSenderNum.includes(n) || texto.toUpperCase().includes(id.toUpperCase());
     return texto.toUpperCase().includes(id.toUpperCase());
   });
-  // Detecta fechado ANTES do filtro para não descartar mensagens sem município
+  // Detecta chamado e fechado ANTES do filtro
+  const chamados = extrairChamados(texto);
   const _textoFech = texto.normalize('NFD').replace(/[̀-ͯ]/g, '');
   const temFechado = /\bvalidad[oa]\b|\bnormalizad[oa]\b|\benvi(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bmand(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bcancelad[oa]\b|\bcancelamento\b/i.test(_textoFech);
+  const temChamado = !!(chamados.bdesk || chamados.atrix);
 
-  // Descarta mensagens sem município/UF e sem Wanderson
-  // Fechado sem município também é descartado — só conta com localização identificada
-  if (detectados.length === 0 && !temWanderson) {
-    console.log(`[FILTRADO:${origem}] de=${msg.from} - nenhum municipio/Wanderson detectado`);
+  // Passa: tem município OU Wanderson OU (fechado + Bdesk/Atrix)
+  if (detectados.length === 0 && !temWanderson && !(temFechado && temChamado)) {
+    console.log(`[FILTRADO:${origem}] de=${msg.from} - nenhum municipio/Wanderson/Fechado+chamado detectado`);
     return false;
   }
 
@@ -792,7 +792,6 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
     if (re.test(texto)) { temMassivo = true; tipoMassivo = tipoMassivo || tipo; }
   }
 
-  const chamados = extrairChamados(texto);
   const chamado = extrairChamado(texto);
   const chaveUnica = chaveUnicaChamado(chamados, texto, msg.from, dataMsg);
   const duplicado = mensagens.some(m =>
@@ -869,13 +868,11 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   if (mensagens.length > 200) mensagens.pop();
 
   if (!duplicado) {
-    if (detectados.length > 0) {
-      if (temFechado) {
-        contadores.fechado++;
-      } else {
-        entrada.uf.forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
-        contadores.total++;
-      }
+    if (temFechado && (detectados.length > 0 || temChamado)) {
+      contadores.fechado++;
+    } else if (!temFechado && detectados.length > 0) {
+      entrada.uf.forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
+      contadores.total++;
     }
     if (temWanderson)   contadores.WANDERSON++;
     if (cmoReparoConfigurado || temCmoReparo)   contadores.cmoReparo++;
