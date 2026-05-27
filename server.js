@@ -152,7 +152,7 @@ const BASE = [
   // ── AMAPÁ ───────────────────────────────────────────────────────────────
   { uf:'AP', cod:'96000', muni:'MACAPA',                     sigla:'MPA',  eps:'ADX' },
   // ── AMAZONAS ────────────────────────────────────────────────────────────
-  { uf:'AM', cod:'92050', muni:'PARINTINS',                  sigla:'',     eps:'ADX' },
+  { uf:'AM', cod:'92050', muni:'PARINTINS',                  sigla:'PAR',  eps:'ADX' },
 ];
 
 // Palavras-chave adicionais que indicam acionamento
@@ -674,6 +674,16 @@ function analisarMensagem(texto) {
     if (melhorPos !== Infinity) {
       candidatos.push({ r, pos: melhorPos });
     }
+  }
+
+  // 4. Código técnico BR-UF-SIGLA-... (ex: BR-PA-BLM-PIE-TP-01 100GE0/0/3)
+  const techRe = /\bBR[-]([A-Z]{2})[-]([A-Z]{2,6})[-]/g;
+  let tm;
+  while ((tm = techRe.exec(upper)) !== null) {
+    const ufCode = tm[1];
+    const sigla  = tm[2];
+    const found  = BASE.find(r => r.uf === ufCode && norm(r.sigla) === sigla);
+    if (found) candidatos.push({ r: found, pos: tm.index });
   }
 
   // Ordena pela posição na mensagem (primeiro endereço mencionado tem prioridade)
