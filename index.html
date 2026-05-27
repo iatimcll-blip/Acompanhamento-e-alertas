@@ -1501,7 +1501,7 @@
           <div class="feed-hd">
             <h2>💬 Mensagens <span class="filtro-ativo-tag" id="filtroAtivoTag"></span></h2>
             <div class="feed-search-wrap">
-              <input type="search" id="feedBusca" class="feed-search" placeholder="🔍 Buscar chamado, texto, grupo…" oninput="setBusca(this.value)" autocomplete="off">
+              <input type="text" id="feedBusca" class="feed-search" placeholder="🔍 Buscar chamado, texto, grupo…" oninput="setBusca(this.value)" autocomplete="new-password" name="mcll-busca">
             </div>
             <span class="msg-count-badge" id="msgCount">0 hoje</span>
           </div>
@@ -3642,6 +3642,9 @@
 
   // ── Init ─────────────────────────────────────────────────────────────────
   window.addEventListener('DOMContentLoaded', () => {
+    // Garante que o campo de busca nunca receba autofill do navegador
+    const _busca = document.getElementById('feedBusca');
+    if (_busca) { _busca.value = ''; setTimeout(() => { _busca.value = ''; }, 300); }
     conectarWS();
     apiFetch('/api/base').then(r => r.json()).then(b => { BASE = b; }).catch(() => {});
     // Auto-abrir tabela no layout de quadrantes
