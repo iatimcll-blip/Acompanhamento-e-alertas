@@ -841,7 +841,7 @@
     .quadrant .timer-clock.alerta { font-size: .70rem; }
     .quadrant .tag-pill { font-size: .54rem; padding: 1px 5px; }
     /* O body do timer no quadrante expande e rola quando há mais de 4 acionamentos */
-    .quadrant .timer-body { max-height: none !important; overflow-y: auto; min-height: 0; }
+    .quadrant .timer-body { max-height: none !important; min-height: 0; }
 
     /* ══════════════════════════════════════════════════
        MODAL DE CONFIGURAÇÕES
@@ -970,13 +970,14 @@
     .quadrant:nth-child(3) { grid-area: mensagens; }
     .quadrant:nth-child(4) { grid-area: massivos; }
     .quadrant:nth-child(5) { grid-area: chamados; }
-    .quadrant .timer-section { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+    .quadrant .timer-section { flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
     .quadrant .timer-body {
       display:grid !important;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      grid-template-rows: repeat(2, minmax(0, 1fr));
+      /* cada linha = metade do container menos padding(12px) e gap(5px) — fixa 2 linhas visíveis */
+      grid-auto-rows: calc((100% - 17px) / 2);
       gap:5px; flex:1; min-height:0; max-height:none !important;
-      padding:6px; overflow-y:auto; align-content:stretch;
+      padding:6px; overflow-y:auto;
     }
     /* Q1 compact — timer cards mais densos */
     .quadrant:nth-child(1) .timer-item { padding: 5px 8px; border-radius: 7px; }
