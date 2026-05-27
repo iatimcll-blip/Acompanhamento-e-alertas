@@ -2019,7 +2019,16 @@
       else if (tipo === 'qr_limpar')      mostrarQRPlaceholder();
       else if (tipo === 'chamado_update') { chamadosStatusLocal[dados.chave] = dados.dados; if (chaveAtualAberta === dados.chave) renderAtz(); renderChamadosPanel(); }
       else if (tipo === 'chamado_removido') { delete chamadosStatusLocal[dados.chave]; if (chaveAtualAberta === dados.chave) fecharAtz(); renderChamadosPanel(); }
+      else if (tipo === 'atualizar-mensagem') { atualizarMensagemLocal(dados); }
     };
+  }
+
+  function atualizarMensagemLocal(dados) {
+    const m = todasMensagens.find(x => x.id === dados.id);
+    if (!m) return;
+    Object.assign(m, dados);
+    atualizarContadoresDisplay();
+    renderFeed();
   }
 
   function handleInit(dados) {

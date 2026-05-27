@@ -274,8 +274,8 @@ function carregarMensagens() {
         m.temFechado = _FECH_RE.test(t);
       }
       if (!m.duplicado) {
-        const _mTemChamado = !!(m.bdesk || m.atrix);
-        if (m.temFechado && ((m.uf||[]).length > 0 || _mTemChamado)) {
+        // Fechado conta se: tem município OU (tem Bdesk/Atrix — histórico implícito pois foi salvo)
+        if (m.temFechado && ((m.uf||[]).length > 0 || m.bdesk || m.atrix)) {
           contadores.fechado++;
         } else if (!m.temFechado && (m.uf||[]).length > 0) {
           (m.uf||[]).forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
@@ -774,10 +774,16 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   const _textoFech = texto.normalize('NFD').replace(/[̀-ͯ]/g, '');
   const temFechado = /\bvalidad[oa]\b|\bnormalizad[oa]\b|\benvi(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bmand(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bcancelad[oa]\b|\bcancelamento\b/i.test(_textoFech);
   const temChamado = !!(chamados.bdesk || chamados.atrix);
+  // Chave antecipada para consultar histórico antes do filtro
+  const _chavePreFiltro = chamados.atrix ? `atrix:${chamados.atrix}`
+    : chamados.bdesk ? `bdesk:${chamados.bdesk}` : null;
+  const temHistoricoDoDia = _chavePreFiltro
+    ? !!(chamadosHoje[_chavePreFiltro] || mensagens.some(m => m.chaveUnica === _chavePreFiltro && m.dataDia === hoje()))
+    : false;
 
-  // Passa: tem município OU Wanderson OU (fechado + Bdesk/Atrix)
-  if (detectados.length === 0 && !temWanderson && !(temFechado && temChamado)) {
-    console.log(`[FILTRADO:${origem}] de=${msg.from} - nenhum municipio/Wanderson/Fechado+chamado detectado`);
+  // Passa se: tem município OU Wanderson OU (fechado + Bdesk/Atrix + histórico do dia)
+  if (detectados.length === 0 && !temWanderson && !(temFechado && temChamado && temHistoricoDoDia)) {
+    console.log(`[FILTRADO:${origem}] de=${msg.from} - sem municipio/Wanderson/Fechado+historico`);
     return false;
   }
 
@@ -803,6 +809,25 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   if (duplicado) {
     chamadosHoje[chaveUnica].atualizacoes = (chamadosHoje[chaveUnica].atualizacoes || 0) + 1;
     console.log(`[DUPLICADO:${origem}] chave=${chaveUnica} de=${msg.from}`);
+  }
+
+  // Fechamento de ciclo: chamado ativo que chegou agora com status fechado
+  // Move o chamado original de ativo (total/UF) para fechado sem precisar de novo contador
+  let fechouChamadoAtivo = false;
+  if (duplicado && temFechado && temChamado) {
+    const original = mensagens.find(m =>
+      m.chaveUnica === chaveUnica && m.dataDia === hoje() && !m.temFechado && !m.duplicado
+    );
+    if (original) {
+      original.temFechado = true;
+      fechouChamadoAtivo = true;
+      (original.uf || []).forEach(u => { if (contadores[u] !== undefined && contadores[u] > 0) contadores[u]--; });
+      if (contadores.total > 0) contadores.total--;
+      contadores.fechado++;
+      console.log(`[FECHAMENTO] chave=${chaveUnica} movido de ativo para fechado`);
+      broadcast('atualizar-mensagem', { id: original.id, temFechado: true });
+      salvarMensagens();
+    }
   }
 
   let chat = null, contact = null;
@@ -868,7 +893,7 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   if (mensagens.length > 200) mensagens.pop();
 
   if (!duplicado) {
-    if (temFechado && (detectados.length > 0 || temChamado)) {
+    if (temFechado && (detectados.length > 0 || (temChamado && temHistoricoDoDia))) {
       contadores.fechado++;
     } else if (!temFechado && detectados.length > 0) {
       entrada.uf.forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
