@@ -7,6 +7,7 @@ const path        = require('path');
 const fs          = require('fs');
 const jwt         = require('jsonwebtoken');
 const bcrypt      = require('bcryptjs');
+const crypto      = require('crypto');
 
 // ── Configuração ────────────────────────────────────────────────────────────
 const JWT_SECRET       = process.env.JWT_SECRET || 'mcll-monitoramento-secret-2024';
@@ -19,6 +20,9 @@ const DATA_DIR   = fs.existsSync('/data') ? '/data' : __dirname;
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@mcll.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'mcll@admin2024';
+const TZ = process.env.TZ_APP || 'America/Fortaleza';
+const CMO_REPARO_FILTRO = process.env.CMO_REPARO_FILTRO || 'Carimbo Transferência - CMO REPARO';
+const CMO_ATIVACAO_FILTRO = process.env.CMO_ATIVACAO_FILTRO || '';
 
 // ── Usuários ────────────────────────────────────────────────────────────────
 function carregarUsuarios() {
@@ -198,7 +202,53 @@ app.use(express.json());
 
 // Retorna data de hoje no formato YYYY-MM-DD
 function hoje() {
-  return new Date().toISOString().slice(0, 10);
+  return dataLocalKey();
+}
+
+function dataLocalKey(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date).reduce((acc, p) => {
+    acc[p.type] = p.value;
+    return acc;
+  }, {});
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
+function dataHoraLocal(date = new Date()) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: TZ,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).format(date);
+}
+
+function horaLocal(date = new Date()) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: TZ,
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+}
+
+function contemFiltro(texto, filtro) {
+  if (!filtro) return false;
+  return texto.toUpperCase().includes(filtro.toUpperCase());
+}
+
+function hashMensagem(texto, remetente, dataDia) {
+  return crypto
+    .createHash('sha1')
+    .update(`${texto || ''}|${remetente || ''}|${dataDia || hoje()}`)
+    .digest('hex')
+    .slice(0, 16);
 }
 
 // ── Persistência diária ─────────────────────────────────────────────────────
@@ -299,13 +349,33 @@ app.post('/api/chamados/:chave/atualizar', autenticar, (req, res) => {
   const { texto, status, autor } = req.body;
   if (!chave) return res.status(400).json({ erro: 'chave obrigatória' });
   if (!chamadosStatus[chave]) return res.status(404).json({ erro: 'Chamado não encontrado' });
+  const ch = chamadosStatus[chave];
+  const statusAnterior = ch.status;
   if (texto && texto.trim()) {
-    chamadosStatus[chave].timeline.push({ ts: Date.now(), texto: texto.trim(), autor: autor || req.usuario.nome, auto: false });
+    ch.timeline.push({ ts: Date.now(), texto: texto.trim(), autor: autor || req.usuario.nome, auto: false });
   }
-  if (status) chamadosStatus[chave].status = status;
-  chamadosStatus[chave].atualizadoEm = Date.now();
+  if (status) ch.status = status;
+  ch.atualizadoEm = Date.now();
   salvarMensagens();
-  broadcast('chamado_update', { chave, dados: chamadosStatus[chave] });
+  broadcast('chamado_update', { chave, dados: ch });
+
+  // Push automático para Google Sheets (TIMELINE_STATUS)
+  if (texto && texto.trim() && SHEETS_WEBHOOK) {
+    enviarParaSheets('TIMELINE_STATUS', {
+      data_hora:           dataHoraLocal(),
+      chave_unica:         chave,
+      atrix:               ch.atrix || '',
+      bdesk:               ch.bdesk || '',
+      localidade:          ch.localidade || '',
+      status_anterior:     statusAnterior || '',
+      status_novo:         status || statusAnterior || '',
+      texto_atualizacao:   texto.trim(),
+      responsavel:         autor || req.usuario.nome,
+      origem:              'Painel Web',
+      data_registro:       dataHoraLocal(),
+    }).catch(() => {});
+  }
+
   res.json({ ok: true });
 });
 
@@ -315,6 +385,30 @@ app.delete('/api/chamados/:chave', autenticar, apenasAdmin, (req, res) => {
   broadcast('chamado_removido', { chave: req.params.chave });
   res.json({ ok: true });
 });
+
+// ── Google Sheets: push interno (não bloqueia o fluxo principal) ─────────────
+async function enviarParaSheets(aba, dados) {
+  if (!SHEETS_WEBHOOK) return;
+  try {
+    const https = require('https');
+    const http  = require('http');
+    const payload = JSON.stringify({ aba, dados });
+    const url = new URL(SHEETS_WEBHOOK);
+    const mod = url.protocol === 'https:' ? https : http;
+    await new Promise((resolve, reject) => {
+      const r = mod.request(url.toString(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) },
+      }, resp => { resp.resume(); resolve(); });
+      r.on('error', reject);
+      r.setTimeout(8000, () => r.destroy());
+      r.write(payload);
+      r.end();
+    });
+  } catch (e) {
+    console.error('[SHEETS] Erro ao enviar para', aba, ':', e.message);
+  }
+}
 
 // ── Google Sheets Webhook ─────────────────────────────────────────────────────
 app.post('/api/sheets/push', autenticar, async (req, res) => {
@@ -424,7 +518,9 @@ app.post('/api/chats/refresh', autenticar, apenasAdmin, async (req, res) => {
       grupo:    c.isGroup,
       naoLidas: c.unreadCount || 0,
     }));
+    contadores.totalWhatsapp = chats.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
     broadcast('chats', chatList);
+    broadcast('contadores', contadores);
     sincronizarMensagensRecentes(chats).catch(e => {
       console.error('Erro ao sincronizar mensagens apos refresh:', e.message);
     });
@@ -501,11 +597,27 @@ wss.on('connection', (ws, req) => {
 
 // Detecta número de chamado: Bdesk (6 dígitos) ou Atrix (DDMMYYYY-NNNNN)
 function extrairChamado(texto) {
-  const atrix = texto.match(/\b(\d{6,8}-\d{4,6})\b/);
-  if (atrix) return { tipo: 'atrix', numero: atrix[1] };
-  const bdesk = texto.match(/\b(\d{6})\b/);
-  if (bdesk) return { tipo: 'bdesk', numero: bdesk[1] };
+  const chamados = extrairChamados(texto);
+  if (chamados.atrix) return { tipo: 'atrix', numero: chamados.atrix };
+  if (chamados.bdesk) return { tipo: 'bdesk', numero: chamados.bdesk };
   return null;
+}
+
+function extrairChamados(texto) {
+  const raw = texto || '';
+  const atrix = raw.match(/\b(?:ATRIX|ATRX)\s*[:#-]?\s*(\d{5,10}(?:-\d{3,8})?)\b/i)
+    || raw.match(/\b(\d{6,8}-\d{4,6})\b/);
+  const bdesk = raw.match(/\bBDESK\s*[:#-]?\s*(\d{5,8})\b/i);
+  return {
+    atrix: atrix ? atrix[1] : null,
+    bdesk: bdesk ? bdesk[1] : null,
+  };
+}
+
+function chaveUnicaChamado(chamados, texto, remetente, dataDia) {
+  if (chamados.atrix) return `atrix:${chamados.atrix}`;
+  if (chamados.bdesk) return `bdesk:${chamados.bdesk}`;
+  return `hash:${hashMensagem(texto, remetente, dataDia)}`;
 }
 
 // ── Filtro de mensagem ──────────────────────────────────────────────────────
@@ -621,9 +733,10 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
 
   if (!texto || texto.trim() === '') return false;
 
-  const dataMsg = msg.timestamp
-    ? new Date(msg.timestamp * 1000).toISOString().slice(0, 10)
-    : hoje();
+  const msgDate = msg.timestamp
+    ? new Date(msg.timestamp * 1000)
+    : new Date();
+  const dataMsg = dataLocalKey(msgDate);
   if (dataMsg !== hoje()) return false;
 
   const { detectados, temAcionamento } = analisarMensagem(texto);
@@ -637,35 +750,29 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
     return false;
   }
 
-  const jaDuplicada = mensagens.some(m =>
-    (m.id === msg.id._serialized) ||
-    (m.numero === msg.from && m.texto === texto && m.dataDia === hoje())
-  );
-  if (jaDuplicada) {
-    console.log(`[DUPLICADO:${origem}] de=${msg.from}`);
-    return false;
-  }
-
   const temRuptura    = /\bRUPTURA\b/i.test(texto);
+  const cmoReparoConfigurado = contemFiltro(texto, CMO_REPARO_FILTRO);
+  const cmoAtivacaoConfigurado = contemFiltro(texto, CMO_ATIVACAO_FILTRO);
   const temCmoReparo  = /CMO\s*REPARO|CARIMBO\s+TRANSFER[EÊ]NCIA\s*[-–]?\s*CMO\s*REPARO/i.test(texto);
-  const temCmoAtivacao= /CMO\s*ATIVA[CÇ][AÃ]O|IMPLANTA[CÇ][AÃ]O|INSTALA[CÇ][AÃ]O\s+DE\s+EQUIPAMENTO|VISTORIA|LAN[CÇ]AMENTO/i.test(texto);
+  const temCmoAtivacao= /CMO\s*ATIVA[CÇ][AÃ]O|IMPLANTA[CÇ][AÃ]O\s*(DE\s+PROJETO)?|INSTALA[CÇ][AÃ]O\s+DE\s+EQUIPAMENTO|VISTORIA(\s+DE\s+REDE)?|LAN[CÇ]AMENTO/i.test(texto);
 
   let temMassivo = false, tipoMassivo = null;
   for (const { tipo, re } of MASSIVO_RE) {
     if (re.test(texto)) { temMassivo = true; tipoMassivo = tipoMassivo || tipo; }
   }
 
+  const chamados = extrairChamados(texto);
   const chamado = extrairChamado(texto);
-  let duplicado = false;
-  if (chamado) {
-    const ufStr = [...new Set(detectados.map(d => d.uf))].sort().join('-');
-    const chave = chamado.tipo + ':' + chamado.numero + (ufStr ? ':' + ufStr : '');
-    if (chamadosHoje[chave]) {
-      duplicado = true;
-      chamadosHoje[chave].atualizacoes = (chamadosHoje[chave].atualizacoes || 0) + 1;
-    } else {
-      chamadosHoje[chave] = { atualizacoes: 0 };
-    }
+  const chaveUnica = chaveUnicaChamado(chamados, texto, msg.from, dataMsg);
+  const duplicado = mensagens.some(m =>
+    (m.id === msg.id._serialized) ||
+    (m.chaveUnica === chaveUnica && m.dataDia === hoje())
+  );
+
+  chamadosHoje[chaveUnica] = chamadosHoje[chaveUnica] || { msgId: msg.id._serialized, atualizacoes: 0 };
+  if (duplicado) {
+    chamadosHoje[chaveUnica].atualizacoes = (chamadosHoje[chaveUnica].atualizacoes || 0) + 1;
+    console.log(`[DUPLICADO:${origem}] chave=${chaveUnica} de=${msg.from}`);
   }
 
   let chat = null, contact = null;
@@ -703,19 +810,23 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
     uf:        [...new Set(detectados.map(d => d.uf))],
     siglas:    [...new Set(detectados.filter(d => d.sigla).map(d => d.sigla))],
     municipios:[...new Set(detectados.map(d => d.muni))],
-    hora:      new Date((msg.timestamp || Math.floor(Date.now() / 1000)) * 1000).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
+    hora:      horaLocal(msgDate),
+    recebidoEm: dataHoraLocal(msgDate),
     dataDia:   dataMsg,
-    ts:        (msg.timestamp || Math.floor(Date.now() / 1000)) * 1000,
+    ts:        msgDate.getTime(),
     lida:         false,
     lidaEm:       null,
     flagged:      false,
     temWanderson,
     temRuptura,
-    temCmoReparo,
-    temCmoAtivacao,
+    temCmoReparo: cmoReparoConfigurado || temCmoReparo,
+    temCmoAtivacao: cmoAtivacaoConfigurado || temCmoAtivacao,
     temMassivo,
     tipoMassivo,
     chamado,
+    atrix: chamados.atrix,
+    bdesk: chamados.bdesk,
+    chaveUnica,
     duplicado,
     mediaData,
     mediaMime,
@@ -731,26 +842,35 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
       contadores.total = contadores.PA + contadores.MA + contadores.AP + contadores.AM;
     }
     if (temWanderson)   contadores.WANDERSON++;
-    if (temCmoReparo)   contadores.cmoReparo++;
-    if (temCmoAtivacao) contadores.cmoAtivacao++;
+    if (cmoReparoConfigurado || temCmoReparo)   contadores.cmoReparo++;
+    if (cmoAtivacaoConfigurado || temCmoAtivacao) contadores.cmoAtivacao++;
   }
 
   // Registra chamado no chamadosStatus para timeline
   if (entrada.chamado) {
-    const chave = entrada.chamado.tipo + ':' + entrada.chamado.numero;
+    const chave = entrada.chaveUnica;
     if (!chamadosStatus[chave]) {
       const loc = (entrada.municipios || [])[0] || '';
       chamadosStatus[chave] = {
         chamado: entrada.chamado,
+        atrix: entrada.atrix,
+        bdesk: entrada.bdesk,
         titulo:  texto.substring(0, 80),
         localidade: loc,
         status:  'aguardando',
-        cmo:     temCmoReparo ? 'reparo' : (temCmoAtivacao ? 'ativacao' : 'nenhum'),
+        cmo:     (cmoReparoConfigurado || temCmoReparo) ? 'reparo' : ((cmoAtivacaoConfigurado || temCmoAtivacao) ? 'ativacao' : 'nenhum'),
         origem:  'WhatsApp',
+        chatId:  entrada.numero,
+        nomeGrupo: entrada.nomeGrupo || null,
         timeline: [{ ts: entrada.ts, texto: `Mensagem recebida de ${entrada.de}`, auto: true }],
         criadoEm: entrada.ts,
+        primeiraMensagemRecebida: entrada.ts,
+        ultimaMensagemRecebida: entrada.ts,
+        quantidadeMensagens: 1,
       };
     } else {
+      chamadosStatus[chave].ultimaMensagemRecebida = entrada.ts;
+      chamadosStatus[chave].quantidadeMensagens = (chamadosStatus[chave].quantidadeMensagens || 1) + 1;
       chamadosStatus[chave].timeline.push({ ts: entrada.ts, texto: `Mensagem atualizada de ${entrada.de}`, auto: true });
     }
   }
@@ -759,6 +879,54 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   console.log(`[ACEITO:${origem}] ${entrada.hora} | ${entrada.de} | munis=${entrada.municipios.join(',')} | ${texto.substring(0,60)}`);
   broadcast('mensagem', entrada);
   broadcast('contadores', contadores);
+
+  // Push automático para Google Sheets (BASE_MENSAGENS)
+  if (!duplicado && SHEETS_WEBHOOK) {
+    const localidade = (entrada.municipios || [])[0] || '';
+    enviarParaSheets('BASE_MENSAGENS', {
+      id: entrada.id,
+      data_recebimento: dataMsg,
+      hora_recebimento: entrada.hora,
+      origem,
+      remetente: entrada.de,
+      grupo: entrada.nomeGrupo || '',
+      mensagem_original: texto,
+      atrix: entrada.atrix || '',
+      bdesk: entrada.bdesk || '',
+      titulo: texto.substring(0, 80),
+      localidade,
+      classificacao: entrada.temRuptura ? 'RUPTURA' : (entrada.temAcionamento ? 'URGENTE' : 'NORMAL'),
+      cmo_reparo:    entrada.temCmoReparo   ? 'SIM' : 'NAO',
+      cmo_ativacao:  entrada.temCmoAtivacao ? 'SIM' : 'NAO',
+      nao_lida:      'SIM',
+      duplicada:     duplicado ? 'SIM' : 'NAO',
+      chave_unica:   entrada.chaveUnica,
+      data_processamento: dataHoraLocal(),
+    }).catch(() => {});
+
+    // Push BASE_CHAMADOS quando chamado é criado pela primeira vez
+    if (entrada.chamado && chamadosStatus[entrada.chaveUnica] && chamadosStatus[entrada.chaveUnica].quantidadeMensagens === 1) {
+      const ch = chamadosStatus[entrada.chaveUnica];
+      enviarParaSheets('BASE_CHAMADOS', {
+        chave_unica:             entrada.chaveUnica,
+        atrix:                   entrada.atrix || '',
+        bdesk:                   entrada.bdesk || '',
+        titulo:                  texto.substring(0, 80),
+        localidade,
+        primeira_mensagem:       dataHoraLocal(new Date(ch.criadoEm)),
+        ultima_mensagem:         dataHoraLocal(new Date(ch.ultimaMensagemRecebida)),
+        quantidade_mensagens:    ch.quantidadeMensagens,
+        status_atual:            ch.status,
+        cmo_reparo:              ch.cmo === 'reparo'   ? 'SIM' : 'NAO',
+        cmo_ativacao:            ch.cmo === 'ativacao' ? 'SIM' : 'NAO',
+        tempo_iniciado:          '',
+        tempo_decorrido:         '',
+        responsavel:             '',
+        ultima_atualizacao:      dataHoraLocal(),
+      }).catch(() => {});
+    }
+  }
+
   return true;
 }
 

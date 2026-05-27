@@ -8,31 +8,31 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #09090b;
-      --surface:  #0f0f13;
-      --card:     #15151c;
-      --card2:    #1c1c25;
-      --card3:    #22222e;
-      --border:   #222230;
-      --border2:  #2e2e3e;
-      --text:     #e2e2ec;
-      --subtext:  #8080a0;
-      --muted:    #505065;
+      --bg:       #b8c0cc;  /* cinza metalizado principal */
+      --surface:  #a8b0bc;  /* sidebar esquerda (mais escura) */
+      --card:     #c8d0da;  /* painéis/quadrantes */
+      --card2:    #d4dce6;  /* cards secundários */
+      --card3:    #dde5ee;  /* cards terciários */
+      --border:   #92a0ae;  /* bordas */
+      --border2:  #8090a0;  /* bordas secundárias */
+      --text:     #0e1624;  /* texto principal — quase preto */
+      --subtext:  #283040;  /* subtextos */
+      --muted:    #5a6878;  /* texto tênue */
 
-      --verde:    #22c55e;
-      --verde-dk: #16a34a;
-      --verde-wpp:#25D366;
-      --azul:     #3b82f6;
-      --laranja:  #f97316;
-      --roxo:     #a855f7;
-      --esmeralda:#10b981;
-      --vermelho: #ef4444;
-      --amarelo:  #eab308;
-      --wanderson:#f59e0b;
-      --flag-cor: #eab308;
+      --verde:    #15803d;  /* verde escuro (legível em cinza) */
+      --verde-dk: #166534;
+      --verde-wpp:#16a34a;
+      --azul:     #1d4ed8;  /* azul escuro */
+      --laranja:  #c2410c;  /* laranja escuro */
+      --roxo:     #7e22ce;  /* roxo escuro */
+      --esmeralda:#047857;  /* esmeralda escuro */
+      --vermelho: #b91c1c;  /* vermelho escuro */
+      --amarelo:  #92400e;  /* âmbar escuro */
+      --wanderson:#b45309;
+      --flag-cor: #92400e;
 
-      --metal:    #8888a0;
-      --silver:   #c8c8d8;
+      --metal:    #405060;
+      --silver:   #0f1c2c;  /* headings dentro dos cards */
     }
 
     html { font-size: 14px; }
@@ -45,37 +45,37 @@
        TOPBAR / BANNER MCLL (item 5 — maior e destacado)
     ══════════════════════════════════════════════════ */
     .topbar {
-      background: rgba(9,9,14,0.92);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
-      border-bottom: 1px solid rgba(255,255,255,.07);
-      padding: 0 20px;
-      height: 62px;
+      background: rgba(8,8,12,0.96);
+      backdrop-filter: blur(28px) saturate(200%);
+      -webkit-backdrop-filter: blur(28px) saturate(200%);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      padding: 0 16px;
+      height: 64px;
       display: flex; align-items: center; justify-content: space-between;
       position: sticky; top: 0; z-index: 300;
-      box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 4px 32px rgba(0,0,0,.9);
+      box-shadow: 0 1px 0 rgba(255,255,255,.05), 0 6px 40px rgba(0,0,0,.95);
     }
     .topbar-left { display: flex; align-items: center; gap: 0; }
-    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
 
-    /* MCLL Logo — item 5: banner maior */
-    .mcll-logo { display: flex; flex-direction: column; align-items: flex-start; line-height: 1; user-select: none; }
+    /* MCLL Logo — destacado na topbar 64px */
+    .mcll-logo { display: flex; flex-direction: column; align-items: flex-start; line-height: 1; user-select: none; gap: 2px; }
     .mcll-letters {
-      font-size: 2.2rem; font-weight: 900; font-style: italic;
+      font-size: 2.1rem; font-weight: 900; font-style: italic;
       letter-spacing: -2px;
-      background: linear-gradient(175deg, #f0f0f0 0%, #c8c8d0 35%, #909098 70%, #686870 100%);
+      background: linear-gradient(175deg, #ffffff 0%, #e0e0f0 25%, #c0c0cc 55%, #808088 85%, #606068 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
-      filter: drop-shadow(2px 3px 6px rgba(0,0,0,.7));
+      filter: drop-shadow(2px 4px 8px rgba(0,0,0,.8));
     }
-    .mcll-sub-row { display: flex; align-items: center; gap: 6px; margin-top: 1px; }
+    .mcll-sub-row { display: flex; align-items: center; gap: 6px; margin-top: 0; }
     .mcll-chevron-l, .mcll-chevron-r {
-      width: 18px; height: 5px; flex-shrink: 0;
+      width: 16px; height: 5px; flex-shrink: 0;
       background: linear-gradient(90deg, #6abf2e, #9ed44d);
       clip-path: polygon(0 50%, 20% 0%, 100% 0%, 80% 50%, 100% 100%, 20% 100%);
     }
     .mcll-chevron-r { background: linear-gradient(90deg, #9ed44d, #6abf2e); }
-    .mcll-sub-text { font-size: .52rem; font-weight: 800; letter-spacing: 3.5px; text-transform: uppercase; color: #b8b8cc; white-space: nowrap; }
+    .mcll-sub-text { font-size: .52rem; font-weight: 800; letter-spacing: 3.5px; text-transform: uppercase; color: #c8c8e0; white-space: nowrap; }
 
     .badge-live {
       background: #ef4444; color: #fff;
@@ -85,34 +85,38 @@
     }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
     .conn-pill {
-      display: flex; align-items: center; gap: 6px;
+      display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 6px;
       background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
       border-radius: 20px; padding: 5px 13px;
-      font-size: .76rem; color: var(--silver);
+      font-size: .76rem; color: #c8ccd8;
       font-weight: 500;
     }
-    .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+    .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: #8888a0; flex-shrink: 0; }
     .conn-dot.on { background: var(--verde); box-shadow: 0 0 0 3px rgba(34,197,94,.22); }
     .date-pill {
-      display: flex; align-items: center; gap: 6px;
-      font-size: .78rem; color: var(--silver); font-weight: 500; letter-spacing: .2px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: .76rem; color: #c8ccd8; font-weight: 500; letter-spacing: .2px;
     }
-    .date-pill .dp-data { font-size: .76rem; }
+    .date-pill .dp-data { font-size: .74rem; color: #9090a8; display: none; }
     .date-pill .dp-clock {
-      font-size: .84rem; font-weight: 700; font-variant-numeric: tabular-nums;
-      color: var(--text); letter-spacing: .5px;
-      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08);
-      border-radius: 6px; padding: 2px 8px;
+      font-size: .98rem; font-weight: 800; font-variant-numeric: tabular-nums;
+      color: #e8e8f0; letter-spacing: 1px;
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 8px; padding: 4px 11px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.4);
     }
     .msg-counter-pill {
-      display: flex; align-items: center; gap: 5px;
-      background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.25);
-      border-radius: 20px; padding: 4px 12px;
-      font-size: .72rem; color: #93c5fd; font-weight: 700;
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(59,130,246,.2); border: 1px solid rgba(59,130,246,.4);
+      border-radius: 20px; padding: 5px 14px;
+      font-size: .7rem; color: #93c5fd; font-weight: 700; white-space: nowrap;
+    }
+    .msg-counter-pill #topMsgCounter {
+      font-size: .9rem; font-weight: 900; font-variant-numeric: tabular-nums; color: #bfdbfe;
     }
     .btn-settings {
       background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-      border-radius: 8px; color: var(--silver); font-size: 1rem;
+      border-radius: 8px; color: #c8ccd8; font-size: 1rem;
       width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
       cursor: pointer; transition: all .15s; flex-shrink: 0;
     }
@@ -120,35 +124,62 @@
 
     /* CMO counter pills na topbar */
     .cmo-pill {
-      display: flex; align-items: center; gap: 4px;
-      border-radius: 20px; padding: 4px 10px;
+      display: flex; align-items: center; gap: 5px;
+      border-radius: 20px; padding: 5px 13px;
       font-size: .68rem; font-weight: 800; white-space: nowrap;
     }
-    .cmo-pill.cmo-reparo { background: rgba(249,115,22,.14); border: 1px solid rgba(249,115,22,.3); color: #fdba74; }
-    .cmo-pill.cmo-atv    { background: rgba(168,85,247,.14); border: 1px solid rgba(168,85,247,.3); color: #d8b4fe; }
-    .cmo-pill span { font-size: .8rem; font-variant-numeric: tabular-nums; }
+    .cmo-pill.cmo-reparo { background: rgba(194,65,12,.2); border: 1px solid rgba(194,65,12,.45); color: #7c2d12; transition: background .14s; }
+    .cmo-pill.cmo-reparo:hover { background: rgba(194,65,12,.32); }
+    .cmo-pill.cmo-atv    { background: rgba(126,34,206,.2); border: 1px solid rgba(126,34,206,.45); color: #4c1d95; transition: background .14s; }
+    .cmo-pill.cmo-atv:hover { background: rgba(126,34,206,.32); }
+    .cmo-pill span { font-size: .88rem; font-weight: 900; font-variant-numeric: tabular-nums; }
 
     /* ══════════════════════════════════════════════════
-       LAYOUT (items 1 e 6)
+       LAYOUT — 2 colunas: sidebar | main
     ══════════════════════════════════════════════════ */
     .app-layout {
       display: grid;
-      grid-template-columns: 240px 1fr;
-      height: calc(100vh - 62px);
+      grid-template-columns: 168px 1fr;
+      height: calc(100vh - 64px);
       overflow: hidden;
     }
 
     /* ══════════════════════════════════════════════════
-       SIDEBAR
+       SIDEBAR ESQUERDO (WhatsApp — 170px)
     ══════════════════════════════════════════════════ */
     .sidebar { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ══════════════════════════════════════════════════
+       MODAL FLUTUANTE — Atualização / Status
+    ══════════════════════════════════════════════════ */
+    .atz-modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 480;
+      background: rgba(0,0,0,.55); backdrop-filter: blur(3px);
+      align-items: flex-end; justify-content: flex-end;
+    }
+    .atz-modal-overlay.aberto { display: flex; }
+    .atz-modal-box {
+      width: 340px; height: calc(100vh - 72px);
+      min-width: 280px; min-height: 220px;
+      max-width: 90vw; max-height: calc(100vh - 72px);
+      margin: 64px 8px 8px 0;
+      display: flex; flex-direction: column;
+      border-radius: 14px; overflow: auto;
+      resize: both;
+      box-shadow: 0 24px 60px rgba(0,0,0,.7);
+      animation: atz-slide-in .18s ease-out;
+    }
+    @keyframes atz-slide-in {
+      from { transform: translateX(30px); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
     .sidebar-hd {
       padding: 10px 13px;
-      background: linear-gradient(135deg, #0a2e20, #122a1e);
-      border-bottom: 1px solid rgba(34,197,94,.16); flex-shrink: 0;
+      background: linear-gradient(135deg, #1a3828, #1e3e2e);
+      border-bottom: 1px solid rgba(21,128,61,.3); flex-shrink: 0;
     }
     .sidebar-hd strong { font-size: .82rem; color: #4ade80; display: block; }
-    .sidebar-hd small  { font-size: .67rem; color: rgba(74,222,128,.6); }
+    .sidebar-hd small  { font-size: .67rem; color: rgba(74,222,128,.65); }
 
     .wpp-connect { padding: 10px 13px; border-bottom: 1px solid var(--border); text-align: center; flex-shrink: 0; }
     .qr-box {
@@ -188,63 +219,98 @@
     /* ══════════════════════════════════════════════════
        MAIN CONTENT
     ══════════════════════════════════════════════════ */
-    .main-content { overflow-y: auto; display: flex; flex-direction: column; gap: 9px; padding: 10px 12px; }
+    .main-content { overflow-y: auto; display: flex; flex-direction: column; gap: 7px; padding: 7px 8px; }
 
     /* ══════════════════════════════════════════════════
        STATS (item 8 — clicável + indicador ativo)
     ══════════════════════════════════════════════════ */
-    .stats-row { display: grid; grid-template-columns: 1.2fr repeat(5,1fr); gap: 7px; flex-shrink: 0; }
+    /* Stats row */
+    .stats-row { display: grid; grid-template-columns: 1.3fr repeat(5,1fr); gap: 5px; flex-shrink: 0; height: 90px; }
     .stat-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 10px 12px; cursor: pointer; position: relative; overflow: hidden;
-      transition: all .15s cubic-bezier(.4,0,.2,1);
-      box-shadow: 0 1px 0 rgba(255,255,255,.03) inset;
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 6px 10px; cursor: pointer; position: relative; overflow: hidden;
+      transition: all .14s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 1px 3px rgba(0,0,0,.12);
+      display: flex; flex-direction: column; justify-content: center;
     }
-    .stat-card:hover { background: var(--card2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.04) inset; }
-    .stat-card.ativo { border-color: var(--azul) !important; box-shadow: 0 0 0 2px rgba(59,130,246,.2); }
-    .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+    .stat-card:hover {
+      background: var(--card2); transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0,0,0,.18);
+    }
+    .stat-card.ativo { border-color: var(--azul) !important; box-shadow: 0 0 0 2px rgba(29,78,216,.22); }
+    .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:0 0 2px 2px; }
     .stat-total::before { background: linear-gradient(90deg, var(--verde-dk), var(--verde)); }
     .stat-pa::before    { background: var(--azul); }
     .stat-ma::before    { background: var(--laranja); }
     .stat-ap::before    { background: var(--esmeralda); }
     .stat-am::before    { background: var(--roxo); }
     .stat-wand::before  { background: var(--wanderson); }
-    .stat-lbl { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 3px; }
-    .stat-num { font-size: 2rem; font-weight: 900; line-height: 1; }
+    .stat-lbl { font-size: .57rem; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin-bottom: 1px; }
+    .stat-num { font-size: 1.75rem; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
     .stat-total .stat-num { color: var(--verde); }
     .stat-pa    .stat-num { color: var(--azul); }
     .stat-ma    .stat-num { color: var(--laranja); }
     .stat-ap    .stat-num { color: var(--esmeralda); }
     .stat-am    .stat-num { color: var(--roxo); }
     .stat-wand  .stat-num { color: var(--wanderson); }
-    .stat-sub { font-size: .62rem; color: var(--muted); margin-top: 2px; }
+    .stat-sub { font-size: .6rem; color: var(--muted); margin-top: 2px; }
 
     /* ══════════════════════════════════════════════════
        TIMER COMPACTO (item 2)
     ══════════════════════════════════════════════════ */
-    .timer-section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; flex-shrink: 0; box-shadow: 0 1px 0 rgba(255,255,255,.03) inset; }
-    .timer-hd {
-      padding: 7px 14px; border-bottom: 1px solid var(--border);
+    .timer-section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; flex: 1; min-height: 0; box-shadow: 0 1px 0 rgba(255,255,255,.03) inset; }
+    /* Header unificado de todas as seções */
+    .section-hd {
+      padding: 8px 14px; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
-      background: rgba(255,255,255,.015); cursor: pointer;
+      background: rgba(255,255,255,.018); flex-shrink: 0;
     }
-    .timer-hd h2 { font-size: .82rem; font-weight: 700; color: var(--silver); display: flex; align-items: center; gap: 6px; }
-    .timer-badge { font-size: .66rem; font-weight: 700; padding: 2px 9px; border-radius: 8px; background: var(--card2); color: var(--muted); }
-    .timer-badge.alerta { background: rgba(239,68,68,.14); color: var(--vermelho); }
+    .section-hd h2, .section-hd h3 {
+      font-size: .8rem; font-weight: 700; color: var(--silver);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .timer-hd {
+      padding: 8px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,.018); cursor: pointer; flex-shrink: 0;
+    }
+    .timer-hd h2 { font-size: .8rem; font-weight: 700; color: var(--silver); display: flex; align-items: center; gap: 6px; }
+    .timer-badge { font-size: .64rem; font-weight: 700; padding: 2px 9px; border-radius: 8px; background: var(--card2); color: var(--muted); white-space: nowrap; }
+    .timer-badge.alerta { background: rgba(239,68,68,.16); color: var(--vermelho); }
     .timer-toggle { font-size: .65rem; color: var(--muted); margin-left: 8px; }
 
-    .timer-body { padding: 7px 11px; display: flex; flex-direction: column; gap: 5px; max-height: 160px; overflow-y: auto; }
+    .timer-body { padding: 8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; overflow-y: auto; align-content: start; }
     .timer-empty { color: var(--muted); font-size: .78rem; padding: 2px 0; }
 
-    /* Timer item — 2 linhas compactas */
+    /* Timer item */
     .timer-item {
-      padding: 8px 12px;
-      background: var(--card2); border: 1px solid var(--border); border-left: 3px solid var(--border2);
-      border-radius: 10px;
+      padding: 8px 10px;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--border2);
+      border-radius: 9px;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: box-shadow .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.1);
     }
-    .timer-item.urgente  { border-left-color: var(--laranja); }
-    .timer-item.expirado { border-left-color: var(--vermelho); animation: blink-brd 1.2s infinite; }
-    @keyframes blink-brd { 0%,100%{border-left-color:var(--vermelho)} 50%{border-left-color:rgba(239,68,68,.2)} }
+    .timer-item.urgente  {
+      border-left-color: var(--laranja);
+      background: rgba(194,65,12,.1);
+      box-shadow: 0 0 0 1px rgba(194,65,12,.2) inset, 0 2px 6px rgba(0,0,0,.1);
+    }
+    .timer-item.expirado {
+      border-left-color: var(--vermelho);
+      background: rgba(185,28,28,.14);
+      box-shadow: 0 0 14px rgba(185,28,28,.35), 0 0 0 1px rgba(185,28,28,.25) inset;
+      animation: blink-brd 1s infinite;
+    }
+    @keyframes blink-brd {
+      0%,100% { border-left-color: var(--vermelho); box-shadow: 0 0 16px rgba(185,28,28,.4), 0 0 0 1px rgba(185,28,28,.3) inset; }
+      50%      { border-left-color: rgba(185,28,28,.4); box-shadow: 0 0 4px rgba(185,28,28,.12); }
+    }
 
     /* Linha 1: nome + tags + clock + botão */
     .timer-line1 {
@@ -256,12 +322,12 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       min-width: 0; flex: 1;           /* ocupa o espaço disponível e trunca se necessário */
     }
-    .timer-tags  { display: flex; gap: 3px; flex-shrink: 0; }
+    .timer-tags  { display: flex; gap: 3px; flex-shrink: 0; grid-column: 1 / -1; }
     .tag-pill    { font-size: .58rem; font-weight: 800; padding: 2px 6px; border-radius: 5px; color: rgba(0,0,0,.85); flex-shrink: 0; }
-    .timer-clock { font-size: .92rem; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0; }
+    .timer-clock { font-size: .96rem; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0; letter-spacing: .5px; }
     .timer-clock.ok      { color: var(--verde); }
     .timer-clock.urgente { color: var(--laranja); }
-    .timer-clock.alerta  { color: var(--vermelho); font-size: .78rem; }
+    .timer-clock.alerta  { color: var(--vermelho); font-size: .82rem; font-weight: 900; letter-spacing: .2px; }
 
     /* Linha 2: barra de progresso */
     .timer-line2 { margin-top: 5px; }
@@ -281,6 +347,25 @@
     .timer-resumo{ display: none; }
     .timer-right { display: none; }
 
+    /* Timer card — linha de localidade piscando */
+    .timer-line2-loc { margin-top: 4px; min-height: 16px; }
+    @keyframes loc-blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+    .timer-localidade-blink {
+      font-size: .8rem; font-weight: 800; color: #78350f;
+      animation: loc-blink 1.6s infinite; display: inline-block;
+      letter-spacing: .2px;
+    }
+    /* Timer card — número do chamado */
+    .timer-chamado-num {
+      font-size: .84rem; font-weight: 900; color: #78350f;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      min-width: 0; flex: 1; letter-spacing: .2px;
+    }
+    /* Timer card — linha 3 (timeline) */
+    .timer-line3 {
+      display: flex; align-items: center; gap: 6px; margin-top: 5px;
+    }
+
     /* ══════════════════════════════════════════════════
        FEED + DETALHE
     ══════════════════════════════════════════════════ */
@@ -294,26 +379,27 @@
     .feed-hd {
       padding: 8px 14px; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
-      background: rgba(255,255,255,.015); flex-shrink: 0;
+      background: rgba(255,255,255,.018); flex-shrink: 0;
     }
-    .feed-hd h2 { font-size: .82rem; font-weight: 700; color: var(--silver); display: flex; align-items: center; gap: 6px; }
+    .feed-hd h2 { font-size: .8rem; font-weight: 700; color: var(--silver); display: flex; align-items: center; gap: 6px; }
     .filtro-ativo-tag {
       font-size: .66rem; font-weight: 700;
       padding: 2px 9px; border-radius: 8px;
-      background: rgba(59,130,246,.15); color: #93c5fd;
+      background: rgba(29,78,216,.18); color: #1e3a8a;
+      border: 1px solid rgba(29,78,216,.35);
       display: none;
     }
     .filtro-ativo-tag.visivel { display: inline-block; }
     .msg-count-badge { font-size: .66rem; font-weight: 700; padding: 2px 9px; border-radius: 8px; background: var(--card2); color: var(--subtext); }
 
-    .filter-bar { padding: 6px 12px; border-bottom: 1px solid var(--border); display: flex; gap: 5px; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
+    .filter-bar { padding: 5px 12px; border-bottom: 1px solid var(--border); display: flex; gap: 4px; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
     .ftab {
       padding: 3px 10px; border-radius: 12px; border: 1px solid var(--border2);
-      font-size: .68rem; font-weight: 700; cursor: pointer;
-      background: transparent; color: var(--subtext); transition: all .11s;
+      font-size: .66rem; font-weight: 700; cursor: pointer;
+      background: transparent; color: var(--subtext); transition: all .1s;
     }
-    .ftab:hover { border-color: var(--metal); color: var(--text); }
-    .ftab.ativo { color: #09090b !important; border-color: transparent !important; }
+    .ftab:hover { border-color: var(--metal); color: var(--text); background: rgba(0,0,0,.07); }
+    .ftab.ativo { color: #fff !important; border-color: transparent !important; font-weight: 800; }
     .ftab.f-todos.ativo  { background: var(--metal); }
     .ftab.f-pa.ativo     { background: var(--azul); }
     .ftab.f-ma.ativo     { background: var(--laranja); }
@@ -321,8 +407,8 @@
     .ftab.f-am.ativo     { background: var(--roxo); }
 
     @keyframes blink-tab {
-      0%,100% { background: rgba(239,68,68,.13); border-color: var(--vermelho); color: var(--vermelho) !important; }
-      50%     { background: transparent; border-color: rgba(239,68,68,.2); color: rgba(239,68,68,.4) !important; }
+      0%,100% { background: rgba(185,28,28,.18); border-color: var(--vermelho); color: var(--vermelho) !important; }
+      50%     { background: transparent; border-color: rgba(185,28,28,.25); color: rgba(185,28,28,.5) !important; }
     }
     .ftab.blink-alert:not(.ativo) { animation: blink-tab 1.1s infinite; }
 
@@ -332,48 +418,93 @@
     }
     .localidade-select option { background: var(--card2); }
 
-    .msg-list { flex: 1; overflow-y: auto; padding: 6px 10px; }
+    .msg-list { flex: 1; overflow-y: auto; padding: 10px 12px; }
 
-    /* Mensagem card */
+    /* ── Mensagem card ─────────────────────────────── */
     .msg-card {
-      padding: 9px 11px; border: 1px solid var(--border); border-left: 3px solid var(--border2);
-      border-radius: 10px; margin-bottom: 6px; background: var(--card2);
-      cursor: pointer; transition: all .15s cubic-bezier(.4,0,.2,1); position: relative;
+      padding: 11px 14px 10px;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--border2);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      background: var(--card2);
+      cursor: pointer;
+      transition: all .14s cubic-bezier(.4,0,.2,1);
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0,0,0,.12);
     }
-    .msg-card:hover { background: var(--card3); border-color: var(--border2); transform: translateX(2px); }
-    .msg-card.urgente { border-left-color: var(--vermelho); }
-    .msg-card.normal  { border-left-color: var(--verde-dk); }
-    .msg-card.lida    { opacity: .38; }
-    .msg-card.selecionada { background: var(--card3); border-color: var(--azul); border-left-color: var(--azul); }
-    .msg-card.flagged { border-left-color: var(--flag-cor); }
-    .msg-card.duplicado { opacity: .65; }
+    .msg-card:hover {
+      background: var(--card3);
+      border-color: var(--border2);
+      box-shadow: 0 3px 10px rgba(0,0,0,.18);
+      transform: translateX(1px) translateY(-1px);
+    }
+    .msg-card.normal   { border-left-color: var(--verde-dk); }
+    .msg-card.urgente  {
+      border-left-color: var(--vermelho);
+      background: rgba(185,28,28,.08);
+    }
+    .msg-card.ruptura  {
+      border-left-color: var(--vermelho) !important;
+      background: rgba(185,28,28,.12);
+      box-shadow: 0 0 14px rgba(185,28,28,.28);
+    }
+    .msg-card.flagged  { border-left-color: var(--flag-cor); background: rgba(146,64,14,.06); }
+    .msg-card.selecionada {
+      background: rgba(29,78,216,.1);
+      border-color: var(--azul);
+      border-left-color: var(--azul);
+      box-shadow: 0 0 0 1px rgba(59,130,246,.2), 0 3px 12px rgba(0,0,0,.4);
+    }
+    .msg-card.lida    { opacity: .32; }
+    .msg-card.duplicado { opacity: .6; border-left-style: dashed; }
 
-    /* Mensagens não lidas pulsam até serem lidas */
+    /* Não lidas pulsam */
     @keyframes msg-unread-pulse {
-      0%,100% { border-left-color: var(--azul); box-shadow: 0 0 0 1px rgba(59,130,246,.15) inset; }
-      50%      { border-left-color: rgba(59,130,246,.25); box-shadow: none; }
+      0%,100% { border-left-color: var(--azul); box-shadow: 0 0 0 2px rgba(29,78,216,.18) inset, 0 2px 6px rgba(29,78,216,.2); }
+      50%      { border-left-color: rgba(29,78,216,.4); box-shadow: 0 1px 3px rgba(0,0,0,.15); }
     }
     @keyframes msg-unread-pulse-red {
-      0%,100% { border-left-color: var(--vermelho); box-shadow: 0 0 0 1px rgba(239,68,68,.15) inset; }
-      50%      { border-left-color: rgba(239,68,68,.2); box-shadow: none; }
+      0%,100% { border-left-color: var(--vermelho); box-shadow: 0 0 0 2px rgba(185,28,28,.18) inset, 0 2px 10px rgba(185,28,28,.25); }
+      50%      { border-left-color: rgba(185,28,28,.4); box-shadow: 0 1px 3px rgba(0,0,0,.15); }
     }
     .msg-card.nao-lida:not(.urgente):not(.ruptura):not(.flagged):not(.lida) {
       border-left-color: var(--azul);
-      animation: msg-unread-pulse 2.5s infinite;
+      animation: msg-unread-pulse 2.4s infinite;
     }
     .msg-card.urgente.nao-lida:not(.lida) {
-      animation: msg-unread-pulse-red 1.5s infinite;
+      animation: msg-unread-pulse-red 1.2s infinite;
     }
 
     /* Miniatura de mídia nos cards */
     .msg-thumb { margin: 5px 0; }
     .msg-thumb img { max-width: 100%; max-height: 100px; border-radius: 6px; object-fit: cover; cursor: pointer; }
 
-    .msg-topo { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; gap: 6px; }
-    .msg-remetente { font-size: .8rem; font-weight: 700; color: var(--text); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .msg-hora { font-size: .64rem; color: var(--muted); flex-shrink: 0; }
-    .msg-text { font-size: .78rem; color: var(--subtext); line-height: 1.4; word-break: break-word; margin-bottom: 5px; }
-    .msg-footer { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .msg-topo {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 5px; gap: 8px;
+    }
+    .msg-remetente {
+      font-size: .78rem; font-weight: 700; color: var(--silver);
+      flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      letter-spacing: .1px;
+    }
+    .msg-hora {
+      font-size: .66rem; color: var(--muted); flex-shrink: 0;
+      font-variant-numeric: tabular-nums; white-space: nowrap;
+    }
+    .msg-text {
+      font-size: .88rem; color: var(--text); line-height: 1.62;
+      word-break: break-word; white-space: pre-wrap;
+      margin-bottom: 9px;
+      max-height: 8.1em;   /* ~5 linhas visíveis; scroll se mais */
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 5;
+      -webkit-box-orient: vertical;
+    }
+    .msg-text.expandido { max-height: none; display: block; -webkit-line-clamp: unset; }
+    .msg-footer { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; row-gap: 3px; }
 
     /* Flag button (item 9) */
     .btn-flag {
@@ -387,19 +518,20 @@
 
     .chip {
       display: inline-flex; align-items: center;
-      padding: 1px 7px; border-radius: 7px; font-size: .61rem; font-weight: 800;
+      padding: 2px 8px; border-radius: 6px; font-size: .62rem; font-weight: 800;
+      letter-spacing: .2px; line-height: 1.4;
     }
-    .chip.uf-pa   { background: rgba(59,130,246,.18);   color: #93c5fd; }
-    .chip.uf-ma   { background: rgba(249,115,22,.18);   color: #fdba74; }
-    .chip.uf-ap   { background: rgba(16,185,129,.18);   color: #6ee7b7; }
-    .chip.uf-am   { background: rgba(168,85,247,.18);   color: #d8b4fe; }
-    .chip.sigla   { background: rgba(34,197,94,.14);    color: #86efac; }
-    .chip.muni    { background: rgba(144,144,168,.12);  color: var(--metal); }
-    .chip.eps-sln { background: rgba(22,163,74,.18);    color: #86efac; }
-    .chip.eps-adx { background: rgba(239,68,68,.18);    color: #fca5a5; }
-    .chip.chamado { background: rgba(234,179,8,.16);    color: #fde047; }
-    .chip.dup     { background: rgba(239,68,68,.12);    color: #fca5a5; font-style: italic; }
-    .badge-lida   { font-size: .64rem; color: var(--verde); margin-left: auto; }
+    .chip.uf-pa   { background: rgba(29,78,216,.18);   color: #1e3a8a;  border: 1px solid rgba(29,78,216,.35); }
+    .chip.uf-ma   { background: rgba(194,65,12,.18);   color: #9a3412;  border: 1px solid rgba(194,65,12,.35); }
+    .chip.uf-ap   { background: rgba(4,120,87,.18);    color: #064e3b;  border: 1px solid rgba(4,120,87,.35); }
+    .chip.uf-am   { background: rgba(126,34,206,.18);  color: #4c1d95;  border: 1px solid rgba(126,34,206,.35); }
+    .chip.sigla   { background: rgba(21,128,61,.18);   color: #14532d;  border: 1px solid rgba(21,128,61,.35); }
+    .chip.muni    { background: rgba(64,80,96,.14);    color: var(--subtext); border: 1px solid rgba(64,80,96,.28); }
+    .chip.eps-sln { background: rgba(21,128,61,.18);   color: #14532d;  border: 1px solid rgba(21,128,61,.32); }
+    .chip.eps-adx { background: rgba(185,28,28,.18);   color: #7f1d1d;  border: 1px solid rgba(185,28,28,.32); }
+    .chip.chamado { background: rgba(146,64,14,.18);   color: #78350f;  border: 1px solid rgba(146,64,14,.38); }
+    .chip.dup     { background: rgba(185,28,28,.12);   color: #7f1d1d;  border: 1px solid rgba(185,28,28,.25); font-style: italic; }
+    .badge-lida   { font-size: .64rem; color: var(--verde); margin-left: auto; font-weight: 700; }
 
     /* ══════════════════════════════════════════════════
        DETALHE / RESPOSTA
@@ -449,13 +581,40 @@
     .btn-reply:hover { opacity: .88; }
 
     /* ══════════════════════════════════════════════════
-       ATUALIZAÇÃO / STATUS PANEL (Q2)
+       GRID RESIZE HANDLES
     ══════════════════════════════════════════════════ */
+    .grid-rh {
+      position: absolute; z-index: 60; background: transparent;
+      transition: background .12s;
+    }
+    .grid-rh:hover { background: rgba(29,78,216,.22); }
+    .grid-rh-col { cursor: col-resize; width: 6px; }
+    .grid-rh-row { cursor: row-resize; height: 6px; }
+
+    /* ══════════════════════════════════════════════════
+       ATUALIZAÇÃO / STATUS PANEL (modal flutuante)
+    ══════════════════════════════════════════════════ */
+    /* Mensagem completa no modal Atz */
+    .atz-msg-completo {
+      padding: 8px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+      max-height: 160px; overflow-y: auto;
+    }
+    .atz-msg-lbl {
+      font-size: .6rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .6px; color: var(--muted); margin-bottom: 4px;
+    }
+    .atz-msg-texto {
+      font-size: .77rem; color: var(--text); line-height: 1.5;
+      white-space: pre-wrap; word-break: break-word;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 7px; padding: 7px 9px;
+    }
     .atz-panel {
       flex: 1; display: flex; flex-direction: column; overflow: hidden;
       background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-      box-shadow: 0 1px 0 rgba(255,255,255,.03) inset;
+      box-shadow: 0 2px 8px rgba(0,0,0,.18);
     }
+    .atz-modal-box .atz-panel { border-radius: 14px; }
     .atz-hd {
       padding: 8px 12px; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
@@ -468,18 +627,18 @@
     /* Info do chamado selecionado */
     .atz-info-block { padding: 10px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .atz-chamado-titulo { font-size: .68rem; font-weight: 600; color: var(--subtext); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 3px; }
-    .atz-chamado-num { font-size: 1.1rem; font-weight: 900; color: var(--amarelo); letter-spacing: .5px; }
+    .atz-chamado-num { font-size: 1.1rem; font-weight: 900; color: #78350f; letter-spacing: .5px; }
     .atz-chamado-sub { font-size: .72rem; color: var(--subtext); margin-top: 2px; }
     .atz-status-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 7px; }
     .atz-badge {
       font-size: .62rem; font-weight: 700; padding: 2px 8px; border-radius: 5px;
       display: flex; align-items: center; gap: 3px;
     }
-    .atz-badge.status { background: rgba(59,130,246,.15); color: #93c5fd; border: 1px solid rgba(59,130,246,.25); }
-    .atz-badge.cmo-r  { background: rgba(249,115,22,.14); color: #fdba74; border: 1px solid rgba(249,115,22,.25); }
-    .atz-badge.cmo-a  { background: rgba(168,85,247,.14); color: #d8b4fe; border: 1px solid rgba(168,85,247,.25); }
-    .atz-badge.finalizado { background: rgba(34,197,94,.14); color: #86efac; border: 1px solid rgba(34,197,94,.25); }
-    .atz-badge.origem { background: rgba(144,144,168,.1); color: var(--metal); border: 1px solid rgba(144,144,168,.2); }
+    .atz-badge.status { background: rgba(29,78,216,.15); color: #1e3a8a; border: 1px solid rgba(29,78,216,.3); }
+    .atz-badge.cmo-r  { background: rgba(194,65,12,.14); color: #7c2d12; border: 1px solid rgba(194,65,12,.3); }
+    .atz-badge.cmo-a  { background: rgba(126,34,206,.14); color: #4c1d95; border: 1px solid rgba(126,34,206,.3); }
+    .atz-badge.finalizado { background: rgba(21,128,61,.15); color: #14532d; border: 1px solid rgba(21,128,61,.3); }
+    .atz-badge.origem { background: rgba(64,80,96,.12); color: var(--metal); border: 1px solid rgba(64,80,96,.25); }
 
     /* Status select */
     .atz-status-select {
@@ -532,10 +691,10 @@
     /* Botão Atualizar no card de mensagem */
     .btn-atualizar {
       font-size: .61rem; font-weight: 700; padding: 2px 8px;
-      background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.25); color: #93c5fd;
+      background: rgba(29,78,216,.12); border: 1px solid rgba(29,78,216,.32); color: #1e3a8a;
       border-radius: 6px; cursor: pointer; transition: background .12s; flex-shrink: 0;
     }
-    .btn-atualizar:hover { background: rgba(59,130,246,.22); }
+    .btn-atualizar:hover { background: rgba(29,78,216,.22); }
 
     /* Senha visível no painel de usuários */
     .ui-senha { font-size: .66rem; color: var(--subtext); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
@@ -642,9 +801,9 @@
     .painel-sel-hd {
       padding: 7px 13px; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
-      background: rgba(59,130,246,.05);
+      background: rgba(29,78,216,.07);
     }
-    .painel-sel-hd h2 { font-size: .78rem; font-weight: 700; color: #93c5fd; }
+    .painel-sel-hd h2 { font-size: .78rem; font-weight: 700; color: #1e3a8a; }
     .mini-stats {
       display: flex; gap: 18px; align-items: center;
       padding: 7px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap;
@@ -662,8 +821,8 @@
     .quadrant .timer-clock { font-size: .86rem; }
     .quadrant .timer-clock.alerta { font-size: .70rem; }
     .quadrant .tag-pill { font-size: .54rem; padding: 1px 5px; }
-    /* O body do timer no quadrante deve expandir para preencher o espaço disponível */
-    .quadrant .timer-body { max-height: none !important; }
+    /* O body do timer no quadrante expande e rola quando há mais de 4 acionamentos */
+    .quadrant .timer-body { max-height: none !important; height: 100%; overflow-y: auto; }
 
     /* ══════════════════════════════════════════════════
        MODAL DE CONFIGURAÇÕES
@@ -762,31 +921,54 @@
       border:1px solid var(--border); background:var(--card);
       color:var(--muted); cursor:pointer; user-select:none; transition:all .13s;
     }
-    .uf-blink-item.blink-pa { background:rgba(59,130,246,.2); border-color:var(--azul); color:var(--azul); animation:uf-blink 1.1s infinite; }
-    .uf-blink-item.blink-ma { background:rgba(249,115,22,.2); border-color:var(--laranja); color:var(--laranja); animation:uf-blink 1.1s infinite; }
-    .uf-blink-item.blink-ap { background:rgba(16,185,129,.2); border-color:var(--esmeralda); color:var(--esmeralda); animation:uf-blink 1.1s infinite; }
-    .uf-blink-item.blink-am { background:rgba(168,85,247,.2); border-color:var(--roxo); color:var(--roxo); animation:uf-blink 1.1s infinite; }
-    @keyframes uf-blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .uf-blink-item.blink-pa { background:rgba(29,78,216,.22); border-color:var(--azul); color:#1e3a8a; box-shadow:0 0 8px rgba(29,78,216,.22); animation:uf-blink 1s infinite; font-weight:900; }
+    .uf-blink-item.blink-ma { background:rgba(194,65,12,.22); border-color:var(--laranja); color:#7c2d12; box-shadow:0 0 8px rgba(194,65,12,.22); animation:uf-blink 1s infinite; font-weight:900; }
+    .uf-blink-item.blink-ap { background:rgba(4,120,87,.22);  border-color:var(--esmeralda); color:#064e3b; box-shadow:0 0 8px rgba(4,120,87,.22); animation:uf-blink 1s infinite; font-weight:900; }
+    .uf-blink-item.blink-am { background:rgba(126,34,206,.22); border-color:var(--roxo); color:#4c1d95; box-shadow:0 0 8px rgba(126,34,206,.22); animation:uf-blink 1s infinite; font-weight:900; }
+    @keyframes uf-blink { 0%,100%{opacity:1} 50%{opacity:.25} }
 
     /* ══════════════════════════════════════════════════
-       4-QUADRANT GRID (item 7)
+       4-QUADRANT GRID
+       Colunas: Monitor(455) + Detalhes(365) → ratio 455:365
+       Linhas: topo(315) + fundo(330) → ratio 315:330
     ══════════════════════════════════════════════════ */
     .main-content { overflow:hidden !important; }
     .quadrant-grid {
       flex:1; min-height:0;
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      grid-template-rows:1fr 1fr;
-      gap:9px;
+      display:grid; position:relative;
+      grid-template-columns: minmax(300px, 1fr) minmax(240px, .88fr) 248px;
+      grid-template-rows: minmax(168px, .32fr) minmax(90px, .30fr) minmax(90px, .30fr) minmax(120px, .38fr);
+      gap:6px;
+      grid-template-areas:
+        "reports   detalhes  chamados"
+        "mensagens detalhes  chamados"
+        "mensagens detalhes  chamados"
+        "mensagens massivos  chamados";
     }
     .quadrant { display:flex; flex-direction:column; overflow:hidden; min-height:0; }
+    .quadrant:nth-child(1) { grid-area: reports; }
+    .quadrant:nth-child(2) { grid-area: detalhes; }
+    .quadrant:nth-child(3) { grid-area: mensagens; }
+    .quadrant:nth-child(4) { grid-area: massivos; }
+    .quadrant:nth-child(5) { grid-area: chamados; }
     .quadrant .timer-section { flex:1; display:flex; flex-direction:column; overflow:hidden; }
     .quadrant .timer-body {
       display:grid !important;
-      grid-template-columns:repeat(auto-fill, minmax(180px,1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
       gap:5px; flex:1; max-height:none !important;
-      padding:5px 8px; overflow-y:auto; align-content:start;
+      padding:6px; overflow:hidden; align-content:stretch;
     }
+    /* Q1 compact — timer cards mais densos */
+    .quadrant:nth-child(1) .timer-item { padding: 5px 8px; border-radius: 7px; }
+    .quadrant:nth-child(1) .timer-muni { font-size: .78rem; }
+    .quadrant:nth-child(1) .timer-clock { font-size: .88rem; }
+    .quadrant:nth-child(1) .timer-localidade-blink { font-size: .72rem; }
+    .quadrant:nth-child(1) .timer-chamado-num { font-size: .76rem; }
+    .quadrant:nth-child(1) .timer-line2 { margin-top: 3px; }
+    .quadrant:nth-child(1) .timer-line2-loc { margin-top: 2px; min-height: 13px; }
+    .quadrant:nth-child(1) .timer-line3 { margin-top: 3px; }
+    .quadrant:nth-child(1) .btn-liberar { padding: 2px 7px; font-size: .58rem; }
     .quadrant .table-section { flex:1; display:flex; flex-direction:column; overflow:hidden; }
     .quadrant #tableBody { flex:1; display:flex !important; flex-direction:column; overflow:hidden; }
     .quadrant .table-wrap { flex:1; max-height:none; overflow-y:auto; }
@@ -798,10 +980,90 @@
       overflow:hidden !important;
     }
 
+    /* ══════════════════════════════════════════════════
+       PAINEL VERTICAL DE CHAMADOS (5ª área)
+    ══════════════════════════════════════════════════ */
+    .chamados-painel {
+      display: flex; flex-direction: column; height: 100%; overflow: hidden;
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    }
+    .chamados-hd {
+      padding: 9px 12px 7px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(0,0,0,.05); flex-shrink: 0;
+    }
+    .chamados-hd h2 { font-size: .78rem; font-weight: 700; color: var(--silver); display: flex; align-items: center; gap: 5px; }
+    .chamados-badge {
+      font-size: .62rem; font-weight: 800; padding: 2px 8px; border-radius: 8px;
+      background: rgba(29,78,216,.18); color: #1e3a8a; border: 1px solid rgba(29,78,216,.3);
+    }
+    .chamados-filter {
+      padding: 5px 7px; border-bottom: 1px solid var(--border);
+      display: flex; gap: 3px; flex-wrap: wrap; flex-shrink: 0;
+      background: rgba(0,0,0,.025);
+    }
+    .chamados-ftab {
+      padding: 2px 8px; border-radius: 10px; border: 1px solid var(--border2);
+      font-size: .6rem; font-weight: 700; cursor: pointer;
+      background: transparent; color: var(--subtext); transition: all .1s;
+    }
+    .chamados-ftab:hover { background: rgba(0,0,0,.07); color: var(--text); }
+    .chamados-ftab.ativo { color: #fff !important; border-color: transparent !important; font-weight: 800; }
+    .chamados-ftab.cf-todos.ativo  { background: var(--metal); }
+    .chamados-ftab.cf-ag.ativo     { background: var(--muted); }
+    .chamados-ftab.cf-at.ativo     { background: var(--azul); }
+    .chamados-ftab.cf-rep.ativo    { background: var(--laranja); }
+    .chamados-ftab.cf-atv.ativo    { background: var(--roxo); }
+    .chamados-ftab.cf-fin.ativo    { background: var(--verde); }
+    .chamados-list {
+      flex: 1; overflow-y: auto; padding: 6px 7px;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    /* Item de chamado */
+    .chamado-item {
+      background: var(--card2); border: 1px solid var(--border);
+      border-left: 3px solid var(--border2);
+      border-radius: 8px; padding: 7px 9px; cursor: pointer;
+      transition: all .13s; display: flex; flex-direction: column; gap: 3px;
+    }
+    .chamado-item:hover { background: var(--card3); transform: translateX(2px); box-shadow: 0 2px 8px rgba(0,0,0,.14); }
+    .chamado-item.status-aguardando     { border-left-color: var(--muted); }
+    .chamado-item.status-em_atendimento { border-left-color: var(--azul); background: rgba(29,78,216,.05); }
+    .chamado-item.status-em_reparo      { border-left-color: var(--laranja); background: rgba(194,65,12,.06); }
+    .chamado-item.status-em_ativacao    { border-left-color: var(--roxo); background: rgba(126,34,206,.06); }
+    .chamado-item.status-finalizado     { border-left-color: var(--verde); opacity: .6; }
+    .chamado-num  { font-size: .8rem; font-weight: 900; color: var(--silver); letter-spacing: .3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chamado-local { font-size: .7rem; color: var(--subtext); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chamado-row  { display: flex; align-items: center; gap: 3px; flex-wrap: wrap; margin-top: 1px; }
+    .chamado-sc   { font-size: .57rem; font-weight: 800; padding: 1px 5px; border-radius: 4px; }
+    .csc-aguardando     { background: rgba(90,104,120,.2);  color: #283040; }
+    .csc-em_atendimento { background: rgba(29,78,216,.18);  color: #1e3a8a; }
+    .csc-em_reparo      { background: rgba(194,65,12,.18);  color: #7c2d12; }
+    .csc-em_ativacao    { background: rgba(126,34,206,.18); color: #4c1d95; }
+    .csc-finalizado     { background: rgba(21,128,61,.18);  color: #14532d; }
+    .chamado-tempo {
+      font-size: .58rem; color: var(--muted); font-variant-numeric: tabular-nums;
+      margin-left: auto; white-space: nowrap; flex-shrink: 0;
+    }
+    .chamado-btn-atz {
+      font-size: .57rem; font-weight: 700; padding: 2px 7px;
+      background: rgba(29,78,216,.12); border: 1px solid rgba(29,78,216,.28); color: #1e3a8a;
+      border-radius: 5px; cursor: pointer; transition: background .12s; margin-top: 4px;
+      align-self: flex-end;
+    }
+    .chamado-btn-atz:hover { background: rgba(29,78,216,.22); }
+    .chamados-vazio {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: .76rem; text-align: center; padding: 20px;
+      line-height: 1.6; flex-direction: column; gap: 6px;
+    }
+    .chamados-vazio span { font-size: 1.4rem; }
+
     /* RUPTURA chip + card (item 10) */
-    .chip.ruptura { background:rgba(239,68,68,.25); color:#fca5a5; animation:blink-rup .8s infinite; font-size:.65rem; letter-spacing:.5px; }
-    @keyframes blink-rup { 0%,100%{background:rgba(239,68,68,.25)} 50%{background:rgba(239,68,68,.05)} }
-    .msg-card.ruptura { border-left-color:#ef4444 !important; box-shadow:0 0 12px rgba(239,68,68,.25); }
+    .chip.ruptura { background:rgba(185,28,28,.2); color:#7f1d1d; animation:blink-rup .8s infinite; font-size:.65rem; letter-spacing:.5px; border:1px solid rgba(185,28,28,.4); }
+    @keyframes blink-rup { 0%,100%{background:rgba(185,28,28,.22)} 50%{background:rgba(185,28,28,.06)} }
+    .msg-card.ruptura { border-left-color:var(--vermelho) !important; box-shadow:0 0 14px rgba(185,28,28,.3); }
 
     /* Sel-ativo badge nos main counters (item 8) */
     .stat-card.sel-ativo::after {
@@ -823,10 +1085,10 @@
     .mas-item .mas-item-tipo { font-size:.6rem; font-weight:700; padding:2px 5px; border-radius:3px; margin-bottom:4px; display:inline-block; }
     .mas-item .mas-item-de { color:var(--subtext); font-size:.67rem; margin-bottom:2px; }
     .mas-item .mas-item-texto { color:var(--text); line-height:1.4; }
-    .mas-tipo-bdesk { background:rgba(59,130,246,.2); color:#93c5fd; }
-    .mas-tipo-total { background:rgba(239,68,68,.2); color:#fca5a5; }
-    .mas-tipo-conjunta { background:rgba(168,85,247,.2); color:#d8b4fe; }
-    .mas-tipo-ruptura { background:rgba(249,115,22,.2); color:#fdba74; }
+    .mas-tipo-bdesk { background:rgba(29,78,216,.2); color:#1e3a8a; }
+    .mas-tipo-total { background:rgba(185,28,28,.2); color:#7f1d1d; }
+    .mas-tipo-conjunta { background:rgba(126,34,206,.2); color:#4c1d95; }
+    .mas-tipo-ruptura { background:rgba(194,65,12,.2); color:#7c2d12; }
     /* Limpar seleção */
     .btn-limpar-sel { font-size:.62rem; background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.3); color:#f87171; border-radius:4px; padding:2px 7px; cursor:pointer; display:none; }
     .btn-limpar-sel.visivel { display:inline-block; }
@@ -919,6 +1181,7 @@
       .app-layout[data-mob="feed"]     .quadrant:nth-child(3) { display: flex; }
       .app-layout[data-mob="timer"]    .quadrant:nth-child(1) { display: flex; }
       .app-layout[data-mob="massivos"] .quadrant:nth-child(4) { display: flex; }
+      .app-layout[data-mob="chamados"] .quadrant:nth-child(5) { display: flex; }
       .app-layout[data-mob="stats"]    .quadrant              { display: none; }
 
       /* Q2 (detalhe) sempre fora do fluxo no mobile */
@@ -1057,13 +1320,13 @@
       <span class="dp-clock" id="relogioAgora">00:00:00</span>
     </div>
     <div class="msg-counter-pill" id="topMsgCounterWrap">
-      💬 <span id="topMsgCounter">0</span> msgs
+      💬 Não lidas: <span id="topMsgCounter">0</span>
     </div>
-    <div class="cmo-pill cmo-reparo" id="topCmoReparo" title="CMO Reparo">
-      🔧 <span id="topCmoReparoNum">0</span>
+    <div class="cmo-pill cmo-reparo" id="topCmoReparo" title="Ver chamados CMO Reparo" onclick="filtrarCmo('reparo')" style="cursor:pointer">
+      🔧 Reparo <span id="topCmoReparoNum">0</span>
     </div>
-    <div class="cmo-pill cmo-atv" id="topCmoAtv" title="CMO Ativação">
-      ⚡ <span id="topCmoAtvNum">0</span>
+    <div class="cmo-pill cmo-atv" id="topCmoAtv" title="Ver chamados CMO Ativação" onclick="filtrarCmo('ativacao')" style="cursor:pointer">
+      ⚡ Ativação <span id="topCmoAtvNum">0</span>
     </div>
     <span class="badge-live">● AO VIVO</span>
     <div class="conn-pill">
@@ -1072,7 +1335,7 @@
     </div>
     <button id="btnSettings" class="btn-settings" onclick="abrirSettings()" title="Configurações" style="display:none">⚙</button>
     <div style="display:flex;align-items:center;gap:8px;margin-left:8px;border-left:1px solid rgba(255,255,255,.08);padding-left:12px">
-      <span id="userNome" style="font-size:.72rem;color:var(--silver);font-weight:500"></span>
+      <span id="userNome" style="font-size:.72rem;color:#c8ccd8;font-weight:500"></span>
       <span id="userPerfil" style="font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:4px"></span>
       <button onclick="logout()" style="font-size:.68rem;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:600">Sair</button>
     </div>
@@ -1175,15 +1438,15 @@
         </div>
       </div>
 
-      <!-- Q2 topo-direita: Atualização / Status -->
+      <!-- Q2 topo-direita: Painel de Detalhes (365px × 315px) -->
       <div class="quadrant">
-        <div class="atz-panel" id="atzPanel">
-          <div class="atz-hd">
-            <h3><button class="mob-back-btn" onclick="fecharAtz()">‹</button>🔄 Atualização / Status</h3>
-            <button class="btn-fechar" onclick="fecharAtz()">✕</button>
+        <div class="detail-wrap" id="detalhePanel">
+          <div class="detail-hd">
+            <h3><button class="mob-back-btn" onclick="fecharDetalhe()">‹</button>📋 Detalhes</h3>
+            <button class="btn-fechar" onclick="fecharDetalhe()">✕</button>
           </div>
-          <div class="atz-body" id="atzBody">
-            <div class="atz-vazio">Selecione uma mensagem com chamado<br>para registrar atualização</div>
+          <div class="detail-body" id="detalheBody">
+            <div class="detalhe-vazio">Selecione uma mensagem</div>
           </div>
         </div>
       </div>
@@ -1201,17 +1464,38 @@
             <button class="ftab f-ma"  id="ftab-MA"       onclick="filtrarFeed('MA',this)">MA</button>
             <button class="ftab f-ap"  id="ftab-AP"       onclick="filtrarFeed('AP',this)">AP</button>
             <button class="ftab f-am"  id="ftab-AM"       onclick="filtrarFeed('AM',this)">AM</button>
-            <button class="ftab"       id="ftab-URGENTE"  onclick="filtrarFeed('URGENTE',this)"  style="color:var(--vermelho);border-color:rgba(239,68,68,.35)">🚨 Urgentes</button>
-            <button class="ftab"       id="ftab-RUPTURA"  onclick="filtrarFeed('RUPTURA',this)"  style="color:#fca5a5;border-color:rgba(239,68,68,.35)">⚡ Ruptura</button>
+            <button class="ftab"       id="ftab-URGENTE"  onclick="filtrarFeed('URGENTE',this)"  style="color:var(--vermelho);border-color:rgba(185,28,28,.35)">🚨 Urgentes</button>
+            <button class="ftab"       id="ftab-RUPTURA"  onclick="filtrarFeed('RUPTURA',this)"  style="color:var(--vermelho);border-color:rgba(185,28,28,.35)">⚡ Ruptura</button>
             <button class="ftab"       id="ftab-NAOIDA"   onclick="filtrarFeed('NAOIDA',this)"   style="color:var(--subtext)">🔔 Não lidas</button>
-            <button class="ftab"       id="ftab-FLAGGED"  onclick="filtrarFeed('FLAGGED',this)"  style="color:var(--flag-cor);border-color:rgba(234,179,8,.35)">⚑ Sinalizadas</button>
-            <button class="ftab"       id="ftab-WANDERSON" onclick="filtrarFeed('WANDERSON',this)" style="color:var(--wanderson);border-color:rgba(245,158,11,.35)">@W</button>
+            <button class="ftab"       id="ftab-FLAGGED"  onclick="filtrarFeed('FLAGGED',this)"  style="color:var(--flag-cor);border-color:rgba(146,64,14,.35)">⚑ Sinalizadas</button>
+            <button class="ftab"       id="ftab-WANDERSON" onclick="filtrarFeed('WANDERSON',this)" style="color:var(--wanderson);border-color:rgba(180,83,9,.35)">@W</button>
             <select class="localidade-select" id="filtroLocalidade" onchange="filtrarPorLocalidade(this.value)">
               <option value="">Todas as localidades</option>
             </select>
           </div>
           <div class="msg-list" id="msgList">
             <p style="color:var(--muted);font-size:.78rem;text-align:center;padding:18px">Aguardando mensagens…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q5 coluna direita: Painel de Chamados -->
+      <div class="quadrant">
+        <div class="chamados-painel">
+          <div class="chamados-hd">
+            <h2>📋 Chamados Ativos</h2>
+            <span class="chamados-badge" id="chamadosBadge">0</span>
+          </div>
+          <div class="chamados-filter">
+            <button class="chamados-ftab cf-todos ativo" onclick="filtrarChamadosStatus('ATIVOS',this)">Ativos</button>
+            <button class="chamados-ftab cf-ag"   onclick="filtrarChamadosStatus('aguardando',this)">Aguardando</button>
+            <button class="chamados-ftab cf-at"   onclick="filtrarChamadosStatus('em_atendimento',this)">Atendimento</button>
+            <button class="chamados-ftab cf-rep"  onclick="filtrarChamadosStatus('em_reparo',this)">Reparo</button>
+            <button class="chamados-ftab cf-atv"  onclick="filtrarChamadosStatus('em_ativacao',this)">Ativação</button>
+            <button class="chamados-ftab cf-fin"  onclick="filtrarChamadosStatus('finalizado',this)">Finalizados</button>
+          </div>
+          <div class="chamados-list" id="chamadosList">
+            <div class="chamados-vazio"><span>📋</span>Nenhum chamado registrado.<br>Aguardando acionamentos…</div>
           </div>
         </div>
       </div>
@@ -1228,29 +1512,29 @@
               <div class="mas-num" id="mas-total">0</div>
               <div class="mas-lbl">Total</div>
             </div>
-            <div class="mas-card" id="mas-card-PA" onclick="filtrarMassivoUF('PA',this)" style="border-color:rgba(59,130,246,.3)">
-              <div class="mas-num" style="color:#3b82f6" id="mas-PA">0</div>
+            <div class="mas-card" id="mas-card-PA" onclick="filtrarMassivoUF('PA',this)" style="border-color:rgba(29,78,216,.4)">
+              <div class="mas-num" style="color:#1e3a8a" id="mas-PA">0</div>
               <div class="mas-lbl">PA</div>
             </div>
-            <div class="mas-card" id="mas-card-MA" onclick="filtrarMassivoUF('MA',this)" style="border-color:rgba(249,115,22,.3)">
-              <div class="mas-num" style="color:#f97316" id="mas-MA">0</div>
+            <div class="mas-card" id="mas-card-MA" onclick="filtrarMassivoUF('MA',this)" style="border-color:rgba(194,65,12,.4)">
+              <div class="mas-num" style="color:#7c2d12" id="mas-MA">0</div>
               <div class="mas-lbl">MA</div>
             </div>
-            <div class="mas-card" id="mas-card-AP" onclick="filtrarMassivoUF('AP',this)" style="border-color:rgba(16,185,129,.3)">
-              <div class="mas-num" style="color:#10b981" id="mas-AP">0</div>
+            <div class="mas-card" id="mas-card-AP" onclick="filtrarMassivoUF('AP',this)" style="border-color:rgba(4,120,87,.4)">
+              <div class="mas-num" style="color:#064e3b" id="mas-AP">0</div>
               <div class="mas-lbl">AP</div>
             </div>
-            <div class="mas-card" id="mas-card-AM" onclick="filtrarMassivoUF('AM',this)" style="border-color:rgba(168,85,247,.3)">
-              <div class="mas-num" style="color:#a855f7" id="mas-AM">0</div>
+            <div class="mas-card" id="mas-card-AM" onclick="filtrarMassivoUF('AM',this)" style="border-color:rgba(126,34,206,.4)">
+              <div class="mas-num" style="color:#4c1d95" id="mas-AM">0</div>
               <div class="mas-lbl">AM</div>
             </div>
           </div>
           <div class="massivo-filter" id="massivoFilterBar">
             <button class="ftab ativo" id="mas-ftab-TODOS" onclick="filtrarMassivoTipo('TODOS',this)">Todos</button>
-            <button class="ftab" id="mas-ftab-BDESK" onclick="filtrarMassivoTipo('BDESK',this)" style="color:#93c5fd;border-color:rgba(59,130,246,.35)">Bdesk</button>
-            <button class="ftab" id="mas-ftab-TOTAL" onclick="filtrarMassivoTipo('TOTAL',this)" style="color:#fca5a5;border-color:rgba(239,68,68,.35)">Falha Total</button>
-            <button class="ftab" id="mas-ftab-CONJUNTA" onclick="filtrarMassivoTipo('CONJUNTA',this)" style="color:#d8b4fe;border-color:rgba(168,85,247,.35)">Conjunta</button>
-            <button class="ftab" id="mas-ftab-RUPTURA" onclick="filtrarMassivoTipo('RUPTURA',this)" style="color:#fdba74;border-color:rgba(249,115,22,.35)">Ruptura</button>
+            <button class="ftab" id="mas-ftab-BDESK" onclick="filtrarMassivoTipo('BDESK',this)" style="color:#1e3a8a;border-color:rgba(29,78,216,.35)">Bdesk</button>
+            <button class="ftab" id="mas-ftab-TOTAL" onclick="filtrarMassivoTipo('TOTAL',this)" style="color:#7f1d1d;border-color:rgba(185,28,28,.35)">Falha Total</button>
+            <button class="ftab" id="mas-ftab-CONJUNTA" onclick="filtrarMassivoTipo('CONJUNTA',this)" style="color:#4c1d95;border-color:rgba(126,34,206,.35)">Conjunta</button>
+            <button class="ftab" id="mas-ftab-RUPTURA" onclick="filtrarMassivoTipo('RUPTURA',this)" style="color:#7c2d12;border-color:rgba(194,65,12,.35)">Ruptura</button>
           </div>
           <div class="massivo-list" id="massivoList">
             <p style="color:var(--muted);font-size:.78rem;text-align:center;padding:18px">Nenhum chamado massivo.</p>
@@ -1261,6 +1545,23 @@
     </div>
 
   </main>
+
+
+</div>
+
+<!-- MODAL FLUTUANTE — Atualização / Status -->
+<div class="atz-modal-overlay" id="atzModal" onclick="fecharAtzOverlay(event)">
+  <div class="atz-modal-box">
+    <div class="atz-panel" id="atzPanel">
+      <div class="atz-hd">
+        <h3>🔄 Atualização / Status</h3>
+        <button class="btn-fechar" onclick="fecharAtz()" title="Fechar">✕</button>
+      </div>
+      <div class="atz-body" id="atzBody">
+        <div class="atz-vazio">Selecione uma mensagem com chamado<br>para registrar atualização</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL CHAT — item 3 -->
@@ -1303,6 +1604,11 @@
     <span>Massivos</span>
     <span class="mob-badge hidden" id="mobBadgeMas"></span>
   </button>
+  <button class="mob-tab" data-tab="chamados" onclick="mobTab('chamados')">
+    <span class="mob-icon">📋</span>
+    <span>Chamados</span>
+    <span class="mob-badge hidden" id="mobBadgeCham"></span>
+  </button>
   <button class="mob-tab" data-tab="stats" onclick="mobTab('stats')">
     <span class="mob-icon">📊</span>
     <span>Stats</span>
@@ -1327,10 +1633,28 @@
       <div class="stabs">
         <button class="stab ativo" id="stab-btn-usuarios" onclick="settingsTab('usuarios',this)">👥 Usuários</button>
         <button class="stab" id="stab-btn-novo" onclick="settingsTab('novo',this)">➕ Novo Usuário</button>
+        <button class="stab" id="stab-btn-filtros" onclick="settingsTab('filtros',this)">⚙ Filtros</button>
       </div>
       <!-- Aba: lista de usuários -->
       <div id="stab-usuarios" class="stab-content ativo">
         <div id="userListAdmin"><p style="color:var(--muted);font-size:.78rem">Carregando…</p></div>
+      </div>
+      <!-- Aba: filtros configuráveis -->
+      <div id="stab-filtros" class="stab-content">
+        <div style="display:flex;flex-direction:column;gap:12px;padding:4px 0">
+          <div>
+            <label style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">🔧 CMO Reparo — Palavra-chave / Carimbo</label>
+            <input id="filtroCmoReparo" class="settings-input" type="text" placeholder="Ex: Carimbo Transferência - CMO REPARO" />
+            <div style="font-size:.64rem;color:var(--muted);margin-top:3px">Padrão do servidor: Carimbo Transferência - CMO REPARO</div>
+          </div>
+          <div>
+            <label style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">⚡ CMO Ativação — Palavra-chave / Carimbo</label>
+            <input id="filtroCmoAtivacao" class="settings-input" type="text" placeholder="Ex: Carimbo Transferência - CMO ATIVAÇÃO" />
+            <div style="font-size:.64rem;color:var(--muted);margin-top:3px">Deixe vazio para usar padrões automáticos do sistema</div>
+          </div>
+          <button class="btn-settings-save" onclick="salvarFiltrosCmo()">Salvar Filtros</button>
+          <div id="filtrosStatus" class="settings-status"></div>
+        </div>
       </div>
       <!-- Aba: novo usuário -->
       <div id="stab-novo" class="stab-content">
@@ -1420,6 +1744,7 @@
 
   // ── Estado ───────────────────────────────────────────────────────────────
   let ws, BASE = [], todasMensagens = [];
+  let wppConectado = false;
   let filtroFeedAtual  = 'TODOS';
   let filtroLocalidade = '';
   let mensagemSelecionada = null;
@@ -1437,6 +1762,31 @@
   let _serverContadores = {};
   let filtroMassivoUFAtual   = 'TODOS';
   let filtroMassivoTipoAtual = 'TODOS';
+  // contagem de não lidas do WhatsApp (soma de unreadCount de todos os chats)
+  let _chatListTotalUnread = 0;
+  // filtros CMO configuráveis (localStorage)
+  let _filtroCmoReparo   = localStorage.getItem('cmoReparoFiltro')   || '';
+  let _filtroCmoAtivacao = localStorage.getItem('cmoAtivacaoFiltro') || '';
+
+  // Palavras-chave padrão (multi-keyword, OR logic)
+  const CMO_REPARO_KEYWORDS   = ['CMO REPARO','CARIMBO TRANSFERÊNCIA - CMO REPARO','CARIMBO TRANSFERENCIA - CMO REPARO'];
+  const CMO_ATIVACAO_KEYWORDS = ['CMO ATIVAÇÃO','CMO ATIVACAO','INSTALAÇÃO DE EQUIPAMENTO','INSTALACAO DE EQUIPAMENTO','LANÇAMENTO','LANCAMENTO','VISTORIA','VISTORIA DE REDE','IMPLANTAÇÃO DE PROJETO','IMPLANTACAO DE PROJETO','IMPLANTAÇÃO','IMPLANTACAO'];
+
+  function msgMatchCmoReparo(m) {
+    if (!m.texto || m.duplicado) return false;
+    if (m.temCmoReparo) return true;
+    const t = m.texto.toUpperCase();
+    if (_filtroCmoReparo && t.includes(_filtroCmoReparo.toUpperCase())) return true;
+    return CMO_REPARO_KEYWORDS.some(k => t.includes(k));
+  }
+
+  function msgMatchCmoAtivacao(m) {
+    if (!m.texto || m.duplicado) return false;
+    if (m.temCmoAtivacao) return true;
+    const t = m.texto.toUpperCase();
+    if (_filtroCmoAtivacao && t.includes(_filtroCmoAtivacao.toUpperCase())) return true;
+    return CMO_ATIVACAO_KEYWORDS.some(k => t.includes(k));
+  }
 
   // ── Mobile Navigation ─────────────────────────────────────────────────────
   function mobIsMobile() { return window.innerWidth <= 800; }
@@ -1517,17 +1867,35 @@
   function mensagemMatchesFiltro(m) {
     if (filtroLocalidade) return (m.municipios||[]).includes(filtroLocalidade);
     switch (filtroFeedAtual) {
-      case 'TODOS':    return (m.detectados||[]).length > 0 || m.temWanderson;
-      case 'PA':       return (m.uf||[]).includes('PA');
-      case 'MA':       return (m.uf||[]).includes('MA');
-      case 'AP':       return (m.uf||[]).includes('AP');
-      case 'AM':       return (m.uf||[]).includes('AM');
-      case 'URGENTE':  return !!m.temAcionamento;
-      case 'RUPTURA':  return !!m.temRuptura;
-      case 'NAOIDA':   return !m.lida && (m.detectados||[]).length > 0;
-      case 'WANDERSON':return !!m.temWanderson;
-      default:         return false;
+      case 'TODOS':      return (m.detectados||[]).length > 0 || m.temWanderson;
+      case 'PA':         return (m.uf||[]).includes('PA');
+      case 'MA':         return (m.uf||[]).includes('MA');
+      case 'AP':         return (m.uf||[]).includes('AP');
+      case 'AM':         return (m.uf||[]).includes('AM');
+      case 'URGENTE':    return !!m.temAcionamento;
+      case 'RUPTURA':    return !!m.temRuptura;
+      case 'NAOIDA':     return !m.lida && (m.detectados||[]).length > 0;
+      case 'FLAGGED':    return !!m.flagged;
+      case 'WANDERSON':  return !!m.temWanderson;
+      case 'CMO_REPARO': return msgMatchCmoReparo(m);
+      case 'CMO_ATIVACAO': return msgMatchCmoAtivacao(m);
+      default:           return false;
     }
+  }
+
+  function filtrarCmo(tipo) {
+    const filtro = tipo === 'reparo' ? 'CMO_REPARO' : 'CMO_ATIVACAO';
+    const label  = tipo === 'reparo' ? '🔧 CMO Reparo' : '⚡ CMO Ativação';
+    filtroFeedAtual = filtro;
+    filtroLocalidade = '';
+    document.getElementById('filtroLocalidade').value = '';
+    document.querySelectorAll('.ftab').forEach(b => b.classList.remove('ativo'));
+    const tag = document.getElementById('filtroAtivoTag');
+    if (tag) { tag.textContent = label; tag.classList.add('visivel'); }
+    renderFeed();
+    // scroll ao feed
+    const fw = document.querySelector('.feed-wrap');
+    if (fw) fw.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   // ── Filtro por grupos selecionados (items 1, 2, 3) ────────────────────────
@@ -1571,8 +1939,8 @@
       else if (tipo === 'chats_erro')     chatListErro(dados.erro);
       else if (tipo === 'reset_diario')   resetDiario(dados.contadores);
       else if (tipo === 'qr_limpar')      mostrarQRPlaceholder();
-      else if (tipo === 'chamado_update') { chamadosStatusLocal[dados.chave] = dados.dados; if (chaveAtualAberta === dados.chave) renderAtz(); }
-      else if (tipo === 'chamado_removido') { delete chamadosStatusLocal[dados.chave]; if (chaveAtualAberta === dados.chave) fecharAtz(); }
+      else if (tipo === 'chamado_update') { chamadosStatusLocal[dados.chave] = dados.dados; if (chaveAtualAberta === dados.chave) renderAtz(); renderChamadosPanel(); }
+      else if (tipo === 'chamado_removido') { delete chamadosStatusLocal[dados.chave]; if (chaveAtualAberta === dados.chave) fecharAtz(); renderChamadosPanel(); }
     };
   }
 
@@ -1584,10 +1952,11 @@
     atualizarTopCounter();
     if (dados.chatList && dados.chatList.length) renderChatList(dados.chatList);
     todasMensagens.forEach(m => {
-      if (m.temAcionamento && m.detectados && m.detectados.length > 0 && !m.lida) iniciarTimers(m, m.ts, m.texto);
+      if ((m.temAcionamento || m.chamado) && m.detectados && m.detectados.length > 0 && !m.lida && !m.duplicado) iniciarTimers(m, m.ts, m.texto);
     });
     renderFeed();
     renderMassivo();
+    renderChamadosPanel();
     atualizarDropdownLocalidades();
     atualizarMobBadges();
     apiFetch('/api/base').then(r => r.json()).then(b => { BASE = b; }).catch(() => {});
@@ -1614,6 +1983,7 @@
 
   function atualizarStatus(status) {
     const ok = status === 'conectado';
+    wppConectado = ok;
     document.getElementById('connDot').className    = ok ? 'conn-dot on' : 'conn-dot';
     document.getElementById('connLabel').textContent = ok ? 'Conectado' : 'Desconectado';
     document.getElementById('wppStatus').textContent  = ok ? 'Online ✔' : 'Aguardando…';
@@ -1629,6 +1999,14 @@
     } else {
       if (wrap) wrap.style.display = 'none';
     }
+    // Atualiza estado dos botões de resposta
+    document.querySelectorAll('.btn-reply, .btn-modal-reply').forEach(btn => {
+      if (perfil === 'administrador') {
+        btn.disabled = !ok;
+        btn.title    = ok ? '' : 'WhatsApp não conectado';
+        btn.style.opacity = ok ? '' : '0.45';
+      }
+    });
   }
 
   async function desconectarWhatsApp() {
@@ -1662,10 +2040,16 @@
   }
 
   // ── Contadores ────────────────────────────────────────────────────────────
-  // Contador geral da topbar = total de TODAS as msgs do WhatsApp (sem filtro, vindo do servidor)
+  // Contador geral da topbar = total de não lidas do WhatsApp (sem filtro)
   function atualizarTopCounter() {
     const el = document.getElementById('topMsgCounter');
-    if (el) el.textContent = _serverContadores.totalWhatsapp || todasMensagens.length;
+    if (el) {
+      // Prefere soma de unreadCount do chatList; cai para contador do servidor
+      const count = _chatListTotalUnread > 0
+        ? _chatListTotalUnread
+        : (_serverContadores.totalWhatsapp || 0);
+      el.textContent = count;
+    }
   }
 
   function atualizarContadores(c) {
@@ -1698,11 +2082,11 @@
     document.getElementById('statAM').textContent    = c.AM       || 0;
     document.getElementById('statWAND').textContent  = c.WANDERSON|| 0;
     document.getElementById('msgCount').textContent  = (c.total || 0) + ' hoje';
-    // CMO counters
+    // CMO counters — contagem via multi-keywords
     const cmoR = document.getElementById('topCmoReparoNum');
     const cmoA = document.getElementById('topCmoAtvNum');
-    if (cmoR) cmoR.textContent = _serverContadores.cmoReparo  || 0;
-    if (cmoA) cmoA.textContent = _serverContadores.cmoAtivacao || 0;
+    if (cmoA) cmoA.textContent = todasMensagens.filter(msgMatchCmoAtivacao).length;
+    if (cmoR) cmoR.textContent = todasMensagens.filter(msgMatchCmoReparo).length;
     atualizarTopCounter();
     atualizarMobBadges();
   }
@@ -1750,6 +2134,9 @@
       return;
     }
     chats.forEach(c => { _chatMap[c.id] = c; });
+    // Atualiza contagem de não lidas do WhatsApp
+    _chatListTotalUnread = chats.reduce((acc, c) => acc + (c.naoLidas || 0), 0);
+    atualizarTopCounter();
     if (cnt) cnt.textContent = chats.length;
     el.innerHTML = chats.map(c => `
       <div class="chat-item${selectedChats.has(c.id) ? ' selecionado' : ''}" data-cid="${escAttr(c.id)}">
@@ -1814,9 +2201,21 @@
   }
 
   async function enviarRespostaModal() {
-    const texto  = document.getElementById('chatModalReply').value.trim();
-    const status = document.getElementById('chatModalStatus');
-    if (!texto || !chatModalId) return;
+    const textoEl = document.getElementById('chatModalReply');
+    const status  = document.getElementById('chatModalStatus');
+    const texto   = textoEl ? textoEl.value.trim() : '';
+    if (!texto) {
+      if (status) { status.textContent = '⚠ Digite uma mensagem.'; status.style.color = 'var(--amarelo)'; }
+      return;
+    }
+    if (!chatModalId) {
+      if (status) { status.textContent = '⚠ Nenhum chat selecionado.'; status.style.color = 'var(--amarelo)'; }
+      return;
+    }
+    if (!wppConectado) {
+      if (status) { status.textContent = '✗ WhatsApp não está conectado.'; status.style.color = 'var(--vermelho)'; }
+      return;
+    }
     status.textContent = 'Enviando…'; status.style.color = 'var(--subtext)';
     try {
       const r = await apiFetch('/api/reply', {
@@ -1825,10 +2224,10 @@
       });
       const data = await r.json();
       if (data.ok) {
-        document.getElementById('chatModalReply').value = '';
-        status.textContent = '✓ Enviado'; status.style.color = 'var(--verde)';
-        setTimeout(() => { status.textContent = ''; }, 3000);
-      } else { throw new Error(data.erro || 'Falha'); }
+        if (textoEl) textoEl.value = '';
+        status.textContent = '✓ Enviado com sucesso'; status.style.color = 'var(--verde)';
+        setTimeout(() => { if (status) status.textContent = ''; }, 3000);
+      } else { throw new Error(data.erro || 'Falha ao enviar'); }
     } catch(e) {
       status.textContent = '✗ ' + e.message; status.style.color = 'var(--vermelho)';
     }
@@ -1844,7 +2243,7 @@
     if (todasMensagens.some(x => x.id === m.id)) return;
     todasMensagens.unshift(m);
     if (todasMensagens.length > 200) todasMensagens.pop();
-    if (m.temAcionamento && m.detectados && m.detectados.length > 0) iniciarTimers(m, m.ts, m.texto);
+    if ((m.temAcionamento || m.chamado) && m.detectados && m.detectados.length > 0 && !m.duplicado) iniciarTimers(m, m.ts, m.texto);
     // Sons: ruptura tem alerta próprio; demais: chime se combinar com filtro ativo
     if (m.temRuptura) playRupturaAlert();
     else if (mensagemMatchesFiltro(m)) playMsgChime();
@@ -1975,18 +2374,36 @@
     const btnAtualizar = m.chamado
       ? `<button class="btn-atualizar" onclick="event.stopPropagation();abrirAtualicao('${escAttr(m.id)}')" title="Abrir painel de atualização">Atualizar</button>`
       : '';
-    const tsCompleto = m.ts ? new Date(m.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}) : m.hora || '';
+    const tsCompleto = m.recebidoEm || (m.ts ? new Date(m.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}) : m.hora || '');
+    const btnCopiar = `<button class="btn-atualizar" onclick="event.stopPropagation();copiarMensagem('${escAttr(m.id)}')" title="Copiar mensagem">Copiar</button>`;
+    const textoCompleto = (m.texto || '').length > 260;
+    const btnExpand = textoCompleto
+      ? `<button class="btn-atualizar" style="margin-left:auto" onclick="event.stopPropagation();toggleTexto('${escAttr(m.id)}',this)" title="Ver texto completo">+ ver mais</button>`
+      : '';
 
     return `<div class="${cls.join(' ')}" onclick="selecionarMensagem('${escAttr(m.id)}')">
       <div class="msg-topo">
         <span class="msg-remetente">${icon} ${escHtml(m.nomeGrupo || m.de || 'Desconhecido')}</span>
-        <span class="msg-hora">${tsCompleto}</span>
+        <span class="msg-hora">🕐 ${tsCompleto}</span>
         <button class="btn-flag ${flagCls}" onclick="event.stopPropagation();toggleFlag('${escAttr(m.id)}')" title="Sinalizar">⚑</button>
       </div>
       ${thumbEl}
-      <div class="msg-text">${escHtml((m.texto||'').substring(0,200))}</div>
-      <div class="msg-footer">${chipMas}${chipRup}${chipsUF}${chipsSig}${chipsMu}${chipCh}${midiaNome}${chipDup}${lidaBadge}${btnAtualizar}</div>
+      <div class="msg-text" id="mt-${escAttr(m.id)}">${escHtml(m.texto||'')}</div>
+      <div class="msg-footer">${chipMas}${chipRup}${chipsUF}${chipsSig}${chipsMu}${chipCh}${midiaNome}${chipDup}${lidaBadge}${btnExpand}${btnAtualizar}${btnCopiar}</div>
     </div>`;
+  }
+
+  function copiarMensagem(id) {
+    const m = todasMensagens.find(x => x.id === id);
+    if (!m) return;
+    navigator.clipboard?.writeText(m.texto || '').catch(() => {});
+  }
+
+  function toggleTexto(id, btn) {
+    const el = document.getElementById('mt-' + id);
+    if (!el) return;
+    const expandido = el.classList.toggle('expandido');
+    if (btn) btn.textContent = expandido ? '− ver menos' : '+ ver mais';
   }
 
   function verMidia(id) {
@@ -2020,16 +2437,24 @@
   function abrirAtualicao(msgId) {
     const m = todasMensagens.find(x => x.id === msgId);
     if (!m || !m.chamado) return;
-    chaveAtualAberta = m.chamado.tipo + ':' + m.chamado.numero;
+    chaveAtualAberta = m.chaveUnica || (m.chamado.tipo + ':' + m.chamado.numero);
     renderAtz();
+    const overlay = document.getElementById('atzModal');
+    if (overlay) overlay.classList.add('aberto');
     if (mobIsMobile()) document.body.classList.add('detail-mob-aberto');
   }
 
   function fecharAtz() {
     chaveAtualAberta = null;
     document.body.classList.remove('detail-mob-aberto');
+    const overlay = document.getElementById('atzModal');
+    if (overlay) overlay.classList.remove('aberto');
     const body = document.getElementById('atzBody');
     if (body) body.innerHTML = '<div class="atz-vazio">Selecione uma mensagem com chamado<br>para registrar atualização</div>';
+  }
+
+  function fecharAtzOverlay(e) {
+    if (e.target === e.currentTarget) fecharAtz();
   }
 
   function renderAtz() {
@@ -2066,18 +2491,31 @@
         </div>
       </div>`).join('');
 
+    // Busca mensagem original para exibir texto completo
+    const msgOriginal = todasMensagens.find(m =>
+      m.chamado && dados.chamado &&
+      m.chamado.tipo === dados.chamado.tipo &&
+      m.chamado.numero === dados.chamado.numero &&
+      !m.duplicado
+    );
+    const textoCompleto = msgOriginal ? (msgOriginal.texto || '') : (dados.titulo || '');
+
     const agora = tsLabel(Date.now());
 
     body.innerHTML = `
       <div class="atz-info-block">
         <div class="atz-chamado-titulo">Chamado selecionado</div>
         <div class="atz-chamado-num">${dados.chamado.tipo.toUpperCase()} #${escHtml(dados.chamado.numero)}</div>
-        <div class="atz-chamado-sub">${escHtml(dados.titulo || '')} · ${escHtml(dados.localidade || '')}</div>
+        <div class="atz-chamado-sub">${escHtml(dados.localidade || '')}</div>
         <div class="atz-status-row">
           ${statusLabel}${cmoLabel}
           <span class="atz-badge origem">📱 ${escHtml(dados.origem||'WhatsApp')}</span>
         </div>
         <select class="atz-status-select" onchange="alterarStatusAtz(this.value)">${statusOpts}</select>
+      </div>
+      <div class="atz-msg-completo">
+        <div class="atz-msg-lbl">Mensagem recebida</div>
+        <div class="atz-msg-texto">${escHtml(textoCompleto)}</div>
       </div>
       <div class="atz-timeline-block">
         <div class="atz-timeline-hd">Timeline do dia</div>
@@ -2117,15 +2555,27 @@
     const ok = await salvarAtz(chaveAtualAberta, texto, null);
     if (!ok) { if (sts) { sts.textContent = '✗ Erro ao salvar'; sts.style.color = 'var(--vermelho)'; } return; }
 
-    // Tentar enviar ao Google Sheets
+    // Tentar enviar ao Google Sheets (TIMELINE_STATUS)
     try {
       const dados = chamadosStatusLocal[chaveAtualAberta] || {};
+      const agora = new Date().toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' });
       await apiFetch('/api/sheets/push', {
         method: 'POST',
         body: JSON.stringify({
-          chave: chaveAtualAberta, chamado: dados.chamado, localidade: dados.localidade,
-          titulo: dados.titulo, status: dados.status, cmo: dados.cmo,
-          atualização: texto, ts: new Date().toISOString(),
+          aba:               'TIMELINE_STATUS',
+          dados: {
+            data_hora:         agora,
+            chave_unica:       chaveAtualAberta,
+            atrix:             dados.atrix || '',
+            bdesk:             dados.bdesk || '',
+            localidade:        dados.localidade || '',
+            status_anterior:   dados.status || '',
+            status_novo:       dados.status || '',
+            texto_atualizacao: texto,
+            responsavel:       localStorage.getItem('mcll_nome') || '',
+            origem:            'Painel Web',
+            data_registro:     agora,
+          }
         }),
       });
       if (sts) { sts.textContent = '✓ Salvo no painel e enviado ao Sheets'; sts.style.color = 'var(--verde)'; }
@@ -2154,79 +2604,87 @@
   // ── Selecionar mensagem ───────────────────────────────────────────────────
   function selecionarMensagem(id) {
     mensagemSelecionada = todasMensagens.find(m => m.id === id);
+    const panel = document.getElementById('detalhePanel');
+    if (panel) { panel.classList.remove('com-msg'); void panel.offsetWidth; panel.classList.add('com-msg'); }
+    renderDetalhe();
+    const body = document.getElementById('detalheBody');
+    if (body) body.scrollTop = 0;
     renderFeed();
     if (mensagemSelecionada && !mensagemSelecionada.lida) marcarLida(id);
-    // Se tem chamado, abre painel de atualização; senão mostra detalhes básicos
-    if (mensagemSelecionada && mensagemSelecionada.chamado) {
-      abrirAtualicao(id);
-    } else {
-      chaveAtualAberta = null;
-      renderAtzBasico(mensagemSelecionada);
-    }
+    // Se tem chamado, abre painel lateral direito de Atualização/Status
+    if (mensagemSelecionada && mensagemSelecionada.chamado) abrirAtualicao(id);
     if (mobIsMobile()) document.body.classList.add('detail-mob-aberto');
-  }
-
-  // Detalhes básicos no painel Q2 (para msgs sem chamado)
-  function renderAtzBasico(m) {
-    const body = document.getElementById('atzBody');
-    if (!body) return;
-    if (!m) { body.innerHTML = '<div class="atz-vazio">Selecione uma mensagem com chamado<br>para registrar atualização</div>'; return; }
-
-    const chipsUF  = (m.uf || []).map(u => `<span class="chip uf-${u.toLowerCase()}">${u}</span>`).join('');
-    const chipsMu  = (m.municipios || []).slice(0,3).map(mu => `<span class="chip muni">${escHtml(mu)}</span>`).join('');
-    const tsCompleto = m.ts ? tsLabel(m.ts) : m.hora || '';
-
-    let mediaEl = '';
-    if (m.mediaData && m.mediaMime) {
-      if (m.mediaMime.startsWith('image/')) {
-        mediaEl = `<div style="margin:8px 0"><img src="data:${escAttr(m.mediaMime)};base64,${m.mediaData}" style="max-width:100%;border-radius:8px;cursor:zoom-in" onclick="verMidia('${escAttr(m.id)}')" /></div>`;
-      } else {
-        mediaEl = `<a href="data:${escAttr(m.mediaMime)};base64,${m.mediaData}" download="${escAttr(m.mediaFilename||'arquivo')}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);border-radius:8px;color:#93c5fd;font-size:.78rem;font-weight:700;text-decoration:none;margin:8px 0">⬇ ${escHtml(m.mediaFilename||m.mediaMime.split('/')[1]||'arquivo')}</a>`;
-      }
-    }
-
-    body.innerHTML = `
-      <div class="atz-info-block">
-        <div class="atz-chamado-titulo">📋 Detalhes da mensagem</div>
-        <div class="detalhe-de" style="margin-top:6px">${m.grupo?'👥':'👤'} ${escHtml(m.de || 'Desconhecido')}</div>
-        ${m.grupo && m.nomeGrupo ? `<div class="detalhe-grupo">${escHtml(m.nomeGrupo)}</div>` : ''}
-        <div class="detalhe-hora">🕐 ${tsCompleto}</div>
-        <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">${chipsUF}${chipsMu}</div>
-      </div>
-      ${mediaEl ? `<div style="padding:0 12px">${mediaEl}</div>` : ''}
-      <div class="atz-timeline-block">
-        <div class="atz-tl-item" style="opacity:1">
-          <div style="flex:1;min-width:0">
-            <div class="detalhe-texto" style="white-space:pre-wrap;word-break:break-word;font-size:.8rem;line-height:1.5">${escHtml(m.texto || '')}</div>
-          </div>
-        </div>
-      </div>
-      <div class="atz-nova-block">
-        <div class="atz-nova-lbl">Enviar Resposta</div>
-        <textarea class="atz-textarea" id="replyText" placeholder="Digite sua resposta…"></textarea>
-        <div class="atz-btns">
-          <button class="btn-salvar-sheets" onclick="enviarResposta()">▶ Enviar Resposta</button>
-        </div>
-        <div class="atz-save-status" id="replyStatus"></div>
-      </div>`;
   }
 
   function fecharDetalhe() {
     mensagemSelecionada = null;
     document.body.classList.remove('detail-mob-aberto');
+    const panel = document.getElementById('detalhePanel');
+    if (panel) panel.classList.remove('com-msg');
+    const body = document.getElementById('detalheBody');
+    if (body) body.innerHTML = '<div class="detalhe-vazio">Selecione uma mensagem</div>';
     fecharAtz();
     renderFeed();
   }
 
   function renderDetalhe() {
-    if (mensagemSelecionada) selecionarMensagem(mensagemSelecionada.id);
+    const body = document.getElementById('detalheBody');
+    if (!body) return;
+    if (!mensagemSelecionada) { body.innerHTML = '<div class="detalhe-vazio">Selecione uma mensagem</div>'; return; }
+    const m = mensagemSelecionada;
+    const chipsUF  = (m.uf || []).map(u => `<span class="chip uf-${u.toLowerCase()}">${u}</span>`).join('');
+    const chipsSig = (m.siglas || []).map(s => `<span class="chip sigla">${s}</span>`).join('');
+    const chipsMu  = (m.municipios || []).map(mu => `<span class="chip muni">${escHtml(mu)}</span>`).join('');
+    const chipsEps = [...new Set((m.detectados||[]).map(d=>d.eps).filter(Boolean))].map(e => `<span class="chip eps-${e.toLowerCase()}">${e}</span>`).join('');
+    const chipCh   = m.chamado ? `<span class="chip chamado">🎫 ${m.chamado.tipo.toUpperCase()} #${m.chamado.numero}</span>` : '';
+    const chipDup  = m.duplicado ? `<span class="chip dup">Atualização de chamado</span>` : '';
+    const tsCompleto = m.ts ? tsLabel(m.ts) : (m.hora || '');
+
+    let mediaEl = '';
+    if (m.mediaData && m.mediaMime) {
+      if (m.mediaMime.startsWith('image/')) {
+        mediaEl = `<div><img src="data:${escAttr(m.mediaMime)};base64,${m.mediaData}" style="max-width:100%;border-radius:10px;cursor:zoom-in" onclick="verMidia('${escAttr(m.id)}')" /></div>`;
+      } else {
+        mediaEl = `<a href="data:${escAttr(m.mediaMime)};base64,${m.mediaData}" download="${escAttr(m.mediaFilename||'arquivo')}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);border-radius:8px;color:#93c5fd;font-size:.78rem;font-weight:700;text-decoration:none">⬇ Baixar ${escHtml(m.mediaFilename||m.mediaMime.split('/')[1]||'arquivo')}</a>`;
+      }
+    } else if (!m.mediaData && m.mediaMime) {
+      mediaEl = `<div style="font-size:.72rem;color:var(--muted)">📎 Mídia: ${escHtml(m.mediaFilename||m.mediaMime)} <span style="color:var(--muted)">(não baixada)</span></div>`;
+    }
+
+    body.innerHTML = `
+      <div>
+        <div class="detalhe-de">${m.grupo?'👥':'👤'} ${escHtml(m.de || 'Desconhecido')}</div>
+        ${m.grupo && m.nomeGrupo ? `<div class="detalhe-grupo">Grupo: ${escHtml(m.nomeGrupo)}</div>` : ''}
+        <div class="detalhe-hora">🕐 ${tsCompleto}</div>
+      </div>
+      ${mediaEl}
+      <div class="detalhe-texto">${escHtml(m.texto || '')}</div>
+      <div class="detalhe-chips">${chipsUF}${chipsSig}${chipsMu}${chipsEps}${chipCh}${chipDup}</div>
+      <div>
+        <div class="reply-label">Enviar Resposta</div>
+        <textarea class="reply-textarea" id="replyText" placeholder="Digite sua resposta…"></textarea>
+        <div class="reply-status" id="replyStatus"></div>
+        <button class="btn-reply" onclick="enviarResposta()">▶ Enviar Resposta</button>
+      </div>`;
   }
 
   // item 7 — reply corrigido
   async function enviarResposta() {
-    const texto  = document.getElementById('replyText').value.trim();
-    const status = document.getElementById('replyStatus');
-    if (!texto || !mensagemSelecionada) return;
+    const textoEl = document.getElementById('replyText');
+    const status  = document.getElementById('replyStatus');
+    const texto   = textoEl ? textoEl.value.trim() : '';
+    if (!texto) {
+      if (status) { status.textContent = '⚠ Digite uma mensagem antes de enviar.'; status.style.color = 'var(--amarelo)'; }
+      return;
+    }
+    if (!mensagemSelecionada) {
+      if (status) { status.textContent = '⚠ Nenhuma mensagem selecionada.'; status.style.color = 'var(--amarelo)'; }
+      return;
+    }
+    if (!wppConectado) {
+      if (status) { status.textContent = '✗ WhatsApp não está conectado.'; status.style.color = 'var(--vermelho)'; }
+      return;
+    }
     status.textContent = 'Enviando…'; status.style.color = 'var(--subtext)';
     try {
       const r = await apiFetch('/api/reply', {
@@ -2235,7 +2693,7 @@
       });
       const data = await r.json();
       if (data.ok) {
-        document.getElementById('replyText').value = '';
+        textoEl.value = '';
         status.textContent = '✓ Enviado com sucesso'; status.style.color = 'var(--verde)';
         setTimeout(() => { if (status) status.textContent = ''; }, 3000);
       } else { throw new Error(data.erro || 'Erro desconhecido'); }
@@ -2250,6 +2708,11 @@
       .then(r => r.json()).then(data => marcarLidaLocal(id, data.lidaEm)).catch(console.error);
   }
   function marcarLidaLocal(id, lidaEm) {
+    const jáLida = todasMensagens.find(x => x.id === id && x.lida);
+    if (!jáLida && _chatListTotalUnread > 0) {
+      _chatListTotalUnread--;
+      atualizarTopCounter();
+    }
     const m = todasMensagens.find(x => x.id === id);
     if (m) { m.lida = true; if (lidaEm) m.lidaEm = lidaEm; }
     renderFeed();
@@ -2268,7 +2731,7 @@
     localStorage.removeItem('timerInicio');
     mensagemSelecionada = null;
     fecharDetalhe();
-    renderTimers(); renderFeed(); renderMassivo(); atualizarContadores(c);
+    renderTimers(); renderFeed(); renderMassivo(); renderChamadosPanel(); atualizarContadores(c);
     atualizarDropdownLocalidades();
   }
 
@@ -2284,6 +2747,7 @@
     }
     rebuildTimers();
     renderFeed();
+    renderChamadosPanel();
     atualizarContadoresDisplay();
     atualizarBtnLimpar();
   }
@@ -2309,26 +2773,56 @@
     });
     rebuildTimers();
     renderFeed();
+    renderChamadosPanel();
     atualizarContadoresDisplay();
     atualizarBtnLimpar();
   }
 
   // ── Timers (items 3, 9) ────────────────────────────────────────────────────
   function iniciarTimers(msgOrDetectados, ts, textoMsg) {
-    let detectados, chatId;
+    let detectados, chatId, chamado, localidade;
     if (Array.isArray(msgOrDetectados)) {
-      detectados = msgOrDetectados; chatId = null;
+      detectados = msgOrDetectados; chatId = null; chamado = null;
     } else {
-      if (!msgOrDetectados.temAcionamento) return;  // só acionamentos geram timer
-      detectados = msgOrDetectados.detectados; chatId = msgOrDetectados.numero;
+      if (!msgOrDetectados.temAcionamento && !msgOrDetectados.chamado) return;
+      detectados = msgOrDetectados.detectados;
+      chatId     = msgOrDetectados.numero;
+      chamado    = msgOrDetectados.chamado;
+      localidade = (msgOrDetectados.municipios || [])[0] || '';
     }
     // quando grupos selecionados, só timer dos grupos selecionados
     if (chatId && selectedChats.size > 0 && !selectedChats.has(chatId)) return;
 
     const _savedInicio = JSON.parse(localStorage.getItem('timerInicio') || '{}');
+
+    // ── Chamado-based timer (BDESK / ATRIX) — prioridade ─────────────────────
+    if (chamado) {
+      const key = msgOrDetectados.chaveUnica || (chamado.tipo + ':' + chamado.numero);
+      if (!timers[key]) {
+        const inicio = _savedInicio[key] || null;
+        const d = (detectados || [])[0];
+        timers[key] = {
+          chamadoLabel:   chamado.tipo.toUpperCase() + ' ' + chamado.numero,
+          tipoChamado:    chamado.tipo,
+          numeroChamado:  chamado.numero,
+          titulo:         (textoMsg || '').substring(0, 80),
+          localidade,
+          muni:           localidade,
+          uf:             d ? d.uf   : '',
+          sigla:          d ? d.sigla: '',
+          eps:            d ? d.eps  : '',
+          inicio,
+          pendente:       !inicio,
+          chatId,
+        };
+      }
+      renderTimers();
+      return;
+    }
+
+    // ── Municipality-based timer (fallback para acionamentos sem chamado) ─────
     for (const d of (detectados || [])) {
       if (!d.sigla && !d.muni) continue;
-      // item 3: MA — só São Luís, Paço do Lumiar, São José de Ribamar
       if (d.uf === 'MA') {
         const muniNorm = (d.muni || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
         if (!MA_TIMER_MUNIS.some(a => a.normalize('NFD').replace(/[̀-ͯ]/g,'') === muniNorm)) continue;
@@ -2336,9 +2830,20 @@
       const key = `${d.uf}-${d.sigla || d.muni}`;
       if (!timers[key]) {
         const inicio = _savedInicio[key] || null;
-        timers[key] = { muni:d.muni, uf:d.uf, sigla:d.sigla, eps:d.eps, inicio, pendente: !inicio, resumo:(textoMsg||'').substring(0,70), chatId };
+        timers[key] = {
+          chamadoLabel:  null,
+          titulo:        (textoMsg || '').substring(0, 70),
+          localidade:    d.muni,
+          muni:          d.muni,
+          uf:            d.uf,
+          sigla:         d.sigla,
+          eps:           d.eps,
+          inicio,
+          pendente:      !inicio,
+          chatId,
+        };
       }
-      break; // apenas o primeiro município válido por mensagem
+      break; // apenas o primeiro município válido
     }
     renderTimers();
   }
@@ -2365,8 +2870,11 @@
   }
 
   function fmtMs(ms) {
-    if (ms <= 0) return '00:00';
-    return String(Math.floor(ms/60000)).padStart(2,'0') + ':' + String(Math.floor((ms%60000)/1000)).padStart(2,'0');
+    if (ms <= 0) return '00:00:00';
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   }
 
   let timerVisible = true;
@@ -2411,45 +2919,49 @@
     panel.innerHTML = keys.map(key => {
       const t   = timers[key];
       const cor = COR_UF[t.uf] || '#8888a0';
-      const tagsHtml = `
-        <span class="tag-pill" style="background:${cor}">${t.uf}</span>
-        ${t.sigla ? `<span class="tag-pill" style="background:#15803d">${t.sigla}</span>` : ''}
-        ${t.eps   ? `<span class="tag-pill" style="background:${t.eps==='ADX'?'#dc2626':'#166534'}">${t.eps}</span>` : ''}`;
+      const tagsHtml = [
+        t.uf    ? `<span class="tag-pill" style="background:${cor}">${t.uf}</span>` : '',
+        t.sigla ? `<span class="tag-pill" style="background:#15803d">${t.sigla}</span>` : '',
+        t.eps   ? `<span class="tag-pill" style="background:${t.eps==='ADX'?'#dc2626':'#166534'}">${t.eps}</span>` : '',
+      ].join('');
 
-      if (t.pendente) {
-        return `<div class="timer-item">
-          <div class="timer-line1">
-            <div class="timer-muni">${escHtml(t.muni)}</div>
-            <div class="timer-tags">${tagsHtml}</div>
-            <div class="timer-clock" style="color:var(--subtext);font-size:.7rem">AGUARD.</div>
-            <button class="btn-liberar" style="background:rgba(34,197,94,.18);color:var(--verde);border-color:rgba(34,197,94,.4)"
-              onclick="iniciarContagem('${key}')">▶ Iniciar</button>
-          </div>
-          <div class="timer-line2">
-            <div class="timer-bar"><div class="timer-bar-fill" style="width:100%;background:var(--border2)"></div></div>
-          </div>
-        </div>`;
-      }
-
-      const decor = now - t.inicio;
-      const rest  = Math.max(0, TIMER_DURACAO - decor);
-      const pct   = Math.max(0, (rest / TIMER_DURACAO) * 100);
-      const exp   = rest <= 0;
-      const urg   = !exp && rest <= 10 * 60 * 1000;
-      const barC  = exp ? '#ef4444' : urg ? '#f97316' : '#22c55e';
+      const decor   = t.pendente ? 0 : (now - t.inicio);
+      const rest    = Math.max(0, TIMER_DURACAO - decor);
+      const pct     = t.pendente ? 100 : Math.max(0, (rest / TIMER_DURACAO) * 100);
+      const exp     = !t.pendente && rest <= 0;
+      const urg     = !t.pendente && !exp && rest <= 10 * 60 * 1000;
+      const barC    = exp ? '#ef4444' : urg ? '#f97316' : '#22c55e';
       const itemCls = exp ? 'expirado' : urg ? 'urgente' : '';
-      const clkC  = exp ? 'alerta' : urg ? 'urgente' : 'ok';
+      const clkC    = exp ? 'alerta'   : urg ? 'urgente' : 'ok';
+      const clkTxt  = t.pendente ? '00:00:00' : (exp ? '⚠ COBRAR' : fmtMs(rest));
+
+      // Linha 1 — chamado ou município
+      const linha1 = t.chamadoLabel
+        ? `<div class="timer-line1"><div class="timer-chamado-num">🎫 ${escHtml(t.chamadoLabel)}</div>${tagsHtml ? `<div class="timer-tags" style="flex-shrink:0">${tagsHtml}</div>` : ''}</div>`
+        : `<div class="timer-line1"><div class="timer-muni">${escHtml(t.muni || '')}</div><div class="timer-tags">${tagsHtml}</div></div>`;
+
+      // Linha 2 — localidade piscando
+      const linha2 = t.localidade
+        ? `<div class="timer-line2-loc"><span class="timer-localidade-blink">📍 ${escHtml(t.localidade)}</span></div>`
+        : `<div class="timer-line2-loc" style="font-size:.72rem;color:var(--muted)">${escHtml((t.titulo||'').substring(0,50))}</div>`;
+
+      // Linha 3 — controle do cronômetro
+      const linha3 = t.pendente
+        ? `<div class="timer-line3">
+             <button class="btn-liberar" style="background:rgba(34,197,94,.18);color:var(--verde);border-color:rgba(34,197,94,.4)"
+               onclick="iniciarContagem('${escAttr(key)}')">▶ Iniciar</button>
+             <div class="timer-clock" style="color:var(--subtext)">00:00:00</div>
+           </div>`
+        : `<div class="timer-line3">
+             <div class="timer-clock ${clkC}">${clkTxt}</div>
+             <button class="btn-liberar" onclick="liberarTimer('${escAttr(key)}')">Liberar</button>
+           </div>`;
 
       return `<div class="timer-item ${itemCls}">
-        <div class="timer-line1">
-          <div class="timer-muni">${escHtml(t.muni)}</div>
-          <div class="timer-tags">${tagsHtml}</div>
-          <div class="timer-clock ${clkC}">${exp ? '⚠ COBRAR' : fmtMs(rest)}</div>
-          <button class="btn-liberar" onclick="liberarTimer('${key}')">Liberar</button>
-        </div>
-        <div class="timer-line2">
-          <div class="timer-bar"><div class="timer-bar-fill" style="width:${pct}%;background:${barC}"></div></div>
-        </div>
+        ${linha1}
+        ${linha2}
+        ${linha3}
+        <div style="margin-top:4px"><div class="timer-bar"><div class="timer-bar-fill" style="width:${pct}%;background:${barC}"></div></div></div>
       </div>`;
     }).join('');
   }
@@ -2513,6 +3025,93 @@
         <td>${r.sigla ? `<span class="chip sigla">${r.sigla}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
         <td>${r.eps === 'SLN' ? '<span class="chip eps-sln">SLN</span>' : r.eps === 'ADX' ? '<span class="chip eps-adx">ADX</span>' : '—'}</td>
       </tr>`).join('');
+  }
+
+  // ── Painel de Chamados (Q5 — coluna direita) ─────────────────────────────
+  let filtroChamadoStatus = 'ATIVOS';
+
+  function renderChamadosPanel() {
+    const list  = document.getElementById('chamadosList');
+    const badge = document.getElementById('chamadosBadge');
+    if (!list) return;
+
+    // Quando grupos selecionados: mostra apenas chamados desses grupos
+    const todasEntradas = Object.entries(chamadosStatusLocal);
+    const entradas = selectedChats.size > 0
+      ? todasEntradas.filter(([, d]) => d.chatId && selectedChats.has(d.chatId))
+      : todasEntradas;
+    const ativos   = entradas.filter(([, d]) => d.status !== 'finalizado');
+    if (badge) badge.textContent = ativos.length;
+    const mobBadge = document.getElementById('mobBadgeCham');
+    if (mobBadge) { mobBadge.textContent = ativos.length || ''; mobBadge.classList.toggle('hidden', !ativos.length); }
+
+    let filtradas;
+    if (filtroChamadoStatus === 'ATIVOS') {
+      filtradas = ativos;
+    } else if (filtroChamadoStatus === 'finalizado') {
+      filtradas = entradas.filter(([, d]) => d.status === 'finalizado');
+    } else {
+      filtradas = entradas.filter(([, d]) => d.status === filtroChamadoStatus);
+    }
+
+    if (!filtradas.length) {
+      list.innerHTML = '<div class="chamados-vazio"><span>📋</span>Nenhum chamado nesta categoria.</div>';
+      return;
+    }
+
+    const ordemStatus = ['aguardando','em_atendimento','em_reparo','em_ativacao','finalizado'];
+    filtradas.sort((a, b) => {
+      const ia = ordemStatus.indexOf(a[1].status), ib = ordemStatus.indexOf(b[1].status);
+      if (ia !== ib) return ia - ib;
+      const ta = (a[1].timeline||[]).at(-1)?.ts || 0;
+      const tb = (b[1].timeline||[]).at(-1)?.ts || 0;
+      return tb - ta;
+    });
+
+    list.innerHTML = filtradas.map(([chave, d]) => {
+      const status   = d.status || 'aguardando';
+      const statusLbl = { aguardando:'Aguardando', em_atendimento:'Em atendimento', em_reparo:'Em reparo', em_ativacao:'Em ativação', finalizado:'Finalizado' }[status] || status;
+      const cmoHtml  = d.cmo === 'reparo'
+        ? '<span class="chamado-sc" style="background:rgba(194,65,12,.18);color:#7c2d12">🔧Reparo</span>'
+        : d.cmo === 'ativacao'
+        ? '<span class="chamado-sc" style="background:rgba(126,34,206,.18);color:#4c1d95">⚡Ativação</span>'
+        : '';
+      const lastTs   = (d.timeline||[]).at(-1)?.ts;
+      const tempoStr = lastTs ? `<span class="chamado-tempo">${new Date(lastTs).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>` : '';
+      const numHtml  = d.chamado
+        ? `${escHtml(d.chamado.tipo.toUpperCase())} #${escHtml(d.chamado.numero)}`
+        : escHtml(chave);
+      const ult = (d.timeline||[]).at(-1);
+      const ultTexto = ult && !ult.auto ? `<div style="font-size:.62rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(ult.texto.substring(0,50))}</div>` : '';
+      return `
+        <div class="chamado-item status-${escAttr(status)}" onclick="abrirChamadoDoPainel('${escAttr(chave)}')">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:4px">
+            <div class="chamado-num">${numHtml}</div>
+            ${tempoStr}
+          </div>
+          <div class="chamado-local">${escHtml(d.localidade || d.titulo || '—')}</div>
+          ${ultTexto}
+          <div class="chamado-row">
+            <span class="chamado-sc csc-${escAttr(status)}">${statusLbl}</span>
+            ${cmoHtml}
+            <button class="chamado-btn-atz" onclick="event.stopPropagation();abrirChamadoDoPainel('${escAttr(chave)}')">🔄 Atualizar</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function filtrarChamadosStatus(status, btn) {
+    filtroChamadoStatus = status;
+    document.querySelectorAll('.chamados-ftab').forEach(b => b.classList.remove('ativo'));
+    if (btn) btn.classList.add('ativo');
+    renderChamadosPanel();
+  }
+
+  function abrirChamadoDoPainel(chave) {
+    chaveAtualAberta = chave;
+    renderAtz();
+    const overlay = document.getElementById('atzModal');
+    if (overlay) overlay.classList.add('aberto');
   }
 
   // ── Chamados Massivos (Q4) ────────────────────────────────────────────────
@@ -2594,9 +3193,29 @@
   function escAttr(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
   // ── Modal de Configurações (admin) ───────────────────────────────────────
+  // ── Filtros CMO configuráveis ─────────────────────────────────────────────
+  function salvarFiltrosCmo() {
+    const reparo   = (document.getElementById('filtroCmoReparo')?.value   || '').trim();
+    const ativacao = (document.getElementById('filtroCmoAtivacao')?.value || '').trim();
+    _filtroCmoReparo   = reparo;
+    _filtroCmoAtivacao = ativacao;
+    if (reparo)   localStorage.setItem('cmoReparoFiltro',   reparo);
+    else          localStorage.removeItem('cmoReparoFiltro');
+    if (ativacao) localStorage.setItem('cmoAtivacaoFiltro', ativacao);
+    else          localStorage.removeItem('cmoAtivacaoFiltro');
+    const sts = document.getElementById('filtrosStatus');
+    if (sts) { sts.textContent = '✓ Filtros salvos! Recarregue para aplicar.'; sts.style.color = 'var(--verde)'; }
+    setTimeout(() => { if (sts) sts.textContent = ''; }, 3500);
+  }
+
   function abrirSettings() {
     document.getElementById('settingsModal').classList.add('aberto');
     carregarListaUsuarios();
+    // Preenche campos de filtros com valores salvos
+    const fr = document.getElementById('filtroCmoReparo');
+    const fa = document.getElementById('filtroCmoAtivacao');
+    if (fr) fr.value = localStorage.getItem('cmoReparoFiltro')   || '';
+    if (fa) fa.value = localStorage.getItem('cmoAtivacaoFiltro') || '';
   }
   function fecharSettings() {
     document.getElementById('settingsModal').classList.remove('aberto');
@@ -2706,6 +3325,131 @@
     }
   }
 
+  // ── Grid Resize ──────────────────────────────────────────────────────────
+  const _GR_KEY  = 'mcll_grid_v3';
+  const _GR_MINC = 160;  // min column px
+  const _GR_MINR = 60;   // min row px
+  let   _grState = null;
+  let   _grDrag  = null;
+
+  function initGridResize() {
+    const grid = document.querySelector('.quadrant-grid');
+    if (!grid || window.innerWidth < 700) return; // skip on mobile
+
+    // Initialise pixel sizes
+    if (!_grState) {
+      const saved = localStorage.getItem(_GR_KEY);
+      if (saved) { try { _grState = JSON.parse(saved); } catch(e) {} }
+    }
+    if (!_grState) _grState = _grDefaultSizes(grid);
+
+    _grApply(grid);
+    _grPlaceHandles(grid);
+
+    window.addEventListener('resize', () => {
+      const g = document.querySelector('.quadrant-grid');
+      if (g && _grState) _grPlaceHandles(g);
+    }, { passive: true });
+  }
+
+  function _grDefaultSizes(grid) {
+    const r   = grid.getBoundingClientRect();
+    const gap = 6;
+    const tw  = r.width  - gap * 2;
+    const th  = r.height - gap * 3;
+    const c3  = Math.min(252, tw * 0.27);
+    const rem = tw - c3;
+    return {
+      cols: [ rem * (1 / 1.88), rem * (0.88 / 1.88), c3 ],
+      rows: [ th * 0.32, th * 0.38 ],
+    };
+  }
+
+  function _grApply(grid) {
+    const [c1, c2, c3] = _grState.cols;
+    const [r1, r4]     = _grState.rows;
+    grid.style.gridTemplateColumns = `${c1}px ${c2}px ${c3}px`;
+    grid.style.gridTemplateRows    = `${r1}px auto auto ${r4}px`;
+  }
+
+  function _grPlaceHandles(grid) {
+    const gr   = grid.getBoundingClientRect();
+    const quads = [...grid.querySelectorAll(':scope > .quadrant')];
+    if (quads.length < 5) return;
+
+    // 0=reports(col1 r1), 1=detalhes(col2 r1-3), 2=mensagens(col1 r2-4),
+    // 3=4th-child→massivos-area(col2 r4), 4=5th-child→chamados-area(col3)
+    const q = quads.map(el => {
+      const r = el.getBoundingClientRect();
+      return { l: r.left - gr.left, t: r.top - gr.top, r: r.right - gr.left, b: r.bottom - gr.top, w: r.width, h: r.height };
+    });
+
+    const defs = [
+      { id: 'grh-col12', cls: 'grid-rh grid-rh-col', style: `left:${q[0].r-3}px;top:0;width:6px;height:${gr.height}px` },
+      { id: 'grh-col23', cls: 'grid-rh grid-rh-col', style: `left:${q[1].r-3}px;top:0;width:6px;height:${gr.height}px` },
+      { id: 'grh-row12', cls: 'grid-rh grid-rh-row', style: `left:${q[0].l}px;top:${q[0].b-3}px;width:${q[0].w}px;height:6px` },
+      { id: 'grh-row34', cls: 'grid-rh grid-rh-row', style: `left:${q[1].l}px;top:${q[1].b-3}px;width:${q[1].w}px;height:6px` },
+    ];
+
+    defs.forEach(({ id, cls, style }) => {
+      let el = document.getElementById(id);
+      if (!el) {
+        el = document.createElement('div');
+        el.id = id;
+        el.dataset.grh = id;
+        el.addEventListener('mousedown', _grHandleMD);
+        grid.appendChild(el);
+      }
+      el.className = cls;
+      el.style.cssText = style + ';position:absolute;z-index:60;';
+    });
+  }
+
+  function _grHandleMD(e) {
+    e.preventDefault();
+    const hid = e.currentTarget.dataset.grh;
+    _grDrag = {
+      hid,
+      sx: e.clientX, sy: e.clientY,
+      cols0: [..._grState.cols],
+      rows0: [..._grState.rows],
+    };
+    document.addEventListener('mousemove', _grDragMove);
+    document.addEventListener('mouseup',   _grDragEnd);
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = hid.startsWith('grh-col') ? 'col-resize' : 'row-resize';
+  }
+
+  function _grDragMove(e) {
+    if (!_grDrag) return;
+    const { hid, sx, sy, cols0, rows0 } = _grDrag;
+    const dx = e.clientX - sx;
+    const dy = e.clientY - sy;
+    const mn = _GR_MINC, mr = _GR_MINR;
+
+    if (hid === 'grh-col12') {
+      _grState.cols = [ Math.max(mn, cols0[0]+dx), Math.max(mn, cols0[1]-dx), cols0[2] ];
+    } else if (hid === 'grh-col23') {
+      _grState.cols = [ cols0[0], Math.max(mn, cols0[1]+dx), Math.max(mn, cols0[2]-dx) ];
+    } else if (hid === 'grh-row12') {
+      _grState.rows = [ Math.max(mr, rows0[0]+dy), rows0[1] ];
+    } else if (hid === 'grh-row34') {
+      _grState.rows = [ rows0[0], Math.max(mr, rows0[1]-dy) ];
+    }
+
+    const grid = document.querySelector('.quadrant-grid');
+    if (grid) { _grApply(grid); _grPlaceHandles(grid); }
+  }
+
+  function _grDragEnd() {
+    if (_grDrag) localStorage.setItem(_GR_KEY, JSON.stringify(_grState));
+    _grDrag = null;
+    document.removeEventListener('mousemove', _grDragMove);
+    document.removeEventListener('mouseup',   _grDragEnd);
+    document.body.style.userSelect = '';
+    document.body.style.cursor     = '';
+  }
+
   // ── Init ─────────────────────────────────────────────────────────────────
   window.addEventListener('DOMContentLoaded', () => {
     conectarWS();
@@ -2716,6 +3460,8 @@
     if (tb) tb.style.display = '';
     const ti = document.getElementById('tableToggleIcon');
     if (ti) ti.textContent = '▲ Recolher';
+    // Painel redimensionável
+    requestAnimationFrame(() => initGridResize());
   });
 </script>
 </body>
