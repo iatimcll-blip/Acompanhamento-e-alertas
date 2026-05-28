@@ -1810,6 +1810,7 @@
   let selectedChats     = new Set();
   let selectedChatsInfo = {};
   let _chatMap          = {};
+  let _chatList         = []; // lista ordenada por atividade recente
   let _serverContadores = {};
   let filtroMassivoUFAtual   = 'TODOS';
   let filtroMassivoTipoAtual = 'TODOS';
@@ -2225,7 +2226,6 @@
   function renderChatList(chats) {
     const el  = document.getElementById('chatList');
     const cnt = document.getElementById('chatCount');
-    _chatMap  = {};
     const btn = document.getElementById('btnRefreshChats');
     if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
     if (!chats || !chats.length) {
@@ -2233,22 +2233,35 @@
       if (cnt) cnt.textContent = '0';
       return;
     }
-    chats.forEach(c => { _chatMap[c.id] = c; });
-    // Atualiza contagem de não lidas do WhatsApp
-    _chatListTotalUnread = chats.reduce((acc, c) => acc + (c.naoLidas || 0), 0);
+    // Mescla com _chatList existente para preservar lastTs e lastTexto
+    chats.forEach(c => {
+      const existing = _chatMap[c.id];
+      if (existing) { c.lastTs = existing.lastTs || 0; c.lastTexto = existing.lastTexto || ''; }
+      _chatMap[c.id] = c;
+    });
+    // Ordena: não-lidas primeiro, depois por atividade mais recente
+    _chatList = chats.slice().sort((a, b) => {
+      if ((b.naoLidas || 0) !== (a.naoLidas || 0)) return (b.naoLidas || 0) - (a.naoLidas || 0);
+      return (b.lastTs || 0) - (a.lastTs || 0);
+    });
+    _chatListTotalUnread = _chatList.reduce((acc, c) => acc + (c.naoLidas || 0), 0);
     atualizarTopCounter();
-    if (cnt) cnt.textContent = chats.length;
-    el.innerHTML = chats.map(c => `
-      <div class="chat-item${selectedChats.has(c.id) ? ' selecionado' : ''}" data-cid="${escAttr(c.id)}">
+    if (cnt) cnt.textContent = _chatList.length;
+    // Guarda scroll antes de re-renderizar
+    const scrollTop = el.scrollTop;
+    el.innerHTML = _chatList.map(c => {
+      const preview = c.lastTexto ? escHtml(c.lastTexto.substring(0, 38)) : (c.grupo ? 'Grupo' : 'Contato');
+      return `<div class="chat-item${selectedChats.has(c.id) ? ' selecionado' : ''}" data-cid="${escAttr(c.id)}">
         <input type="checkbox" class="chat-check" ${selectedChats.has(c.id) ? 'checked' : ''}>
         <div class="chat-avatar">${c.grupo ? '👥' : '👤'}</div>
         <div class="chat-info">
           <div class="chat-nome" title="${escAttr(c.nome || c.id)}">${escHtml(c.nome || c.id)}</div>
-          <div class="chat-tipo">${c.grupo ? 'Grupo' : 'Contato'}</div>
+          <div class="chat-tipo" style="font-size:.6rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${preview}</div>
         </div>
-        ${c.naoLidas > 0 ? `<div class="chat-badge">${c.naoLidas}</div>` : ''}
-      </div>`).join('');
-
+        ${(c.naoLidas || 0) > 0 ? `<div class="chat-badge">${c.naoLidas}</div>` : ''}
+      </div>`;
+    }).join('');
+    el.scrollTop = scrollTop;
     el.querySelectorAll('.chat-item').forEach(item => {
       const id = item.dataset.cid;
       const cb = item.querySelector('.chat-check');
@@ -2344,6 +2357,14 @@
     todasMensagens.unshift(m);
     if (todasMensagens.length > 200) todasMensagens.pop();
     if ((m.temAcionamento || m.chamado) && m.detectados && m.detectados.length > 0 && !m.duplicado) iniciarTimers(m, m.ts, m.texto);
+    // Atualiza chat list: sobe o grupo ao topo e incrementa não lidas
+    if (m.numero && _chatMap[m.numero]) {
+      const c = _chatMap[m.numero];
+      c.naoLidas   = (c.naoLidas || 0) + 1;
+      c.lastTs     = m.ts || Date.now();
+      c.lastTexto  = (m.texto || '').substring(0, 40);
+      renderChatList(_chatList.length ? _chatList : [c]);
+    }
     // Sons: ruptura tem alerta próprio; demais: chime se combinar com filtro ativo
     if (m.temRuptura) playRupturaAlert();
     else if (mensagemMatchesFiltro(m)) playMsgChime();
@@ -2842,6 +2863,9 @@
         const agora = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
         todasMensagens.forEach(m => { if (!m.lida) { m.lida = true; m.lidaEm = agora; } });
         _chatListTotalUnread = 0;
+        // Zera badges de todos os chats na sidebar
+        _chatList.forEach(c => { c.naoLidas = 0; if (_chatMap[c.id]) _chatMap[c.id].naoLidas = 0; });
+        if (_chatList.length) renderChatList(_chatList);
         atualizarTopCounter();
         atualizarContadoresDisplay();
         renderFeed();
@@ -2862,8 +2886,14 @@
     const jaEraLida = m.lida;
     m.lida = true;
     if (lidaEm) m.lidaEm = lidaEm;
-    if (!jaEraLida && _chatListTotalUnread > 0) {
-      _chatListTotalUnread--;
+    if (!jaEraLida) {
+      if (_chatListTotalUnread > 0) _chatListTotalUnread--;
+      // Decrementa badge do chat na sidebar
+      const chat = m.numero ? _chatMap[m.numero] : null;
+      if (chat && chat.naoLidas > 0) {
+        chat.naoLidas--;
+        renderChatList(_chatList.length ? _chatList : Object.values(_chatMap));
+      }
       atualizarTopCounter();
     }
     renderFeed();
