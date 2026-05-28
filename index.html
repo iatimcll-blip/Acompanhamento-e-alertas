@@ -1948,7 +1948,7 @@
   function mensagemMatchesFiltro(m) {
     if (filtroLocalidade) return (m.municipios||[]).includes(filtroLocalidade);
     switch (filtroFeedAtual) {
-      case 'TODOS':      return (m.uf||[]).length > 0 && !_clientIsFechado(m);
+      case 'TODOS':      return true;
       case 'PA':         return (m.uf||[]).includes('PA') && !_clientIsFechado(m);
       case 'MA':         return (m.uf||[]).includes('MA') && !_clientIsFechado(m);
       case 'AP':         return (m.uf||[]).includes('AP') && !_clientIsFechado(m);
@@ -1960,7 +1960,6 @@
       case 'WANDERSON':  return !!m.temWanderson || _clientIsWanderson(m);
       case 'CMO_REPARO':    return msgMatchCmoReparo(m);
       case 'CMO_ATIVACAO':  return msgMatchCmoAtivacao(m);
-      case 'MASSIVO_INFRA': return msgMatchInfra(m);
       default:              return false;
     }
   }
@@ -2458,14 +2457,11 @@
       msgs = msgs.filter(m => m.temWanderson || _clientIsWanderson(m));
     } else if (filtroFeedAtual === 'FECHADO') {
       msgs = msgs.filter(m => _clientIsFechado(m) && ((m.uf||[]).length > 0 || m.bdesk || m.atrix));
-    } else if (filtroFeedAtual === 'MASSIVO_INFRA') {
-      msgs = msgs.filter(m => msgMatchInfra(m));
     } else if (['PA','MA','AP','AM'].includes(filtroFeedAtual)) {
       // Filtra pela UF cadastrada; exclui fechados (eles vão para a aba FECHADO)
       msgs = msgs.filter(m => (m.uf || []).includes(filtroFeedAtual) && !_clientIsFechado(m));
     } else {
-      // TODOS: apenas mensagens com UF/município cadastrado nas regras — sem fechados (aba própria)
-      msgs = msgs.filter(m => (m.uf||[]).length > 0 && !_clientIsFechado(m));
+      // TODOS: mostra todas as mensagens recebidas sem filtro adicional
     }
 
     // Filtro de busca livre (chamado, texto, grupo, município)
@@ -3420,26 +3416,6 @@
     document.querySelectorAll('#massivoFilterBar .ftab').forEach(b => b.classList.remove('ativo', 'blink-alert'));
     if (btn) btn.classList.add('ativo');
     renderMassivo();
-    // Ao clicar em INFRA: propaga filtro para o painel de Mensagens
-    if (tipo === 'INFRA') {
-      filtroFeedAtual  = 'MASSIVO_INFRA';
-      filtroLocalidade = '';
-      const sel = document.getElementById('filtroLocalidade');
-      if (sel) sel.value = '';
-      document.querySelectorAll('#filterTabs .ftab').forEach(b => b.classList.remove('ativo'));
-      const tag = document.getElementById('filtroAtivoTag');
-      if (tag) { tag.textContent = '🏗 Infra'; tag.classList.add('visivel'); }
-      renderFeed();
-    } else if (filtroFeedAtual === 'MASSIVO_INFRA') {
-      // Saiu do filtro INFRA — volta para TODOS
-      filtroFeedAtual = 'TODOS';
-      document.querySelectorAll('#filterTabs .ftab').forEach(b => b.classList.remove('ativo'));
-      const todos = document.querySelector('.ftab.f-todos');
-      if (todos) todos.classList.add('ativo');
-      const tag = document.getElementById('filtroAtivoTag');
-      if (tag) tag.classList.remove('visivel');
-      renderFeed();
-    }
   }
 
   function atualizarBtnLimpar() {
