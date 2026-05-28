@@ -1842,6 +1842,13 @@
     return CMO_ATIVACAO_KEYWORDS.some(k => t.includes(k));
   }
 
+  const _INFRA_RE = /tipo\s*:\s*infra(?:estrutura)?\b|\binfra(?:estrutura)?\b/i;
+  function msgMatchInfra(m) {
+    if (!m.texto) return false;
+    if (m.tipoMassivo === 'INFRA') return true;
+    return _INFRA_RE.test(m.texto);
+  }
+
   // ── Mobile Navigation ─────────────────────────────────────────────────────
   function mobIsMobile() { return window.innerWidth <= 800; }
 
@@ -1951,9 +1958,10 @@
       case 'NAOIDA':     return !m.lida;
       case 'FLAGGED':    return !!m.flagged;
       case 'WANDERSON':  return !!m.temWanderson || _clientIsWanderson(m);
-      case 'CMO_REPARO': return msgMatchCmoReparo(m);
-      case 'CMO_ATIVACAO': return msgMatchCmoAtivacao(m);
-      default:           return false;
+      case 'CMO_REPARO':    return msgMatchCmoReparo(m);
+      case 'CMO_ATIVACAO':  return msgMatchCmoAtivacao(m);
+      case 'MASSIVO_INFRA': return msgMatchInfra(m);
+      default:              return false;
     }
   }
 
@@ -2450,6 +2458,8 @@
       msgs = msgs.filter(m => m.temWanderson || _clientIsWanderson(m));
     } else if (filtroFeedAtual === 'FECHADO') {
       msgs = msgs.filter(m => _clientIsFechado(m) && ((m.uf||[]).length > 0 || m.bdesk || m.atrix));
+    } else if (filtroFeedAtual === 'MASSIVO_INFRA') {
+      msgs = msgs.filter(m => msgMatchInfra(m));
     } else if (['PA','MA','AP','AM'].includes(filtroFeedAtual)) {
       // Filtra pela UF cadastrada; exclui fechados (eles vão para a aba FECHADO)
       msgs = msgs.filter(m => (m.uf || []).includes(filtroFeedAtual) && !_clientIsFechado(m));
@@ -3410,6 +3420,26 @@
     document.querySelectorAll('#massivoFilterBar .ftab').forEach(b => b.classList.remove('ativo', 'blink-alert'));
     if (btn) btn.classList.add('ativo');
     renderMassivo();
+    // Ao clicar em INFRA: propaga filtro para o painel de Mensagens
+    if (tipo === 'INFRA') {
+      filtroFeedAtual  = 'MASSIVO_INFRA';
+      filtroLocalidade = '';
+      const sel = document.getElementById('filtroLocalidade');
+      if (sel) sel.value = '';
+      document.querySelectorAll('#filterTabs .ftab').forEach(b => b.classList.remove('ativo'));
+      const tag = document.getElementById('filtroAtivoTag');
+      if (tag) { tag.textContent = '🏗 Infra'; tag.classList.add('visivel'); }
+      renderFeed();
+    } else if (filtroFeedAtual === 'MASSIVO_INFRA') {
+      // Saiu do filtro INFRA — volta para TODOS
+      filtroFeedAtual = 'TODOS';
+      document.querySelectorAll('#filterTabs .ftab').forEach(b => b.classList.remove('ativo'));
+      const todos = document.querySelector('.ftab.f-todos');
+      if (todos) todos.classList.add('ativo');
+      const tag = document.getElementById('filtroAtivoTag');
+      if (tag) tag.classList.remove('visivel');
+      renderFeed();
+    }
   }
 
   function atualizarBtnLimpar() {
