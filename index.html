@@ -1407,6 +1407,7 @@
       <div class="sidebar-chats-hd">
         <span>Grupos e Contatos</span>
         <button id="btnLimparSel" class="btn-limpar-sel" onclick="limparSel()">✕ Limpar</button>
+        <button onclick="marcarTodasLidas(this)" title="Marcar todas as mensagens como lidas" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.78rem;padding:2px 5px;border-radius:4px;transition:color .2s;" onmouseover="this.style.color='#4ade80'" onmouseout="this.style.color='var(--muted)'">✓</button>
         <button id="btnRefreshChats" onclick="refreshChats()" title="Atualizar lista de chats" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.78rem;padding:2px 5px;border-radius:4px;transition:color .2s;" onmouseover="this.style.color='#4ade80'" onmouseout="this.style.color='var(--muted)'">🔄</button>
         <span id="chatCount" style="color:var(--subtext)">0</span>
       </div>
@@ -2830,6 +2831,27 @@
   }
 
   // ── Marcar lida ───────────────────────────────────────────────────────────
+  async function marcarTodasLidas(btn) {
+    const naoLidas = todasMensagens.filter(m => !m.lida).length;
+    if (!naoLidas) return;
+    if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+    try {
+      const r = await apiFetch('/api/mensagens/todas-lidas', { method: 'POST' });
+      const data = await r.json();
+      if (data.ok) {
+        const agora = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+        todasMensagens.forEach(m => { if (!m.lida) { m.lida = true; m.lidaEm = agora; } });
+        _chatListTotalUnread = 0;
+        atualizarTopCounter();
+        atualizarContadoresDisplay();
+        renderFeed();
+        renderMassivo();
+        atualizarMobBadges();
+      }
+    } catch(e) { console.error('Erro ao marcar todas como lidas:', e); }
+    finally { if (btn) { btn.textContent = '✓'; btn.disabled = false; } }
+  }
+
   function marcarLida(id) {
     apiFetch(`/api/mensagens/${encodeURIComponent(id)}/lida`, { method: 'POST' })
       .then(r => r.json()).then(data => marcarLidaLocal(id, data.lidaEm)).catch(console.error);

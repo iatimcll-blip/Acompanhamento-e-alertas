@@ -471,6 +471,24 @@ app.post('/api/sync/mensagens', autenticar, async (_, res) => {
   });
 });
 
+// Marcar todas as mensagens como lidas
+app.post('/api/mensagens/todas-lidas', autenticar, (req, res) => {
+  const agora = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+  const atualizadas = [];
+  mensagens.forEach(m => {
+    if (!m.lida) {
+      m.lida = true;
+      m.lidaEm = agora;
+      atualizadas.push({ id: m.id, lidaEm: agora });
+    }
+  });
+  if (atualizadas.length > 0) {
+    salvarMensagens();
+    atualizadas.forEach(a => broadcast('lida', a));
+  }
+  res.json({ ok: true, total: atualizadas.length });
+});
+
 // Marcar mensagem como lida
 app.post('/api/mensagens/:id/lida', autenticar, (req, res) => {
   const msg = mensagens.find(m => m.id === req.params.id);
