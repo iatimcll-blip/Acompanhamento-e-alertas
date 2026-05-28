@@ -155,14 +155,14 @@
     .atz-modal-overlay {
       display: none; position: fixed; inset: 0; z-index: 480;
       background: rgba(0,0,0,.55); backdrop-filter: blur(3px);
-      align-items: flex-end; justify-content: flex-end;
     }
-    .atz-modal-overlay.aberto { display: flex; }
+    .atz-modal-overlay.aberto { display: block; }
     .atz-modal-box {
+      position: absolute;
+      right: 8px; bottom: 8px;
       width: 340px; height: calc(100vh - 72px);
-      min-width: 280px; min-height: 220px;
+      min-width: 260px; min-height: 220px;
       max-width: 90vw; max-height: calc(100vh - 72px);
-      margin: 64px 8px 8px 0;
       display: flex; flex-direction: column;
       border-radius: 14px; overflow: auto;
       resize: both;
