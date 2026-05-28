@@ -994,6 +994,17 @@ async function sincronizarMensagensRecentes(chatsOrigem = null) {
       client.getChats(),
       new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ao carregar chats')), 90000)),
     ]);
+    // Popula e transmite lista de grupos/contatos automaticamente (sem precisar clicar em 🔄)
+    if (!chatsOrigem && chats.length > 0) {
+      chatList = chats.slice(0, 80).map(c => ({
+        id:       c.id._serialized,
+        nome:     c.name || c.id.user || '',
+        grupo:    c.isGroup,
+        naoLidas: c.unreadCount || 0,
+      }));
+      contadores.totalWhatsapp = chats.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
+      broadcast('chats', chatList);
+    }
     // Ordena por mensagem mais recente (inclui chats sem não-lidas mas com msgs de hoje)
     const agora = Date.now() / 1000;
     // Início do dia no timezone configurado (evita usar timezone do SO que pode ser UTC no Railway)
