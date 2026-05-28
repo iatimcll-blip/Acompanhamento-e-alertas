@@ -506,9 +506,9 @@ app.post('/api/chat-messages', autenticar, async (req, res) => {
   }
 });
 
-// Carrega lista de chats sob demanda (evita timeout no startup) — apenas admin
+// Carrega lista de chats sob demanda (disponível para todos os usuários autenticados)
 let carregandoChats = false;
-app.post('/api/chats/refresh', autenticar, apenasAdmin, async (req, res) => {
+app.post('/api/chats/refresh', autenticar, async (req, res) => {
   if (statusWpp !== 'conectado') return res.status(503).json({ erro: 'WhatsApp não conectado' });
   if (carregandoChats) return res.status(429).json({ erro: 'Carregamento já em andamento' });
   carregandoChats = true;

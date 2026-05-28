@@ -1937,11 +1937,11 @@
   function mensagemMatchesFiltro(m) {
     if (filtroLocalidade) return (m.municipios||[]).includes(filtroLocalidade);
     switch (filtroFeedAtual) {
-      case 'TODOS':      return (m.uf||[]).length > 0 && !_clientIsFechado(m) && !m.duplicado;
-      case 'PA':         return (m.uf||[]).includes('PA');
-      case 'MA':         return (m.uf||[]).includes('MA');
-      case 'AP':         return (m.uf||[]).includes('AP');
-      case 'AM':         return (m.uf||[]).includes('AM');
+      case 'TODOS':      return (m.uf||[]).length > 0 || m.temWanderson || _clientIsWanderson(m);
+      case 'PA':         return (m.uf||[]).includes('PA') && !_clientIsFechado(m);
+      case 'MA':         return (m.uf||[]).includes('MA') && !_clientIsFechado(m);
+      case 'AP':         return (m.uf||[]).includes('AP') && !_clientIsFechado(m);
+      case 'AM':         return (m.uf||[]).includes('AM') && !_clientIsFechado(m);
       case 'URGENTE':    return !!m.temAcionamento;
       case 'RUPTURA':    return !!m.temRuptura;
       case 'NAOIDA':     return !m.lida;
@@ -2173,7 +2173,7 @@
       c = _serverContadores;
       document.querySelectorAll('.stat-card').forEach(el => el.classList.remove('sel-ativo'));
     }
-    document.getElementById('statTotal').textContent  = naoLidas;
+    document.getElementById('statTotal').textContent  = c.total    || 0;
     document.getElementById('statPA').textContent     = c.PA       || 0;
     document.getElementById('statMA').textContent     = c.MA       || 0;
     document.getElementById('statAP').textContent     = c.AP       || 0;
@@ -2427,10 +2427,11 @@
     } else if (filtroFeedAtual === 'FECHADO') {
       msgs = msgs.filter(m => _clientIsFechado(m) && ((m.uf||[]).length > 0 || m.bdesk || m.atrix));
     } else if (['PA','MA','AP','AM'].includes(filtroFeedAtual)) {
-      msgs = msgs.filter(m => (m.uf || []).includes(filtroFeedAtual));
+      // Filtra pela UF cadastrada; exclui fechados (eles vão para a aba FECHADO)
+      msgs = msgs.filter(m => (m.uf || []).includes(filtroFeedAtual) && !_clientIsFechado(m));
     } else {
-      // TODOS: apenas mensagens com município/UF identificado e não fechadas
-      msgs = msgs.filter(m => (m.uf||[]).length > 0 && !_clientIsFechado(m) && !m.duplicado);
+      // TODOS: todas as mensagens com município/UF identificado pelas regras cadastradas
+      msgs = msgs.filter(m => (m.uf||[]).length > 0 || m.temWanderson || _clientIsWanderson(m));
     }
 
     // Filtro de busca livre (chamado, texto, grupo, município)
