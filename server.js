@@ -170,6 +170,7 @@ const MASSIVO_RE = [
   { tipo: 'TOTAL',    re: /tipo\s+de\s+falha\s*:\s*total/i },
   { tipo: 'CONJUNTA', re: /tipo\s*:\s*conjunta/i },
   { tipo: 'RUPTURA',  re: /tipo\s*:\s*ruptura/i },
+  { tipo: 'INFRA',    re: /tipo\s*:\s*infra(?:estrutura)?\b|\binfra(?:estrutura)?\b/i },
 ];
 
 // ── Estado em memória ───────────────────────────────────────────────────────

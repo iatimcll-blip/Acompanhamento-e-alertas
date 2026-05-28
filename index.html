@@ -1109,6 +1109,7 @@
     .mas-tipo-total { background:rgba(185,28,28,.2); color:#7f1d1d; }
     .mas-tipo-conjunta { background:rgba(126,34,206,.2); color:#4c1d95; }
     .mas-tipo-ruptura { background:rgba(194,65,12,.2); color:#7c2d12; }
+    .mas-tipo-infra { background:rgba(5,150,105,.2); color:#065f46; }
     /* Limpar seleção */
     .btn-limpar-sel { font-size:.62rem; background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.3); color:#f87171; border-radius:4px; padding:2px 7px; cursor:pointer; display:none; }
     .btn-limpar-sel.visivel { display:inline-block; }
@@ -1585,6 +1586,7 @@
             <button class="ftab" id="mas-ftab-TOTAL" onclick="filtrarMassivoTipo('TOTAL',this)" style="color:#7f1d1d;border-color:rgba(185,28,28,.35)">Falha Total</button>
             <button class="ftab" id="mas-ftab-CONJUNTA" onclick="filtrarMassivoTipo('CONJUNTA',this)" style="color:#4c1d95;border-color:rgba(126,34,206,.35)">Conjunta</button>
             <button class="ftab" id="mas-ftab-RUPTURA" onclick="filtrarMassivoTipo('RUPTURA',this)" style="color:#7c2d12;border-color:rgba(194,65,12,.35)">Ruptura</button>
+            <button class="ftab" id="mas-ftab-INFRA"   onclick="filtrarMassivoTipo('INFRA',this)"   style="color:#065f46;border-color:rgba(5,150,105,.35)">Infra</button>
           </div>
           <div class="massivo-list" id="massivoList">
             <p style="color:var(--muted);font-size:.78rem;text-align:center;padding:18px">Nenhum chamado massivo.</p>
@@ -2509,7 +2511,7 @@
     const chipDup  = m.duplicado ? `<span class="chip dup">atualização</span>` : '';
     const chipRup  = m.temRuptura ? `<span class="chip ruptura">⚡ RUPTURA</span>` : '';
     const chipFech = fechado ? `<span class="chip fechado-chip">✅ Fechado</span>` : '';
-    const tipoCls  = { BDESK:'mas-tipo-bdesk', TOTAL:'mas-tipo-total', CONJUNTA:'mas-tipo-conjunta', RUPTURA:'mas-tipo-ruptura' };
+    const tipoCls  = { BDESK:'mas-tipo-bdesk', TOTAL:'mas-tipo-total', CONJUNTA:'mas-tipo-conjunta', RUPTURA:'mas-tipo-ruptura', INFRA:'mas-tipo-infra' };
     const chipMas  = m.temMassivo && m.tipoMassivo ? `<span class="mas-item-tipo ${tipoCls[m.tipoMassivo]||''}">${m.tipoMassivo}</span>` : '';
     const lidaBadge = m.lida ? `<span class="badge-lida">✓ ${m.lidaEm || ''}</span>` : '';
     const flagCls  = m.flagged ? 'ativo' : '';
@@ -3389,7 +3391,7 @@
       if (card) card.classList.toggle('blink-alert', temNaoLida && filtroMassivoUFAtual !== uf);
     });
     // pisca abas de tipo quando há não lidos daquele tipo
-    ['BDESK','TOTAL','CONJUNTA','RUPTURA'].forEach(tipo => {
+    ['BDESK','TOTAL','CONJUNTA','RUPTURA','INFRA'].forEach(tipo => {
       const btn = document.getElementById('mas-ftab-' + tipo);
       const temNaoLida = msgs.some(m => !m.lida && m.tipoMassivo === tipo);
       if (btn) btn.classList.toggle('blink-alert', temNaoLida && filtroMassivoTipoAtual !== tipo);
