@@ -4,39 +4,42 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MCLL Monitoramento — Painel de Acionamentos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #b8c0cc;  /* cinza metalizado principal */
-      --surface:  #a8b0bc;  /* sidebar esquerda (mais escura) */
-      --card:     #c8d0da;  /* painéis/quadrantes */
-      --card2:    #d4dce6;  /* cards secundários */
-      --card3:    #dde5ee;  /* cards terciários */
-      --border:   #92a0ae;  /* bordas */
-      --border2:  #8090a0;  /* bordas secundárias */
-      --text:     #0e1624;  /* texto principal — quase preto */
-      --subtext:  #283040;  /* subtextos */
-      --muted:    #5a6878;  /* texto tênue */
+      --bg:       #0a0e1a;  /* azul-noite profundo */
+      --surface:  #0d1120;  /* sidebar esquerda */
+      --card:     #111827;  /* painéis/quadrantes */
+      --card2:    #1f2937;  /* cards secundários */
+      --card3:    #263244;  /* cards terciários */
+      --border:   #1e2d4a;  /* bordas */
+      --border2:  #2a3a55;  /* bordas secundárias */
+      --text:     #e2e8f0;  /* texto principal */
+      --subtext:  #94a3b8;  /* subtextos */
+      --muted:    #64748b;  /* texto tênue */
 
-      --verde:    #15803d;  /* verde escuro (legível em cinza) */
-      --verde-dk: #166534;
-      --verde-wpp:#16a34a;
-      --azul:     #1d4ed8;  /* azul escuro */
-      --laranja:  #c2410c;  /* laranja escuro */
-      --roxo:     #7e22ce;  /* roxo escuro */
-      --esmeralda:#047857;  /* esmeralda escuro */
-      --vermelho: #b91c1c;  /* vermelho escuro */
-      --amarelo:  #92400e;  /* âmbar escuro */
-      --wanderson:#b45309;
-      --flag-cor: #92400e;
+      --verde:    #22c55e;  /* verde neon */
+      --verde-dk: #16a34a;
+      --verde-wpp:#4ade80;
+      --azul:     #3b82f6;  /* azul elétrico */
+      --laranja:  #f97316;  /* laranja vivo */
+      --roxo:     #a855f7;  /* roxo neon */
+      --esmeralda:#10b981;  /* esmeralda */
+      --vermelho: #ef4444;  /* vermelho alerta */
+      --amarelo:  #f59e0b;  /* âmbar */
+      --wanderson:#fb923c;
+      --flag-cor: #f59e0b;
 
-      --metal:    #405060;
-      --silver:   #0f1c2c;  /* headings dentro dos cards */
+      --metal:    #334155;
+      --silver:   #cbd5e1;  /* headings dentro dos cards */
     }
 
     html { font-size: 14px; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow: hidden; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow: hidden; }
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
@@ -175,11 +178,11 @@
     }
     .sidebar-hd {
       padding: 10px 13px;
-      background: linear-gradient(135deg, #1a3828, #1e3e2e);
-      border-bottom: 1px solid rgba(21,128,61,.3); flex-shrink: 0;
+      background: linear-gradient(135deg, #0f1f38, #122040);
+      border-bottom: 1px solid rgba(59,130,246,.25); flex-shrink: 0;
     }
-    .sidebar-hd strong { font-size: .82rem; color: #4ade80; display: block; }
-    .sidebar-hd small  { font-size: .67rem; color: rgba(74,222,128,.65); }
+    .sidebar-hd strong { font-size: .82rem; color: #60a5fa; display: block; }
+    .sidebar-hd small  { font-size: .67rem; color: rgba(96,165,250,.65); }
 
     .wpp-connect { padding: 10px 13px; border-bottom: 1px solid var(--border); text-align: center; flex-shrink: 0; }
     .qr-box {
