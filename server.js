@@ -657,8 +657,8 @@ function analisarMensagem(texto) {
       }
     } catch (_) {}
 
-    // 3. Sigla com limite de palavra
-    if (r.sigla) {
+    // 3. Sigla com limite de palavra (mín. 4 chars — evita falsos positivos com palavras comuns: PAR, MBA, ATM…)
+    if (r.sigla && r.sigla.length >= 4) {
       try {
         const siglaRe = new RegExp('\\b' + escRe(r.sigla) + '\\b');
         const sm = cleaned.match(siglaRe);
