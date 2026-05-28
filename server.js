@@ -256,6 +256,18 @@ function carregarMensagens() {
     const salvo = JSON.parse(raw);
     mensagens    = salvo.mensagens || [];
     chamadosHoje = salvo.chamadosHoje || {};
+
+    // Re-executa detecção em cada mensagem para corrigir falsos positivos de versões antigas
+    mensagens.forEach(m => {
+      if (m.texto) {
+        const { detectados } = analisarMensagem(m.texto);
+        m.detectados = detectados;
+        m.uf         = [...new Set(detectados.map(d => d.uf))];
+        m.municipios = [...new Set(detectados.map(d => d.muni))];
+        m.siglas     = [...new Set(detectados.filter(d => d.sigla).map(d => d.sigla))];
+      }
+    });
+
     // Recalcula contadores a partir das mensagens salvas
     contadores = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
     const _FECH_RE = /\bvalidad[oa]\b|\bnormalizad[oa]\b|\benvi(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bmand(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bcancelad[oa]\b|\bcancelamento\b/i;
@@ -271,7 +283,7 @@ function carregarMensagens() {
           contadores.fechado++;
         } else if (!m.temFechado && (m.uf||[]).length > 0) {
           (m.uf||[]).forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
-          contadores.total++; // conta mensagem uma única vez, independente de quantas UFs
+          contadores.total++;
         }
         if (m.temWanderson)   contadores.WANDERSON++;
         if (m.temCmoReparo)   contadores.cmoReparo++;
