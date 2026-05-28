@@ -1937,7 +1937,7 @@
   function mensagemMatchesFiltro(m) {
     if (filtroLocalidade) return (m.municipios||[]).includes(filtroLocalidade);
     switch (filtroFeedAtual) {
-      case 'TODOS':      return (m.uf||[]).length > 0 || m.temWanderson || _clientIsWanderson(m);
+      case 'TODOS':      return (m.uf||[]).length > 0 && !_clientIsFechado(m);
       case 'PA':         return (m.uf||[]).includes('PA') && !_clientIsFechado(m);
       case 'MA':         return (m.uf||[]).includes('MA') && !_clientIsFechado(m);
       case 'AP':         return (m.uf||[]).includes('AP') && !_clientIsFechado(m);
@@ -2430,8 +2430,8 @@
       // Filtra pela UF cadastrada; exclui fechados (eles vão para a aba FECHADO)
       msgs = msgs.filter(m => (m.uf || []).includes(filtroFeedAtual) && !_clientIsFechado(m));
     } else {
-      // TODOS: todas as mensagens com município/UF identificado pelas regras cadastradas
-      msgs = msgs.filter(m => (m.uf||[]).length > 0 || m.temWanderson || _clientIsWanderson(m));
+      // TODOS: apenas mensagens com UF/município cadastrado nas regras — sem fechados (aba própria)
+      msgs = msgs.filter(m => (m.uf||[]).length > 0 && !_clientIsFechado(m));
     }
 
     // Filtro de busca livre (chamado, texto, grupo, município)
