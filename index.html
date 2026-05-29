@@ -478,7 +478,7 @@
     .msg-card.duplicado { opacity: .6; border-left-style: dashed; }
     .msg-card.fechado { border-left-color: var(--verde) !important; background: rgba(21,128,61,.10) !important; }
     .msg-card.fechado .msg-text { color: var(--verde-dk); }
-    .chip.fechado-chip { background: rgba(21,128,61,.18); color: var(--verde); border: 1px solid rgba(21,128,61,.4); }
+    .chip.fechado-chip { background: rgba(21,128,61,.32); color: #fff; border: 1px solid rgba(21,128,61,.5); }
 
     /* Não lidas pulsam */
     @keyframes msg-unread-pulse {
@@ -542,16 +542,16 @@
       padding: 2px 8px; border-radius: 6px; font-size: .62rem; font-weight: 800;
       letter-spacing: .2px; line-height: 1.4;
     }
-    .chip.uf-pa   { background: rgba(29,78,216,.18);   color: #1e3a8a;  border: 1px solid rgba(29,78,216,.35); }
-    .chip.uf-ma   { background: rgba(194,65,12,.18);   color: #9a3412;  border: 1px solid rgba(194,65,12,.35); }
-    .chip.uf-ap   { background: rgba(4,120,87,.18);    color: #064e3b;  border: 1px solid rgba(4,120,87,.35); }
-    .chip.uf-am   { background: rgba(126,34,206,.18);  color: #4c1d95;  border: 1px solid rgba(126,34,206,.35); }
-    .chip.sigla   { background: rgba(21,128,61,.18);   color: #14532d;  border: 1px solid rgba(21,128,61,.35); }
-    .chip.muni    { background: rgba(64,80,96,.14);    color: var(--subtext); border: 1px solid rgba(64,80,96,.28); }
-    .chip.eps-sln { background: rgba(21,128,61,.18);   color: #14532d;  border: 1px solid rgba(21,128,61,.32); }
-    .chip.eps-adx { background: rgba(185,28,28,.18);   color: #7f1d1d;  border: 1px solid rgba(185,28,28,.32); }
-    .chip.chamado { background: rgba(146,64,14,.18);   color: #78350f;  border: 1px solid rgba(146,64,14,.38); }
-    .chip.dup     { background: rgba(185,28,28,.12);   color: #7f1d1d;  border: 1px solid rgba(185,28,28,.25); font-style: italic; }
+    .chip.uf-pa   { background: rgba(29,78,216,.32);   color: #fff;  border: 1px solid rgba(29,78,216,.5); }
+    .chip.uf-ma   { background: rgba(194,65,12,.32);   color: #fff;  border: 1px solid rgba(194,65,12,.5); }
+    .chip.uf-ap   { background: rgba(4,120,87,.32);    color: #fff;  border: 1px solid rgba(4,120,87,.5); }
+    .chip.uf-am   { background: rgba(126,34,206,.32);  color: #fff;  border: 1px solid rgba(126,34,206,.5); }
+    .chip.sigla   { background: rgba(21,128,61,.32);   color: #fff;  border: 1px solid rgba(21,128,61,.5); }
+    .chip.muni    { background: rgba(64,80,96,.28);    color: #fff;  border: 1px solid rgba(64,80,96,.45); }
+    .chip.eps-sln { background: rgba(21,128,61,.32);   color: #fff;  border: 1px solid rgba(21,128,61,.5); }
+    .chip.eps-adx { background: rgba(185,28,28,.32);   color: #fff;  border: 1px solid rgba(185,28,28,.5); }
+    .chip.chamado { background: rgba(146,64,14,.32);   color: #fff;  border: 1px solid rgba(146,64,14,.5); }
+    .chip.dup     { background: rgba(185,28,28,.22);   color: #fff;  border: 1px solid rgba(185,28,28,.4); font-style: italic; }
     .badge-lida   { font-size: .64rem; color: var(--verde); margin-left: auto; font-weight: 700; }
 
     /* ══════════════════════════════════════════════════
@@ -1089,7 +1089,7 @@
     .chamados-vazio span { font-size: 1.4rem; }
 
     /* RUPTURA chip + card (item 10) */
-    .chip.ruptura { background:rgba(185,28,28,.2); color:#7f1d1d; animation:blink-rup .8s infinite; font-size:.65rem; letter-spacing:.5px; border:1px solid rgba(185,28,28,.4); }
+    .chip.ruptura { background:rgba(185,28,28,.35); color:#fff; animation:blink-rup .8s infinite; font-size:.65rem; letter-spacing:.5px; border:1px solid rgba(185,28,28,.5); }
     @keyframes blink-rup { 0%,100%{background:rgba(185,28,28,.22)} 50%{background:rgba(185,28,28,.06)} }
     .msg-card.ruptura { border-left-color:var(--vermelho) !important; box-shadow:0 0 14px rgba(185,28,28,.3); }
 
