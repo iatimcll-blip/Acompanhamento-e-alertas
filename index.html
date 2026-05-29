@@ -1510,7 +1510,7 @@
           <div class="feed-hd">
             <h2>💬 Mensagens <span class="filtro-ativo-tag" id="filtroAtivoTag"></span></h2>
             <div class="feed-search-wrap">
-              <input type="text" id="feedBusca" class="feed-search" placeholder="🔍 Buscar chamado, texto, grupo…" oninput="setBusca(this.value)" autocomplete="new-password" name="mcll-busca">
+              <input type="text" id="feedBusca" class="feed-search" placeholder="🔍 Buscar chamado, texto, grupo…" oninput="setBusca(this.value)" autocomplete="off" name="mcll-busca" readonly onfocus="this.removeAttribute('readonly')">
             </div>
             <span class="msg-count-badge" id="msgCount">0 hoje</span>
           </div>
@@ -2660,7 +2660,7 @@
           ${t.autor ? `<div class="atz-tl-autor">— ${escHtml(t.autor)}</div>` : ''}
         </div>
       </div>`).join('');
-    const _tlTextoPlano = _tl.map(t => `[${tsLabel(t.ts)}] ${t.texto}${t.autor ? ' ('+t.autor+')' : ''}`).join('\n');
+    window._tlTextoAtual = _tl.map(t => `[${tsLabel(t.ts)}] ${t.texto}${t.autor ? ' (' + t.autor + ')' : ''}`).join('\n');
 
     // Busca mensagem original para exibir texto completo
     const msgOriginal = todasMensagens.find(m =>
@@ -2691,7 +2691,7 @@
       <div class="atz-timeline-block">
         <div class="atz-timeline-hd">
           <span>Timeline do dia (${_tl.length})</span>
-          ${_tl.length ? `<button class="btn-copiar-tl" onclick="navigator.clipboard?.writeText(${JSON.stringify(_tlTextoPlano)}).then(()=>{this.textContent='✓ Copiado';setTimeout(()=>this.textContent='📋 Copiar',2000)})">📋 Copiar</button>` : ''}
+          ${_tl.length ? `<button class="btn-copiar-tl" onclick="copiarTimeline(this)">📋 Copiar</button>` : ''}
         </div>
         ${timelineHtml || '<div style="color:var(--muted);font-size:.74rem">Nenhum registro ainda.</div>'}
       </div>
@@ -3449,6 +3449,14 @@
   }
 
   // ── Utils ─────────────────────────────────────────────────────────────────
+  function copiarTimeline(btn) {
+    const texto = window._tlTextoAtual || '';
+    if (!texto) return;
+    navigator.clipboard?.writeText(texto).then(() => {
+      if (btn) { btn.textContent = '✓ Copiado'; setTimeout(() => { btn.textContent = '📋 Copiar'; }, 2000); }
+    }).catch(() => {});
+  }
+
   function escHtml(s) {
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -3730,7 +3738,13 @@
   window.addEventListener('DOMContentLoaded', () => {
     // Garante que o campo de busca nunca receba autofill do navegador
     const _busca = document.getElementById('feedBusca');
-    if (_busca) { _busca.value = ''; setTimeout(() => { _busca.value = ''; }, 300); }
+    if (_busca) {
+      _busca.value = '';
+      // Limpa em múltiplos momentos pois Chrome preenchide autofill assíncrono
+      [100, 300, 600, 1000].forEach(ms => setTimeout(() => {
+        if (_busca.value && !buscaTexto) { _busca.value = ''; }
+      }, ms));
+    }
     conectarWS();
     apiFetch('/api/base').then(r => r.json()).then(b => { BASE = b; }).catch(() => {});
     // Auto-abrir tabela no layout de quadrantes
