@@ -1534,7 +1534,7 @@
             <button class="ftab f-am"  id="ftab-AM"       onclick="filtrarFeed('AM',this)">AM</button>
             <button class="ftab"       id="ftab-URGENTE"  onclick="filtrarFeed('URGENTE',this)"  style="color:var(--vermelho);border-color:rgba(185,28,28,.35)">🚨 Urgentes</button>
             <button class="ftab"       id="ftab-RUPTURA"  onclick="filtrarFeed('RUPTURA',this)"  style="color:var(--vermelho);border-color:rgba(185,28,28,.35)">⚡ Ruptura</button>
-            <button class="ftab"       id="ftab-NAOIDA"   onclick="filtrarFeed('NAOIDA',this)"   style="color:var(--subtext)">🔔 Não lidas</button>
+            <button class="ftab"       id="ftab-NAOIDA"   onclick="filtrarFeed('NAOIDA',this)"   style="color:var(--subtext)">🔔 Não lidas <span id="badge-naoLidas" style="display:none;background:var(--vermelho);color:#fff;font-size:.55rem;font-weight:900;padding:1px 5px;border-radius:8px;margin-left:3px;vertical-align:middle"></span></button>
             <button class="ftab"       id="ftab-FLAGGED"  onclick="filtrarFeed('FLAGGED',this)"  style="color:var(--flag-cor);border-color:rgba(146,64,14,.35)">⚑ Sinalizadas</button>
             <button class="ftab"       id="ftab-FECHADO"   onclick="filtrarFeed('FECHADO',this)"  style="color:var(--verde);border-color:rgba(21,128,61,.35)">✅ Fechados</button>
             <button class="ftab"       id="ftab-WANDERSON" onclick="filtrarFeed('WANDERSON',this)" style="color:var(--wanderson);border-color:rgba(180,83,9,.35)">@W</button>
@@ -3278,6 +3278,14 @@
     if (tabUrg) {
       const temUrgNaoLido = msgs.some(m => !m.lida && m.temAcionamento);
       tabUrg.classList.toggle('blink-alert', temUrgNaoLido && filtroFeedAtual !== 'URGENTE');
+    }
+
+    // Badge numérico no botão "Não lidas"
+    const _naoLidasTotal = msgs.filter(m => !m.lida).length;
+    const badgeNL = document.getElementById('badge-naoLidas');
+    if (badgeNL) {
+      badgeNL.textContent = _naoLidasTotal > 99 ? '99+' : _naoLidasTotal;
+      badgeNL.style.display = _naoLidasTotal > 0 ? 'inline' : 'none';
     }
   }
 
