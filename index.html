@@ -3359,11 +3359,17 @@
     const lista = document.getElementById('massivoList');
     if (!lista) return;
 
-    let msgs = getActiveMsgs().filter(m => m.temMassivo);
+    // Para INFRA: busca em TODAS as mensagens via regex (não só temMassivo)
+    // Para outros tipos: usa temMassivo como base
+    const _todosAtivos = getActiveMsgs();
+    let msgs = filtroMassivoTipoAtual === 'INFRA'
+      ? _todosAtivos.filter(m => msgMatchInfra(m))
+      : _todosAtivos.filter(m => m.temMassivo);
 
-    // Contadores por UF (antes dos filtros)
+    // Contadores por UF (base: temMassivo + infra)
+    const _base = _todosAtivos.filter(m => m.temMassivo || msgMatchInfra(m));
     const cnt = { total: 0, PA: 0, MA: 0, AP: 0, AM: 0 };
-    msgs.forEach(m => {
+    _base.forEach(m => {
       cnt.total++;
       (m.uf || []).forEach(u => { if (cnt[u] !== undefined) cnt[u]++; });
     });
@@ -3373,14 +3379,14 @@
     if (badge) badge.textContent = cnt.total + ' hoje';
 
     // Piscar contadores e abas com não lidos
-    atualizarMassivoBlinks(msgs);
+    atualizarMassivoBlinks(_base);
 
     // Filtro UF
     if (filtroMassivoUFAtual !== 'TODOS') {
       msgs = msgs.filter(m => (m.uf || []).includes(filtroMassivoUFAtual));
     }
-    // Filtro tipo
-    if (filtroMassivoTipoAtual !== 'TODOS') {
+    // Filtro tipo (INFRA já aplicado acima na base)
+    if (filtroMassivoTipoAtual !== 'TODOS' && filtroMassivoTipoAtual !== 'INFRA') {
       msgs = msgs.filter(m => m.tipoMassivo === filtroMassivoTipoAtual);
     }
 
@@ -3402,7 +3408,9 @@
     // pisca abas de tipo quando há não lidos daquele tipo
     ['BDESK','TOTAL','CONJUNTA','RUPTURA','INFRA'].forEach(tipo => {
       const btn = document.getElementById('mas-ftab-' + tipo);
-      const temNaoLida = msgs.some(m => !m.lida && m.tipoMassivo === tipo);
+      const temNaoLida = tipo === 'INFRA'
+        ? msgs.some(m => !m.lida && msgMatchInfra(m))
+        : msgs.some(m => !m.lida && m.tipoMassivo === tipo);
       if (btn) btn.classList.toggle('blink-alert', temNaoLida && filtroMassivoTipoAtual !== tipo);
     });
   }

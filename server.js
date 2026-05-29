@@ -258,14 +258,22 @@ function carregarMensagens() {
     mensagens    = salvo.mensagens || [];
     chamadosHoje = salvo.chamadosHoje || {};
 
-    // Re-executa detecção em cada mensagem para corrigir falsos positivos de versões antigas
+    // Re-executa detecção em cada mensagem para corrigir campos de versões antigas
     mensagens.forEach(m => {
       if (m.texto) {
+        // Re-detecta município/UF
         const { detectados } = analisarMensagem(m.texto);
         m.detectados = detectados;
         m.uf         = [...new Set(detectados.map(d => d.uf))];
         m.municipios = [...new Set(detectados.map(d => d.muni))];
         m.siglas     = [...new Set(detectados.filter(d => d.sigla).map(d => d.sigla))];
+        // Re-detecta tipo massivo (MASSIVO_RE pode ter ganho novas entradas como INFRA)
+        let temMassivo = false, tipoMassivo = null;
+        for (const { tipo, re } of MASSIVO_RE) {
+          if (re.test(m.texto)) { temMassivo = true; tipoMassivo = tipoMassivo || tipo; }
+        }
+        m.temMassivo  = temMassivo;
+        m.tipoMassivo = tipoMassivo;
       }
     });
 
