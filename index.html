@@ -1513,6 +1513,8 @@
             <div class="feed-search-wrap">
               <input type="text" id="feedBusca" class="feed-search" placeholder="🔍 Buscar chamado, texto, grupo…" oninput="setBusca(this.value)" autocomplete="off" name="mcll-busca" readonly onfocus="this.removeAttribute('readonly')">
             </div>
+            <button onclick="marcarTodasLidas(this)" title="Marcar todas como lidas"
+              style="flex-shrink:0;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--verde);font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap">✓ Todas lidas</button>
             <span class="msg-count-badge" id="msgCount">0 hoje</span>
           </div>
           <div class="filter-bar" id="filterTabs">
