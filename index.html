@@ -2214,7 +2214,9 @@
     document.getElementById('statAP').textContent     = c.AP       || 0;
     document.getElementById('statAM').textContent     = c.AM       || 0;
     document.getElementById('statFechado').textContent= c.fechado  || 0;
-    document.getElementById('statWAND').textContent   = c.WANDERSON|| 0;
+    // Wanderson: sempre calculado client-side com a mesma lógica da aba (evita divergência com servidor)
+    const wandCount = _baseMsgs.filter(m => !m.duplicado && (m.temWanderson || _clientIsWanderson(m))).length;
+    document.getElementById('statWAND').textContent   = wandCount;
     document.getElementById('msgCount').textContent   = naoLidas + ' não lidas';
     // CMO counters — contagem via multi-keywords
     const cmoR = document.getElementById('topCmoReparoNum');
