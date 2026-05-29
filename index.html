@@ -38,8 +38,9 @@
       --silver:   #cbd5e1;  /* headings dentro dos cards */
     }
 
-    html { font-size: 14px; }
-    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow: hidden; }
+    /* Fonte base escala com a largura do viewport — UI proporcional em qualquer zoom */
+    html { font-size: clamp(11px, 0.9vw + 0.3vh, 15px); }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100dvh; overflow: hidden; }
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
@@ -52,8 +53,8 @@
       backdrop-filter: blur(28px) saturate(200%);
       -webkit-backdrop-filter: blur(28px) saturate(200%);
       border-bottom: 1px solid rgba(255,255,255,.08);
-      padding: 0 16px;
-      height: 64px;
+      padding: 0 clamp(8px, 1.2vw, 20px);
+      height: clamp(52px, 5.5vh, 68px);
       display: flex; align-items: center; justify-content: space-between;
       position: sticky; top: 0; z-index: 300;
       box-shadow: 0 1px 0 rgba(255,255,255,.05), 0 6px 40px rgba(0,0,0,.95);
@@ -142,8 +143,8 @@
     ══════════════════════════════════════════════════ */
     .app-layout {
       display: grid;
-      grid-template-columns: 210px 1fr;
-      height: calc(100vh - 64px);
+      grid-template-columns: clamp(160px, 14vw, 230px) 1fr;
+      height: calc(100dvh - clamp(52px, 5.5vh, 68px));
       overflow: hidden;
     }
 
@@ -163,9 +164,9 @@
     .atz-modal-box {
       position: absolute;
       right: 8px; bottom: 8px;
-      width: 340px; height: calc(100vh - 72px);
+      width: clamp(280px, 24vw, 380px); height: calc(100dvh - clamp(52px, 5.5vh, 68px) - 8px);
       min-width: 260px; min-height: 220px;
-      max-width: 90vw; max-height: calc(100vh - 72px);
+      max-width: 92vw; max-height: calc(100dvh - clamp(52px, 5.5vh, 68px) - 8px);
       display: flex; flex-direction: column;
       border-radius: 14px; overflow: auto;
       resize: both;
@@ -228,7 +229,7 @@
        STATS (item 8 — clicável + indicador ativo)
     ══════════════════════════════════════════════════ */
     /* Stats row */
-    .stats-row { display: grid; grid-template-columns: 1.3fr repeat(6,1fr); gap: 5px; flex-shrink: 0; height: 90px; }
+    .stats-row { display: grid; grid-template-columns: 1.3fr repeat(6,1fr); gap: 5px; flex-shrink: 0; height: clamp(70px, 7.5vh, 96px); }
     .stat-card {
       background: var(--card); border: 1px solid var(--border); border-radius: 10px;
       padding: 6px 10px; cursor: pointer; position: relative; overflow: hidden;
@@ -962,9 +963,9 @@
     .quadrant-grid {
       flex:1; min-height:0;
       display:grid; position:relative;
-      grid-template-columns: minmax(300px, 1fr) minmax(240px, .88fr) 248px;
-      grid-template-rows: minmax(168px, .32fr) minmax(90px, .30fr) minmax(90px, .30fr) minmax(120px, .38fr);
-      gap:6px;
+      grid-template-columns: minmax(240px, 1fr) minmax(200px, .88fr) clamp(200px, 17vw, 270px);
+      grid-template-rows: minmax(140px, .32fr) minmax(80px, .30fr) minmax(80px, .30fr) minmax(100px, .38fr);
+      gap: clamp(4px, 0.5vw, 8px);
       grid-template-areas:
         "reports   detalhes  chamados"
         "mensagens detalhes  chamados"
@@ -1132,7 +1133,7 @@
        MOBILE / TELAS VERTICAIS (≤ 800 px)
     ══════════════════════════════════════════════════ */
     @media (max-width: 800px) {
-      html { font-size: 13px; }
+      html { font-size: clamp(11px, 3.2vw, 13px); }
       body { overflow: hidden; }
 
       /* Topbar compacto */
