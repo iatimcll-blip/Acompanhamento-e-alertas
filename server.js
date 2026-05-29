@@ -246,6 +246,37 @@ function hashMensagem(texto, remetente, dataDia) {
     .slice(0, 16);
 }
 
+// ── Formatação de nomes e números WhatsApp ───────────────────────────────────
+function formatarTelefone(num) {
+  const n = String(num).replace(/\D/g, '').replace(/^0+/, '');
+  if (n.startsWith('55') && n.length >= 12) {
+    const ddd  = n.slice(2, 4);
+    const rest = n.slice(4);
+    if (rest.length === 9) return `+55 (${ddd}) ${rest.slice(0,5)}-${rest.slice(5)}`;
+    if (rest.length === 8) return `+55 (${ddd}) ${rest.slice(0,4)}-${rest.slice(4)}`;
+  }
+  return n.length >= 8 ? `+${n}` : n;
+}
+
+function resolverNome(raw) {
+  if (!raw) return '';
+  // Remove sufixos @c.us, @g.us, @s.whatsapp.net, @lid
+  const limpo = String(raw).replace(/@[\w.]+$/, '').trim();
+  // Se ficou só dígitos, é um número de telefone → formatar
+  if (/^\d{8,15}$/.test(limpo)) return formatarTelefone(limpo);
+  return limpo;
+}
+
+function nomeRemetente(contact, msg) {
+  // Prioridade: nome salvo nos contatos → nome de perfil → número formatado
+  if (contact?.pushname)               return contact.pushname;
+  if (contact?.name && contact.name !== contact?.number) return contact.name;
+  if (msg?._data?.notifyName)          return msg._data.notifyName;
+  if (contact?.number)                 return formatarTelefone(contact.number);
+  const raw = msg?.author || msg?.from || '';
+  return resolverNome(raw) || 'Desconhecido';
+}
+
 // ── Persistência diária ─────────────────────────────────────────────────────
 function dataFile() {
   return path.join(DATA_DIR, `data-${hoje()}.json`);
@@ -571,7 +602,7 @@ app.post('/api/chat-messages', autenticar, async (req, res) => {
 
     const result = msgs.map(m => ({
       id:       m.id._serialized,
-      de:       m.fromMe ? 'Você' : (m._data?.notifyName || m.author || ''),
+      de:       m.fromMe ? 'Você' : (m._data?.notifyName || resolverNome(m.author || '')),
       texto:    m.body || '',
       hora:     new Date(m.timestamp * 1000).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
       fromMe:   m.fromMe,
@@ -619,9 +650,11 @@ app.post('/api/chats/refresh', autenticar, async (req, res) => {
     ]);
     // Cacheia objetos reais de chat para uso rápido em /api/chat-messages
     chats.forEach(c => { _chatObjects[c.id._serialized] = c; });
+    // Cacheia objetos reais de chat para uso rápido em /api/chat-messages
+    chats.forEach(c => { _chatObjects[c.id._serialized] = c; });
     chatList = chats.slice(0, 80).map(c => ({
       id:       c.id._serialized,
-      nome:     c.name || c.id.user || '',
+      nome:     c.name || (c.isGroup ? '' : resolverNome(c.id.user || '')),
       grupo:    c.isGroup,
       naoLidas: c.unreadCount || 0,
     }));
@@ -955,7 +988,7 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
 
   const entrada = {
     id:        msg.id._serialized,
-    de:        contact?.pushname || contact?.number || msg._data?.notifyName || msg.author || msg.from,
+    de:        nomeRemetente(contact, msg),
     numero:    msg.from,
     grupo:     Boolean(chat?.isGroup || msg.from.includes('@g.us')),
     nomeGrupo: chat?.isGroup ? chat.name : null,
@@ -1106,7 +1139,7 @@ async function sincronizarMensagensRecentes(chatsOrigem = null) {
       chats.forEach(c => { _chatObjects[c.id._serialized] = c; });
       chatList = chats.slice(0, 80).map(c => ({
         id:       c.id._serialized,
-        nome:     c.name || c.id.user || '',
+        nome:     c.name || (c.isGroup ? '' : resolverNome(c.id.user || '')),
         grupo:    c.isGroup,
         naoLidas: c.unreadCount || 0,
       }));
