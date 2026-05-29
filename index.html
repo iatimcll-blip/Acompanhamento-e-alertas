@@ -324,7 +324,7 @@
       overflow: hidden; /* impede que o conteúdo estoure o balão */
     }
     .timer-muni {
-      font-size: .85rem; font-weight: 800; color: var(--text);
+      font-size: .85rem; font-weight: 800; color: #fff;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       min-width: 0; flex: 1;           /* ocupa o espaço disponível e trunca se necessário */
     }
@@ -357,13 +357,13 @@
     .timer-line2-loc { margin-top: 4px; min-height: 16px; }
     @keyframes loc-blink { 0%,100%{opacity:1} 50%{opacity:.25} }
     .timer-localidade-blink {
-      font-size: .8rem; font-weight: 800; color: #78350f;
+      font-size: .8rem; font-weight: 800; color: #fff;
       animation: loc-blink 1.6s infinite; display: inline-block;
       letter-spacing: .2px;
     }
     /* Timer card — número do chamado */
     .timer-chamado-num {
-      font-size: .84rem; font-weight: 900; color: #78350f;
+      font-size: .84rem; font-weight: 900; color: #fff;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       min-width: 0; flex: 1; letter-spacing: .2px;
     }
@@ -3238,13 +3238,36 @@
   // ── UF blink bar (item 4) ─────────────────────────────────────────────────
   function atualizarUFBlinks() {
     const msgs = getActiveMsgs();
+
+    // Abas UF — pisca somente se tem mensagens não lidas naquela UF
     ['PA','MA','AP','AM'].forEach(uf => {
       const blinkEl = document.getElementById('blink-' + uf);
       const tabEl   = document.getElementById('ftab-' + uf);
-      const temNaoLida = msgs.some(m => !m.lida && !m.flagged && (m.uf||[]).includes(uf));
+      const temNaoLida = msgs.some(m => !m.lida && (m.uf||[]).includes(uf) && !_clientIsFechado(m));
       if (blinkEl) blinkEl.classList.toggle('blink-' + uf.toLowerCase(), temNaoLida);
       if (tabEl)   tabEl.classList.toggle('blink-alert', temNaoLida && filtroFeedAtual !== uf);
     });
+
+    // Aba FECHADO — pisca se há fechados não lidos
+    const tabFech = document.getElementById('ftab-FECHADO') || document.querySelector('.ftab[onclick*="FECHADO"]');
+    if (tabFech) {
+      const temFechNaoLido = msgs.some(m => !m.lida && _clientIsFechado(m));
+      tabFech.classList.toggle('blink-alert', temFechNaoLido && filtroFeedAtual !== 'FECHADO');
+    }
+
+    // Aba WANDERSON — pisca se há mensagens Wanderson não lidas
+    const tabWand = document.getElementById('ftab-WANDERSON') || document.querySelector('.ftab[onclick*="WANDERSON"]');
+    if (tabWand) {
+      const temWandNaoLido = msgs.some(m => !m.lida && (m.temWanderson || _clientIsWanderson(m)));
+      tabWand.classList.toggle('blink-alert', temWandNaoLido && filtroFeedAtual !== 'WANDERSON');
+    }
+
+    // Aba URGENTE — pisca se há acionamentos não lidos
+    const tabUrg = document.getElementById('ftab-URGENTE') || document.querySelector('.ftab[onclick*="URGENTE"]');
+    if (tabUrg) {
+      const temUrgNaoLido = msgs.some(m => !m.lida && m.temAcionamento);
+      tabUrg.classList.toggle('blink-alert', temUrgNaoLido && filtroFeedAtual !== 'URGENTE');
+    }
   }
 
   // ── Tabela municípios ─────────────────────────────────────────────────────
