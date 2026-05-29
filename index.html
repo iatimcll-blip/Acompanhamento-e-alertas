@@ -1845,9 +1845,14 @@
     return CMO_ATIVACAO_KEYWORDS.some(k => t.includes(k));
   }
 
-  const _INFRA_RE = /tipo\s*:\s*infra(?:estrutura)?\b|\binfra(?:estrutura)?\b/i;
+  const _INFRA_RE      = /tipo\s*:\s*infra(?:estrutura)?\b|\binfra(?:estrutura)?\b/i;
+  const _INFRA_GRUPO_RE = /infra(?:estrutura)?/i;
   function msgMatchInfra(m) {
-    if (!m.texto) return false;
+    const temUFCadastrada = (m.uf||[]).length > 0;
+    // Grupo cujo nome contém "infra" + município cadastrado nas regras
+    if (_INFRA_GRUPO_RE.test(m.nomeGrupo || '') && temUFCadastrada) return true;
+    // Fallback: texto contém padrão infra + município cadastrado
+    if (!m.texto || !temUFCadastrada) return false;
     if (m.tipoMassivo === 'INFRA') return true;
     return _INFRA_RE.test(m.texto);
   }

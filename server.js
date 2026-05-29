@@ -272,6 +272,12 @@ function carregarMensagens() {
         for (const { tipo, re } of MASSIVO_RE) {
           if (re.test(m.texto)) { temMassivo = true; tipoMassivo = tipoMassivo || tipo; }
         }
+        // Grupo Infraestrutura com município cadastrado → INFRA
+        const _isInfraGrupo = /infra(?:estrutura)?/i.test(m.nomeGrupo || '');
+        if (_isInfraGrupo && detectados.length > 0) {
+          temMassivo  = true;
+          tipoMassivo = tipoMassivo || 'INFRA';
+        }
         m.temMassivo  = temMassivo;
         m.tipoMassivo = tipoMassivo;
       }
@@ -830,6 +836,9 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   for (const { tipo, re } of MASSIVO_RE) {
     if (re.test(texto)) { temMassivo = true; tipoMassivo = tipoMassivo || tipo; }
   }
+  // Grupo "Infraestrutura - MA/PA" (ou similar): marca INFRA se tem município cadastrado
+  // O nome do grupo é resolvido após getChat(), mas antecipamos via msg.from verificado depois
+  // A marcação definitiva via nomeGrupo ocorre no cliente (msgMatchInfra)
 
   const chamado = extrairChamado(texto);
   const chaveUnica = chaveUnicaChamado(chamados, texto, msg.from, dataMsg);
@@ -910,8 +919,9 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
     temFechado,
     temCmoReparo: cmoReparoConfigurado || temCmoReparo,
     temCmoAtivacao: cmoAtivacaoConfigurado || temCmoAtivacao,
-    temMassivo,
-    tipoMassivo,
+    // Grupo Infraestrutura: marca como INFRA se detectou município cadastrado
+    temMassivo:  temMassivo || (/infra(?:estrutura)?/i.test(chat?.name || '') && detectados.length > 0),
+    tipoMassivo: tipoMassivo || (/infra(?:estrutura)?/i.test(chat?.name || '') && detectados.length > 0 ? 'INFRA' : null),
     chamado,
     atrix: chamados.atrix,
     bdesk: chamados.bdesk,
