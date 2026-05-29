@@ -550,14 +550,43 @@ app.post('/api/chat-messages', autenticar, async (req, res) => {
   const { chatId } = req.body;
   if (!chatId) return res.status(400).json({ erro: 'chatId obrigatório' });
   try {
-    const chat = await client.getChatById(chatId);
-    const msgs = await chat.fetchMessages({ limit: 50 });
-    const result = msgs.map(m => ({
-      id:     m.id._serialized,
-      de:     m.fromMe ? 'Você' : (m._data.notifyName || m.author || ''),
-      texto:  m.body || '',
-      hora:   new Date(m.timestamp * 1000).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
-      fromMe: m.fromMe,
+    const chat = await Promise.race([
+      client.getChatById(chatId),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ao buscar chat')), 15000)),
+    ]);
+    const msgs = await Promise.race([
+      chat.fetchMessages({ limit: 50 }),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ao buscar mensagens')), 20000)),
+    ]);
+    const result = await Promise.all(msgs.map(async m => {
+      let mediaData = null, mediaMime = null, mediaFilename = null;
+      if (m.hasMedia) {
+        try {
+          const media = await Promise.race([
+            m.downloadMedia(),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('timeout mídia')), 10000)),
+          ]);
+          if (media?.data) {
+            mediaMime     = media.mimetype || '';
+            mediaFilename = media.filename || null;
+            if (mediaMime.startsWith('image/')) {
+              const sz = Buffer.from(media.data, 'base64').length;
+              if (sz < 2 * 1024 * 1024) mediaData = media.data;
+            }
+          }
+        } catch (_) {}
+      }
+      return {
+        id:            m.id._serialized,
+        de:            m.fromMe ? 'Você' : (m._data?.notifyName || m.author || ''),
+        texto:         m.body || '',
+        hora:          new Date(m.timestamp * 1000).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
+        fromMe:        m.fromMe,
+        hasMedia:      m.hasMedia,
+        mediaData,
+        mediaMime,
+        mediaFilename,
+      };
     }));
     res.json({ chatId, nome: chat.name, messages: result });
   } catch (err) {

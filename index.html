@@ -2316,12 +2316,23 @@
         document.getElementById('chatModalMsgs').innerHTML = '<div class="modal-loading">Nenhuma mensagem encontrada.</div>';
         return;
       }
-      document.getElementById('chatModalMsgs').innerHTML = msgs.map(m => `
-        <div class="chat-msg-item ${m.fromMe ? 'from-me' : 'from-them'}">
+      document.getElementById('chatModalMsgs').innerHTML = msgs.map(m => {
+        let midiaEl = '';
+        if (m.mediaData && m.mediaMime && m.mediaMime.startsWith('image/')) {
+          midiaEl = `<img src="data:${escAttr(m.mediaMime)};base64,${m.mediaData}"
+            style="max-width:100%;border-radius:8px;margin-bottom:4px;cursor:zoom-in;display:block"
+            onclick="window.open(this.src,'_blank')" />`;
+        } else if (m.hasMedia && !m.mediaData) {
+          const icone = (m.mediaMime||'').startsWith('video/') ? '🎥' : (m.mediaMime||'').startsWith('audio/') ? '🎵' : '📎';
+          midiaEl = `<div style="font-size:.72rem;color:var(--muted);padding:4px 0">${icone} ${escHtml(m.mediaFilename || m.mediaMime || 'mídia')}</div>`;
+        }
+        return `<div class="chat-msg-item ${m.fromMe ? 'from-me' : 'from-them'}">
           ${!m.fromMe && m.de ? `<div class="chat-msg-de">${escHtml(m.de)}</div>` : ''}
-          <div class="chat-msg-bubble">${escHtml(m.texto || '(mídia)')}</div>
+          ${midiaEl}
+          ${m.texto ? `<div class="chat-msg-bubble">${escHtml(m.texto)}</div>` : (midiaEl ? '' : `<div class="chat-msg-bubble" style="color:var(--muted)">(mídia sem prévia)</div>`)}
           <div class="chat-msg-hora">${m.hora}</div>
-        </div>`).join('');
+        </div>`;
+      }).join('');
       const c = document.getElementById('chatModalMsgs');
       c.scrollTop = c.scrollHeight;
     } catch(e) {
