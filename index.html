@@ -1346,6 +1346,15 @@
     }
     /* Desktop: oculta botão voltar mobile */
     .mob-back-btn { display: none; }
+
+    /* ── Todos os textos de botões na cor branca ──────────────────────────── */
+    button { color: #fff !important; }
+    /* Abas inativas: branco com leve opacidade para indicar estado não-selecionado */
+    .ftab:not(.ativo):not(.blink-alert),
+    .chamados-ftab:not(.ativo),
+    .stab:not(.ativo) { color: rgba(255,255,255,.65) !important; }
+    /* Hover: branco pleno */
+    .ftab:hover, .chamados-ftab:hover, .stab:hover { color: #fff !important; }
   </style>
 </head>
 <body>
