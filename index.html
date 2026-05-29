@@ -2318,18 +2318,21 @@
       }
       document.getElementById('chatModalMsgs').innerHTML = msgs.map(m => {
         let midiaEl = '';
-        if (m.mediaData && m.mediaMime && m.mediaMime.startsWith('image/')) {
-          midiaEl = `<img src="data:${escAttr(m.mediaMime)};base64,${m.mediaData}"
-            style="max-width:100%;border-radius:8px;margin-bottom:4px;cursor:zoom-in;display:block"
-            onclick="window.open(this.src,'_blank')" />`;
-        } else if (m.hasMedia && !m.mediaData) {
-          const icone = (m.mediaMime||'').startsWith('video/') ? '🎥' : (m.mediaMime||'').startsWith('audio/') ? '🎵' : '📎';
-          midiaEl = `<div style="font-size:.72rem;color:var(--muted);padding:4px 0">${icone} ${escHtml(m.mediaFilename || m.mediaMime || 'mídia')}</div>`;
+        if (m.hasMedia) {
+          const mime = m.mediaMime || '';
+          const icone = mime.startsWith('image/') ? '🖼' : mime.startsWith('video/') ? '🎥' : mime.startsWith('audio/') ? '🎵' : '📎';
+          const nome  = escHtml(m.mediaFilename || mime || 'mídia');
+          midiaEl = `<div id="mid-${escAttr(m.id)}" style="margin-bottom:4px">
+            <button onclick="carregarMidiaModal('${escAttr(m.id)}',this)"
+              style="font-size:.7rem;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:var(--azul);border-radius:6px;padding:4px 10px;cursor:pointer;font-family:inherit">
+              ${icone} ${nome} — clique para ver
+            </button>
+          </div>`;
         }
         return `<div class="chat-msg-item ${m.fromMe ? 'from-me' : 'from-them'}">
           ${!m.fromMe && m.de ? `<div class="chat-msg-de">${escHtml(m.de)}</div>` : ''}
           ${midiaEl}
-          ${m.texto ? `<div class="chat-msg-bubble">${escHtml(m.texto)}</div>` : (midiaEl ? '' : `<div class="chat-msg-bubble" style="color:var(--muted)">(mídia sem prévia)</div>`)}
+          ${m.texto ? `<div class="chat-msg-bubble">${escHtml(m.texto)}</div>` : ''}
           <div class="chat-msg-hora">${m.hora}</div>
         </div>`;
       }).join('');
@@ -2337,6 +2340,32 @@
       c.scrollTop = c.scrollHeight;
     } catch(e) {
       document.getElementById('chatModalMsgs').innerHTML = `<div class="modal-erro">Erro: ${escHtml(e.message)}</div>`;
+    }
+  }
+
+  async function carregarMidiaModal(msgId, btn) {
+    const wrap = document.getElementById('mid-' + msgId);
+    if (!wrap) return;
+    if (btn) { btn.textContent = '⏳ Carregando…'; btn.disabled = true; }
+    try {
+      const r = await apiFetch('/api/message-media', { method: 'POST', body: JSON.stringify({ msgId }) });
+      const d = await r.json();
+      if (d.erro) throw new Error(d.erro);
+      if (d.mimetype.startsWith('image/')) {
+        wrap.innerHTML = `<img src="data:${escAttr(d.mimetype)};base64,${d.data}"
+          style="max-width:100%;border-radius:8px;cursor:zoom-in;display:block"
+          onclick="window.open(this.src,'_blank')" />`;
+      } else if (d.mimetype.startsWith('audio/')) {
+        wrap.innerHTML = `<audio controls style="max-width:100%;margin:4px 0"><source src="data:${escAttr(d.mimetype)};base64,${d.data}"></audio>`;
+      } else if (d.mimetype.startsWith('video/')) {
+        wrap.innerHTML = `<video controls style="max-width:100%;border-radius:8px"><source src="data:${escAttr(d.mimetype)};base64,${d.data}"></video>`;
+      } else {
+        const link = `data:${escAttr(d.mimetype)};base64,${d.data}`;
+        wrap.innerHTML = `<a href="${link}" download="${escAttr(d.filename||'arquivo')}"
+          style="font-size:.72rem;color:var(--azul)">⬇ Baixar ${escHtml(d.filename||'arquivo')}</a>`;
+      }
+    } catch(e) {
+      if (wrap) wrap.innerHTML = `<span style="font-size:.7rem;color:var(--vermelho)">✗ ${escHtml(e.message)}</span>`;
     }
   }
 

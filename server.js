@@ -176,6 +176,7 @@ const MASSIVO_RE = [
 // ── Estado em memória ───────────────────────────────────────────────────────
 let mensagens       = [];
 let chatList        = [];
+let _chatObjects    = {}; // cache dos objetos de chat reais (evita getChatById lento)
 let chamadosHoje    = {}; // chave → { msgId, atualizacoes }
 let chamadosStatus  = {}; // chave → { chamado, titulo, localidade, status, cmo, origem, timeline, criadoEm }
 let contadores      = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
@@ -544,53 +545,62 @@ app.post('/api/reply', autenticar, apenasAdmin, async (req, res) => {
   }
 });
 
+// Cache de mensagens WhatsApp (para baixar mídia sob demanda)
+const _msgObjects = {};
+
 // Mensagens de um chat/grupo específico (POST evita problemas com @ no path)
 app.post('/api/chat-messages', autenticar, async (req, res) => {
   if (statusWpp !== 'conectado') return res.status(503).json({ erro: 'WhatsApp não conectado' });
   const { chatId } = req.body;
   if (!chatId) return res.status(400).json({ erro: 'chatId obrigatório' });
   try {
-    const chat = await Promise.race([
+    // Usa objeto cacheado (instantâneo) ou busca com timeout longo
+    const chat = _chatObjects[chatId] || await Promise.race([
       client.getChatById(chatId),
-      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ao buscar chat')), 15000)),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('chat não encontrado — tente atualizar a lista (🔄)')), 25000)),
     ]);
+    if (!_chatObjects[chatId]) _chatObjects[chatId] = chat;
+
     const msgs = await Promise.race([
       chat.fetchMessages({ limit: 50 }),
-      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ao buscar mensagens')), 20000)),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ao buscar mensagens')), 25000)),
     ]);
-    const result = await Promise.all(msgs.map(async m => {
-      let mediaData = null, mediaMime = null, mediaFilename = null;
-      if (m.hasMedia) {
-        try {
-          const media = await Promise.race([
-            m.downloadMedia(),
-            new Promise((_, rej) => setTimeout(() => rej(new Error('timeout mídia')), 10000)),
-          ]);
-          if (media?.data) {
-            mediaMime     = media.mimetype || '';
-            mediaFilename = media.filename || null;
-            if (mediaMime.startsWith('image/')) {
-              const sz = Buffer.from(media.data, 'base64').length;
-              if (sz < 2 * 1024 * 1024) mediaData = media.data;
-            }
-          }
-        } catch (_) {}
-      }
-      return {
-        id:            m.id._serialized,
-        de:            m.fromMe ? 'Você' : (m._data?.notifyName || m.author || ''),
-        texto:         m.body || '',
-        hora:          new Date(m.timestamp * 1000).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
-        fromMe:        m.fromMe,
-        hasMedia:      m.hasMedia,
-        mediaData,
-        mediaMime,
-        mediaFilename,
-      };
+
+    // Cacheia objetos de mensagem para download de mídia sob demanda
+    msgs.forEach(m => { _msgObjects[m.id._serialized] = m; });
+
+    const result = msgs.map(m => ({
+      id:       m.id._serialized,
+      de:       m.fromMe ? 'Você' : (m._data?.notifyName || m.author || ''),
+      texto:    m.body || '',
+      hora:     new Date(m.timestamp * 1000).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
+      fromMe:   m.fromMe,
+      hasMedia: m.hasMedia,
+      mediaMime: m.hasMedia ? (m._data?.mimetype || '') : null,
+      mediaFilename: m.hasMedia ? (m._data?.filename || null) : null,
     }));
     res.json({ chatId, nome: chat.name, messages: result });
   } catch (err) {
     console.error('Erro ao buscar msgs do chat:', err.message);
+    res.status(500).json({ erro: err.message });
+  }
+});
+
+// Baixa mídia de uma mensagem específica sob demanda (evita timeout no carregamento inicial)
+app.post('/api/message-media', autenticar, async (req, res) => {
+  if (statusWpp !== 'conectado') return res.status(503).json({ erro: 'WhatsApp não conectado' });
+  const { msgId } = req.body;
+  if (!msgId) return res.status(400).json({ erro: 'msgId obrigatório' });
+  const msg = _msgObjects[msgId];
+  if (!msg) return res.status(404).json({ erro: 'Mensagem não encontrada no cache' });
+  try {
+    const media = await Promise.race([
+      msg.downloadMedia(),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ao baixar mídia')), 15000)),
+    ]);
+    if (!media?.data) return res.status(404).json({ erro: 'Mídia não disponível' });
+    res.json({ mimetype: media.mimetype || '', data: media.data, filename: media.filename || null });
+  } catch (err) {
     res.status(500).json({ erro: err.message });
   }
 });
@@ -607,6 +617,8 @@ app.post('/api/chats/refresh', autenticar, async (req, res) => {
       client.getChats(),
       new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 120000)),
     ]);
+    // Cacheia objetos reais de chat para uso rápido em /api/chat-messages
+    chats.forEach(c => { _chatObjects[c.id._serialized] = c; });
     chatList = chats.slice(0, 80).map(c => ({
       id:       c.id._serialized,
       nome:     c.name || c.id.user || '',
@@ -1091,6 +1103,7 @@ async function sincronizarMensagensRecentes(chatsOrigem = null) {
     ]);
     // Popula e transmite lista de grupos/contatos automaticamente (sem precisar clicar em 🔄)
     if (!chatsOrigem && chats.length > 0) {
+      chats.forEach(c => { _chatObjects[c.id._serialized] = c; });
       chatList = chats.slice(0, 80).map(c => ({
         id:       c.id._serialized,
         nome:     c.name || c.id.user || '',
