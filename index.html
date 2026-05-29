@@ -3450,13 +3450,35 @@
 
     // Para INFRA: busca em TODAS as mensagens via regex (não só temMassivo)
     // Para outros tipos: usa temMassivo como base
+    // Deduplica por chaveUnica: mostra apenas 1 card por BDESK/ATRIX (a mensagem mais recente)
     const _todosAtivos = getActiveMsgs();
-    let msgs = filtroMassivoTipoAtual === 'INFRA'
-      ? _todosAtivos.filter(m => msgMatchInfra(m))
-      : _todosAtivos.filter(m => m.temMassivo);
+    const _vistosLista = new Set();
+    const _dedup = (arr) => arr.filter(m => {
+      const chave = m.chaveUnica;
+      if (chave && !chave.startsWith('hash:')) {
+        if (_vistosLista.has(chave)) return false;
+        _vistosLista.add(chave);
+      }
+      return true;
+    });
+    let msgs = _dedup(
+      filtroMassivoTipoAtual === 'INFRA'
+        ? _todosAtivos.filter(m => msgMatchInfra(m))
+        : _todosAtivos.filter(m => m.temMassivo)
+    );
 
-    // Contadores por UF (base: temMassivo + infra)
-    const _base = _todosAtivos.filter(m => m.temMassivo || msgMatchInfra(m));
+    // Contadores por UF — deduplica por chaveUnica (1 por BDESK/ATRIX, não conta atualizações)
+    const _baseAll = _todosAtivos.filter(m => m.temMassivo || msgMatchInfra(m));
+    const _vistosCnt = new Set();
+    const _base = _baseAll.filter(m => {
+      // Para chamados com número único (bdesk/atrix), conta só 1 por chamado
+      const chave = m.chaveUnica;
+      if (chave && !chave.startsWith('hash:')) {
+        if (_vistosCnt.has(chave)) return false;
+        _vistosCnt.add(chave);
+      }
+      return true;
+    });
     const cnt = { total: 0, PA: 0, MA: 0, AP: 0, AM: 0 };
     _base.forEach(m => {
       cnt.total++;
