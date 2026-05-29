@@ -314,9 +314,24 @@ function carregarMensagens() {
   }
 }
 
-function salvarMensagens() {
+let _salvarTimer = null;
+function salvarMensagens(imediato = false) {
+  // Debounce de 2s — evita escrever disco a cada mensagem em rajadas
+  if (imediato) {
+    if (_salvarTimer) { clearTimeout(_salvarTimer); _salvarTimer = null; }
+    _escreverArquivo();
+  } else {
+    if (_salvarTimer) clearTimeout(_salvarTimer);
+    _salvarTimer = setTimeout(() => { _salvarTimer = null; _escreverArquivo(); }, 2000);
+  }
+}
+function _escreverArquivo() {
   try {
-    fs.writeFileSync(dataFile(), JSON.stringify({ mensagens, chamadosHoje, totalWhatsapp: contadores.totalWhatsapp, chamadosStatus }), 'utf8');
+    // Escrita atômica: temp → rename, evita corrupção por crash durante write
+    const dest = dataFile();
+    const tmp  = dest + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify({ mensagens, chamadosHoje, totalWhatsapp: contadores.totalWhatsapp, chamadosStatus }), 'utf8');
+    fs.renameSync(tmp, dest);
   } catch (e) {
     console.error('Erro ao salvar mensagens:', e.message);
   }
@@ -414,7 +429,7 @@ app.post('/api/chamados/:chave/atualizar', autenticar, (req, res) => {
 
 app.delete('/api/chamados/:chave', autenticar, apenasAdmin, (req, res) => {
   delete chamadosStatus[req.params.chave];
-  salvarMensagens();
+  salvarMensagens(true);
   broadcast('chamado_removido', { chave: req.params.chave });
   res.json({ ok: true });
 });
@@ -610,7 +625,7 @@ app.post('/api/mensagens/:id/flag', autenticar, (req, res) => {
   const msg = mensagens.find(m => m.id === req.params.id);
   if (!msg) return res.status(404).json({ erro: 'not found' });
   msg.flagged = !msg.flagged;
-  salvarMensagens();
+  salvarMensagens(true);
   broadcast('flag', { id: msg.id, flagged: msg.flagged });
   res.json({ ok: true, flagged: msg.flagged });
 });
@@ -619,16 +634,18 @@ app.post('/api/mensagens/:id/flag', autenticar, (req, res) => {
 function broadcast(tipo, dados) {
   const payload = JSON.stringify({ tipo, dados, ts: Date.now() });
   wss.clients.forEach(c => {
-    if (c.readyState === WebSocket.OPEN) c.send(payload);
+    if (c.readyState === WebSocket.OPEN) {
+      try { c.send(payload); } catch (_) {}
+    }
   });
 }
 
 // Heartbeat — mantém conexões vivas através do proxy do Railway (fecha ociosas após ~60s)
 setInterval(() => {
   wss.clients.forEach(ws => {
-    if (ws.isAlive === false) { ws.terminate(); return; }
+    if (ws.isAlive === false) { try { ws.terminate(); } catch (_) {} return; }
     ws.isAlive = false;
-    ws.ping();
+    try { ws.ping(); } catch (_) {}
   });
 }, 25000);
 
@@ -868,7 +885,7 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
       contadores.fechado++;
       console.log(`[FECHAMENTO] chave=${chaveUnica} movido de ativo para fechado`);
       broadcast('atualizar-mensagem', { id: original.id, temFechado: true });
-      salvarMensagens();
+      salvarMensagens(true);
     }
   }
 
@@ -933,7 +950,7 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   };
 
   mensagens.unshift(entrada);
-  if (mensagens.length > 200) mensagens.pop();
+  if (mensagens.length > 500) mensagens.pop();
 
   if (!duplicado) {
     if (temFechado && (detectados.length > 0 || (temChamado && temHistoricoDoDia))) {
@@ -1228,14 +1245,18 @@ function agendarResetMeiaNoite() {
   const ms         = meiaNoite - agora;
   const msAjustado = ms > 0 ? ms : ms + 86400000; // fallback: nunca negativo
   setTimeout(() => {
+    // Para o sync periódico antes do reset para evitar processamento em estado inconsistente
+    if (_syncPeriodico) { clearInterval(_syncPeriodico); _syncPeriodico = null; }
     contadores      = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
     chatList        = [];
     chamadosHoje    = {};
     chamadosStatus  = {};
     mensagens       = [];
-    salvarMensagens();
+    salvarMensagens(true);
     console.log('Reset diário realizado —', dataHoraLocal());
     broadcast('reset_diario', { contadores });
+    // Reinicia sync periódico se WhatsApp estiver conectado
+    if (statusWpp === 'conectado') iniciarSyncPeriodico();
     agendarResetMeiaNoite();
   }, msAjustado);
   const proxima = new Date(agora.getTime() + msAjustado);

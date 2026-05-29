@@ -2376,7 +2376,7 @@
   function novaMensagem(m) {
     if (todasMensagens.some(x => x.id === m.id)) return;
     todasMensagens.unshift(m);
-    if (todasMensagens.length > 200) todasMensagens.pop();
+    if (todasMensagens.length > 500) todasMensagens.pop();
     if ((m.temAcionamento || m.chamado) && m.detectados && m.detectados.length > 0 && !m.duplicado) iniciarTimers(m, m.ts, m.texto);
     // Atualiza chat list: sobe o grupo ao topo e incrementa não lidas
     if (m.numero && _chatMap[m.numero]) {
