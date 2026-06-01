@@ -12,17 +12,23 @@ const crypto      = require('crypto');
 // ── Configuração ────────────────────────────────────────────────────────────
 const JWT_SECRET       = process.env.JWT_SECRET || 'mcll-monitoramento-secret-2024';
 const PORT             = process.env.PORT || 3000;
-const WPP_SESSION_PATH = process.env.WPP_SESSION_PATH || path.join(__dirname, '.wpp-session');
 
 // Diretório de dados persistente — usa /data (volume Railway) quando disponível,
 // senão cai para __dirname (desenvolvimento local)
 const DATA_DIR   = fs.existsSync('/data') ? '/data' : __dirname;
+const WPP_SESSION_PATH = process.env.WPP_SESSION_PATH || path.join(DATA_DIR, '.wpp-session');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@mcll.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'mcll@admin2024';
 const TZ = process.env.TZ_APP || 'America/Fortaleza';
 const CMO_REPARO_FILTRO = process.env.CMO_REPARO_FILTRO || 'Carimbo Transferência - CMO REPARO';
 const CMO_ATIVACAO_FILTRO = process.env.CMO_ATIVACAO_FILTRO || '';
+
+for (const dir of [DATA_DIR, WPP_SESSION_PATH]) {
+  try { fs.mkdirSync(dir, { recursive: true }); } catch (e) {
+    console.error(`Erro ao preparar diretorio ${dir}:`, e.message);
+  }
+}
 
 // ── Usuários ────────────────────────────────────────────────────────────────
 function carregarUsuarios() {
@@ -282,6 +288,30 @@ function dataFile() {
   return path.join(DATA_DIR, `data-${hoje()}.json`);
 }
 
+function compactarMensagensDuplicadasPorId(lista) {
+  const porId = new Map();
+  let removidas = 0;
+
+  for (const msg of lista || []) {
+    if (!msg?.id) continue;
+    const atual = porId.get(msg.id);
+    if (!atual) {
+      porId.set(msg.id, msg);
+      continue;
+    }
+
+    removidas++;
+    const preferida = (!msg.duplicado && atual.duplicado) ? msg : atual;
+    const descartada = preferida === msg ? atual : msg;
+    preferida.lida = Boolean(preferida.lida || descartada.lida);
+    preferida.lidaEm = preferida.lidaEm || descartada.lidaEm || null;
+    preferida.flagged = Boolean(preferida.flagged || descartada.flagged);
+    porId.set(msg.id, preferida);
+  }
+
+  return { mensagens: Array.from(porId.values()).sort((a, b) => (b.ts || 0) - (a.ts || 0)), removidas };
+}
+
 function carregarMensagens() {
   console.log(`📁 Dados em: ${DATA_DIR}`);
   try {
@@ -315,6 +345,10 @@ function carregarMensagens() {
       }
     });
 
+    const compactado = compactarMensagensDuplicadasPorId(mensagens);
+    mensagens = compactado.mensagens;
+    const duplicatasRemovidas = compactado.removidas;
+
     // Recalcula contadores a partir das mensagens salvas
     contadores = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
     const _FECH_RE = /\bvalidad[oa]\b|\bnormalizad[oa]\b|\benvi(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bmand(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bcancelad[oa]\b|\bcancelamento\b/i;
@@ -339,6 +373,10 @@ function carregarMensagens() {
     });
     contadores.totalWhatsapp = salvo.totalWhatsapp || 0;
     chamadosStatus = salvo.chamadosStatus || {};
+    if (duplicatasRemovidas > 0) {
+      console.log(`Removidas ${duplicatasRemovidas} mensagens duplicadas do arquivo diario`);
+      salvarMensagens(true);
+    }
     console.log(`✅ ${mensagens.length} mensagens do dia restauradas`);
   } catch (e) {
     if (e.code !== 'ENOENT') console.error('Aviso ao carregar mensagens:', e.message);
@@ -873,6 +911,14 @@ let client = criarCliente();
 let sincronizandoMensagens = false;
 
 async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
+  const idMensagem = msg?.id?._serialized;
+  if (!idMensagem) return false;
+
+  if (mensagens.some(m => m.id === idMensagem)) {
+    console.log(`[IGNORADA:${origem}] id=${idMensagem} ja processado`);
+    return false;
+  }
+
   // Conta todas as mensagens do WhatsApp antes de qualquer filtro
   if (origem === 'ao vivo') {
     contadores.totalWhatsapp = (contadores.totalWhatsapp || 0) + 1;
@@ -934,11 +980,10 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   const chamado = extrairChamado(texto);
   const chaveUnica = chaveUnicaChamado(chamados, texto, msg.from, dataMsg);
   const duplicado = mensagens.some(m =>
-    (m.id === msg.id._serialized) ||
     (m.chaveUnica === chaveUnica && m.dataDia === hoje())
   );
 
-  chamadosHoje[chaveUnica] = chamadosHoje[chaveUnica] || { msgId: msg.id._serialized, atualizacoes: 0 };
+  chamadosHoje[chaveUnica] = chamadosHoje[chaveUnica] || { msgId: idMensagem, atualizacoes: 0 };
   if (duplicado) {
     chamadosHoje[chaveUnica].atualizacoes = (chamadosHoje[chaveUnica].atualizacoes || 0) + 1;
     console.log(`[DUPLICADO:${origem}] chave=${chaveUnica} de=${msg.from}`);
@@ -987,7 +1032,7 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   }
 
   const entrada = {
-    id:        msg.id._serialized,
+    id:        idMensagem,
     de:        nomeRemetente(contact, msg),
     numero:    msg.from,
     grupo:     Boolean(chat?.isGroup || msg.from.includes('@g.us')),
