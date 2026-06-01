@@ -101,6 +101,20 @@
       letter-spacing: .06em;
       margin-top: 6px;
     }
+    .instance-badge {
+      display: none;
+      margin: -18px auto 22px;
+      width: fit-content;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(59,130,246,.35);
+      background: rgba(59,130,246,.14);
+      color: #bfdbfe;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
 
     h2 {
       font-size: .92rem;
@@ -206,6 +220,7 @@
     </div>
     <div class="mcll-tagline">Painel de Acionamentos — Acesso Restrito</div>
   </div>
+  <div class="instance-badge" id="instanceBadge"></div>
 
   <h2>Entrar na plataforma</h2>
 
@@ -233,6 +248,22 @@
 </div>
 
 <script>
+  function aplicarNomeInstancia(nome) {
+    const instanceName = (nome || '').trim();
+    if (!instanceName) return;
+    const badge = document.getElementById('instanceBadge');
+    if (badge) {
+      badge.textContent = instanceName;
+      badge.style.display = 'block';
+    }
+    document.title = `MCLL Monitoramento — ${instanceName}`;
+  }
+
+  fetch('/api/config')
+    .then(r => r.ok ? r.json() : null)
+    .then(cfg => aplicarNomeInstancia(cfg && cfg.instanceName))
+    .catch(() => {});
+
   // Se já tem token válido, redireciona direto
   const token = localStorage.getItem('mcll_token');
   if (token) {

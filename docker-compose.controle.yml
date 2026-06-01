@@ -1,0 +1,24 @@
+services:
+  controle:
+    build: .
+    container_name: painel-acionamentos-controle
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      APP_INSTANCE_NAME: Controle
+      TZ_APP: America/Fortaleza
+      WPP_SESSION_PATH: /data/.wpp-session
+      JWT_SECRET: ${JWT_SECRET:-troque-esta-chave-controle}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@mcll.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-mcll@admin2024}
+      SHEETS_WEBHOOK_URL: ${SHEETS_WEBHOOK_URL:-}
+      CMO_REPARO_FILTRO: ${CMO_REPARO_FILTRO:-Carimbo Transferencia - CMO REPARO}
+      CMO_ATIVACAO_FILTRO: ${CMO_ATIVACAO_FILTRO:-}
+    ports:
+      - "3001:3000"
+    volumes:
+      - controle-data:/data
+
+volumes:
+  controle-data:

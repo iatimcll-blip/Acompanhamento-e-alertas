@@ -73,6 +73,19 @@
       filter: drop-shadow(2px 4px 8px rgba(0,0,0,.8));
     }
     .mcll-sub-row { display: flex; align-items: center; gap: 6px; margin-top: 0; }
+    .instance-badge {
+      display: none;
+      margin-left: 12px;
+      padding: 4px 9px;
+      border: 1px solid rgba(59,130,246,.35);
+      border-radius: 999px;
+      background: rgba(59,130,246,.14);
+      color: #bfdbfe;
+      font-size: .66rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
     .mcll-chevron-l, .mcll-chevron-r {
       width: 16px; height: 5px; flex-shrink: 0;
       background: linear-gradient(90deg, #6abf2e, #9ed44d);
@@ -1370,6 +1383,7 @@
         <div class="mcll-chevron-r"></div>
       </div>
     </div>
+    <span class="instance-badge" id="instanceBadge"></span>
   </div>
   <div class="topbar-right">
     <div class="date-pill" style="flex-direction:column;align-items:flex-end;gap:1px">
@@ -1794,6 +1808,22 @@
     });
   }
 
+  function aplicarNomeInstancia(nome) {
+    const instanceName = (nome || '').trim();
+    if (!instanceName) return;
+    const badge = document.getElementById('instanceBadge');
+    if (badge) {
+      badge.textContent = instanceName;
+      badge.style.display = 'inline-flex';
+    }
+    document.title = `MCLL Monitoramento — ${instanceName}`;
+  }
+
+  fetch('/api/config')
+    .then(r => r.ok ? r.json() : null)
+    .then(cfg => aplicarNomeInstancia(cfg && cfg.instanceName))
+    .catch(() => {});
+
   // ── Data completa ─────────────────────────────────────────────────────────
   (function() {
     const d    = new Date();
@@ -2071,6 +2101,7 @@
   }
 
   function handleInit(dados) {
+    aplicarNomeInstancia(dados.instanceName);
     atualizarStatus(dados.statusWpp);
     atualizarContadores(dados.contadores);
     todasMensagens = dados.mensagens || [];

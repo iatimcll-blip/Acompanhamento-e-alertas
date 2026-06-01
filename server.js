@@ -20,6 +20,7 @@ const WPP_SESSION_PATH = process.env.WPP_SESSION_PATH || path.join(DATA_DIR, '.w
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@mcll.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'mcll@admin2024';
+const APP_INSTANCE_NAME = (process.env.APP_INSTANCE_NAME || process.env.INSTANCE_NAME || '').trim();
 const TZ = process.env.TZ_APP || 'America/Fortaleza';
 const CMO_REPARO_FILTRO = process.env.CMO_REPARO_FILTRO || 'Carimbo Transferência - CMO REPARO';
 const CMO_ATIVACAO_FILTRO = process.env.CMO_ATIVACAO_FILTRO || '';
@@ -200,6 +201,7 @@ app.get('/', (_, res) => { res.setHeader('Cache-Control','no-store'); res.sendFi
 app.get('/painel', (_, res) => { res.setHeader('Cache-Control','no-store'); res.sendFile(path.join(__dirname, 'index.html')); });
 app.use(express.static(path.join(__dirname), { etag: false, lastModified: false }));
 app.use(express.json());
+app.get('/api/config', (_, res) => res.json({ instanceName: APP_INSTANCE_NAME }));
 
 // Retorna data de hoje no formato YYYY-MM-DD
 function hoje() {
@@ -556,7 +558,7 @@ app.post('/api/sheets/push', autenticar, async (req, res) => {
 });
 
 // ── API REST ─────────────────────────────────────────────────────────────────
-app.get('/api/status',    autenticar, (_, res) => res.json({ status: statusWpp, contadores }));
+app.get('/api/status',    autenticar, (_, res) => res.json({ status: statusWpp, contadores, instanceName: APP_INSTANCE_NAME }));
 app.get('/api/mensagens', autenticar, (_, res) => res.json(mensagens.filter(m => m.dataDia === hoje())));
 app.get('/api/base',      autenticar, (_, res) => res.json(BASE));
 app.get('/api/chats',     autenticar, (_, res) => res.json(chatList));
@@ -772,7 +774,7 @@ wss.on('connection', (ws, req) => {
     ws.close(4001, 'Token inválido');
     return;
   }
-  ws.send(JSON.stringify({ tipo:'init', dados: { statusWpp, contadores, mensagens, chatList, chamadosStatus, usuario: { nome: ws.usuario.nome, perfil: ws.usuario.perfil } } }));
+  ws.send(JSON.stringify({ tipo:'init', dados: { statusWpp, contadores, mensagens, chatList, chamadosStatus, instanceName: APP_INSTANCE_NAME, usuario: { nome: ws.usuario.nome, perfil: ws.usuario.perfil } } }));
 });
 
 // Detecta número de chamado: Bdesk (6 dígitos) ou Atrix (DDMMYYYY-NNNNN)
