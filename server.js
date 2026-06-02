@@ -186,6 +186,8 @@ let chatList        = [];
 let _chatObjects    = {}; // cache dos objetos de chat reais (evita getChatById lento)
 let chamadosHoje    = {}; // chave → { msgId, atualizacoes }
 let chamadosStatus  = {}; // chave → { chamado, titulo, localidade, status, cmo, origem, timeline, criadoEm }
+let mensagensProcessadasIds = new Set();
+let mensagensEmProcessamentoIds = new Set();
 let contadores      = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
 let statusWpp       = 'desconectado';
 
@@ -321,6 +323,7 @@ function carregarMensagens() {
     const salvo = JSON.parse(raw);
     mensagens    = salvo.mensagens || [];
     chamadosHoje = salvo.chamadosHoje || {};
+    const idsProcessadosSalvos = Array.isArray(salvo.idsProcessados) ? salvo.idsProcessados : [];
 
     // Re-executa detecção em cada mensagem para corrigir campos de versões antigas
     mensagens.forEach(m => {
@@ -350,6 +353,10 @@ function carregarMensagens() {
     const compactado = compactarMensagensDuplicadasPorId(mensagens);
     mensagens = compactado.mensagens;
     const duplicatasRemovidas = compactado.removidas;
+    mensagensProcessadasIds = new Set([
+      ...idsProcessadosSalvos.filter(Boolean),
+      ...mensagens.map(m => m.id).filter(Boolean),
+    ]);
 
     // Recalcula contadores a partir das mensagens salvas
     contadores = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
@@ -402,7 +409,13 @@ function _escreverArquivo() {
     // Escrita atômica: temp → rename, evita corrupção por crash durante write
     const dest = dataFile();
     const tmp  = dest + '.tmp';
-    fs.writeFileSync(tmp, JSON.stringify({ mensagens, chamadosHoje, totalWhatsapp: contadores.totalWhatsapp, chamadosStatus }), 'utf8');
+    fs.writeFileSync(tmp, JSON.stringify({
+      mensagens,
+      chamadosHoje,
+      idsProcessados: Array.from(mensagensProcessadasIds),
+      totalWhatsapp: contadores.totalWhatsapp,
+      chamadosStatus,
+    }), 'utf8');
     fs.renameSync(tmp, dest);
   } catch (e) {
     console.error('Erro ao salvar mensagens:', e.message);
@@ -916,8 +929,16 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   const idMensagem = msg?.id?._serialized;
   if (!idMensagem) return false;
 
-  if (mensagens.some(m => m.id === idMensagem)) {
+  if (mensagensProcessadasIds.has(idMensagem) || mensagensEmProcessamentoIds.has(idMensagem) || mensagens.some(m => m.id === idMensagem)) {
     console.log(`[IGNORADA:${origem}] id=${idMensagem} ja processado`);
+    return false;
+  }
+
+  mensagensEmProcessamentoIds.add(idMensagem);
+  try {
+
+  if (msg.fromMe) {
+    console.log(`[IGNORADA:${origem}] id=${idMensagem} enviada pelo proprio numero`);
     return false;
   }
 
@@ -1166,7 +1187,11 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
     }
   }
 
+  mensagensProcessadasIds.add(idMensagem);
   return true;
+  } finally {
+    mensagensEmProcessamentoIds.delete(idMensagem);
+  }
 }
 
 async function sincronizarMensagensRecentes(chatsOrigem = null) {
@@ -1374,6 +1399,8 @@ function agendarResetMeiaNoite() {
     chamadosHoje    = {};
     chamadosStatus  = {};
     mensagens       = [];
+    mensagensProcessadasIds = new Set();
+    mensagensEmProcessamentoIds = new Set();
     salvarMensagens(true);
     console.log('Reset diário realizado —', dataHoraLocal());
     broadcast('reset_diario', { contadores });
