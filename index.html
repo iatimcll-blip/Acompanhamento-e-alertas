@@ -816,6 +816,7 @@
     .chat-msg-hora { font-size: .62rem; color: var(--muted); margin-top: 2px; }
 
     .chat-modal-reply { padding: 11px 14px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .chat-modal-reply.oculto, .reply-box.oculto { display: none !important; }
     .chat-modal-reply textarea {
       width: 100%; height: 65px; resize: none;
       background: var(--card2); border: 1px solid var(--border2); border-radius: 8px;
@@ -1801,6 +1802,7 @@
     // Oculta botão de resposta para não-admin
     if (perfil !== 'administrador') {
       document.querySelectorAll('.btn-reply, .btn-modal-reply').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.chat-modal-reply, .reply-box').forEach(el => el.classList.add('oculto'));
       // Oculta seção Grupos e Contatos para não-admin
       const chatsSection = document.querySelector('.sidebar-chats');
       if (chatsSection) chatsSection.style.display = 'none';
@@ -2418,6 +2420,8 @@
   // ── Modal de chat (item 2) ────────────────────────────────────────────────
   async function abrirChatModal(chatId, nome, grupo) {
     chatModalId = chatId;
+    const modalReply = document.querySelector('#chatModal .chat-modal-reply');
+    if (modalReply) modalReply.classList.toggle('oculto', (localStorage.getItem('mcll_perfil') || '') !== 'administrador');
     document.getElementById('chatModalNome').textContent = nome || chatId;
     document.getElementById('chatModalSub').textContent  = (grupo === true || grupo === 'true') ? 'Grupo' : 'Contato';
     document.getElementById('chatModal').classList.add('aberto');
@@ -2495,6 +2499,7 @@
   }
 
   async function enviarRespostaModal() {
+    if ((localStorage.getItem('mcll_perfil') || '') !== 'administrador') return;
     const textoEl = document.getElementById('chatModalReply');
     const status  = document.getElementById('chatModalStatus');
     const texto   = textoEl ? textoEl.value.trim() : '';
@@ -2994,7 +2999,7 @@
       ${mediaEl}
       <div class="detalhe-texto">${escHtml(m.texto || '')}</div>
       <div class="detalhe-chips">${chipsUF}${chipsSig}${chipsMu}${chipsEps}${chipCh}${chipDup}</div>
-      <div>
+      <div class="reply-box${(localStorage.getItem('mcll_perfil') || '') === 'administrador' ? '' : ' oculto'}">
         <div class="reply-label">Enviar Resposta</div>
         <textarea class="reply-textarea" id="replyText" placeholder="Digite sua resposta…"></textarea>
         <div class="reply-status" id="replyStatus"></div>
@@ -3004,6 +3009,7 @@
 
   // item 7 — reply corrigido
   async function enviarResposta() {
+    if ((localStorage.getItem('mcll_perfil') || '') !== 'administrador') return;
     const textoEl = document.getElementById('replyText');
     const status  = document.getElementById('replyStatus');
     const texto   = textoEl ? textoEl.value.trim() : '';
