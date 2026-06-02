@@ -169,7 +169,22 @@ const WANDERSON_IDS = [
   '555586994944816',
   '+5586994944816',
   '86994944816',
+  '8699494-4816',
 ];
+
+function isWandersonReferencia(texto = '', remetente = '') {
+  const textoNorm = String(texto).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const textoNum = String(texto).replace(/\D/g, '');
+  const remetenteNum = String(remetente).replace(/\D/g, '');
+  return WANDERSON_IDS.some(id => {
+    const idTexto = String(id).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const idNum = String(id).replace(/\D/g, '');
+    if (idNum.length >= 8) {
+      return textoNum.includes(idNum) || remetenteNum.includes(idNum);
+    }
+    return textoNorm.includes(idTexto);
+  });
+}
 
 // Padrões de chamados massivos
 const MASSIVO_RE = [
@@ -1026,13 +1041,8 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   if (dataMsg !== hoje()) return false;
 
   const { detectados, temAcionamento } = analisarMensagem(texto);
-  // Detecta Wanderson: pelo texto (menção) OU pelo número do remetente (msg enviada por ele)
-  const _wSenderNum = ((msg.author || msg.from || '')).replace(/\D/g, '');
-  const temWanderson = WANDERSON_IDS.some(id => {
-    const n = id.replace(/\D/g, '');
-    if (n.length >= 8) return _wSenderNum.includes(n) || texto.toUpperCase().includes(id.toUpperCase());
-    return texto.toUpperCase().includes(id.toUpperCase());
-  });
+  // Detecta Wanderson: pelo texto/menção OU pelo número do remetente.
+  const temWanderson = isWandersonReferencia(texto, msg.author || msg.from || '');
   // Detecta chamado e fechado ANTES do filtro
   const chamados = extrairChamados(texto);
   const _textoFech = texto.normalize('NFD').replace(/[̀-ͯ]/g, '');

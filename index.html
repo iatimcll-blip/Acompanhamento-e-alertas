@@ -2006,15 +2006,17 @@
 
   // Detecta Wanderson pelo remetente ou menção no texto (IDs sincronizados com server.js)
   const _WAND_IDS = ['wanderson marcellus penha costa','marcellus penha costa','@wanderson',
-    '5586994944816','555586994944816','+5586994944816','86994944816'];
+    '5586994944816','555586994944816','+5586994944816','86994944816','8699494-4816'];
   function _clientIsWanderson(m) {
-    const deNorm  = (m.de     || '').toLowerCase().replace(/\s+/g,' ').trim();
-    const numNorm = (m.numero || '').toLowerCase().replace(/\D/g,'');
-    const texNorm = (m.texto  || '').toLowerCase();
+    const deNorm  = (m.de     || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g,' ').trim();
+    const numNorm = (m.numero || '').replace(/\D/g,'');
+    const texNorm = (m.texto  || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const texNum  = (m.texto  || '').replace(/\D/g,'');
     return _WAND_IDS.some(id => {
       const n = id.replace(/\D/g,'');
-      if (n.length >= 8) return numNorm.includes(n) || texNorm.includes(n);
-      return deNorm.includes(id) || texNorm.includes(id);
+      if (n.length >= 8) return numNorm.includes(n) || texNum.includes(n);
+      const idNorm = id.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return deNorm.includes(idNorm) || texNorm.includes(idNorm);
     });
   }
 
