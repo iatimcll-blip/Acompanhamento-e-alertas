@@ -1139,7 +1139,11 @@
     .mas-card .mas-num { font-size:1.1rem; font-weight:700; }
     .mas-card .mas-lbl { font-size:.6rem; color:var(--subtext); }
     .massivo-filter { display:flex; gap:4px; flex-wrap:wrap; padding:4px 14px 6px; flex-shrink:0; }
-    .massivo-list { flex:1; overflow-y:auto; padding:0 8px 8px; }
+    .massivo-list { flex:1 1 58%; min-height:105px; overflow-y:auto; padding:0 8px 8px; }
+    .cat-section { flex:0 0 34%; min-height:125px; border-top:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
+    .cat-hd { display:flex; align-items:center; justify-content:space-between; padding:8px 14px 6px; flex-shrink:0; }
+    .cat-hd h2 { font-size:.78rem; font-weight:700; color:var(--text); }
+    .cat-list { flex:1; overflow-y:auto; padding:0 8px 8px; }
     .mas-item { background:var(--card); border:1px solid var(--border); border-radius:6px; padding:7px 10px; margin-bottom:5px; font-size:.73rem; }
     .mas-item .mas-item-tipo { font-size:.6rem; font-weight:700; padding:2px 5px; border-radius:3px; margin-bottom:4px; display:inline-block; }
     .mas-item .mas-item-de { color:var(--subtext); font-size:.67rem; margin-bottom:2px; }
@@ -1636,6 +1640,10 @@
               <div class="mas-num" style="color:#4c1d95" id="mas-AM">0</div>
               <div class="mas-lbl">AM</div>
             </div>
+            <div class="mas-card" id="mas-card-CAT" onclick="scrollCatPanel()" style="border-color:rgba(5,150,105,.4)">
+              <div class="mas-num" style="color:#065f46" id="mas-CAT">0</div>
+              <div class="mas-lbl">CAT</div>
+            </div>
           </div>
           <div class="massivo-filter" id="massivoFilterBar">
             <button class="ftab ativo" id="mas-ftab-TODOS" onclick="filtrarMassivoTipo('TODOS',this)">Todos</button>
@@ -1647,6 +1655,15 @@
           </div>
           <div class="massivo-list" id="massivoList">
             <p style="color:var(--muted);font-size:.78rem;text-align:center;padding:18px">Nenhum chamado massivo.</p>
+          </div>
+          <div class="cat-section" id="catPanel">
+            <div class="cat-hd">
+              <h2>CAT - Maranhão</h2>
+              <span class="msg-count-badge" id="catCount">0 hoje</span>
+            </div>
+            <div class="cat-list" id="catList">
+              <p style="color:var(--muted);font-size:.78rem;text-align:center;padding:14px">Nenhuma mensagem CAT - Maranhão.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -1915,6 +1932,17 @@
     const t = m.texto.toUpperCase();
     if (_filtroCmoAtivacao && t.includes(_filtroCmoAtivacao.toUpperCase())) return true;
     return CMO_ATIVACAO_KEYWORDS.some(k => t.includes(k));
+  }
+
+  function normalizarTextoBusca(texto = '') {
+    return String(texto).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+  }
+
+  function msgMatchCatMaranhao(m) {
+    if (!m || m.duplicado) return false;
+    if (m.temCatMaranhao) return true;
+    const grupo = normalizarTextoBusca(m.nomeGrupo || '').replace(/\s+/g, ' ').trim();
+    return /\bCAT\s*[-\u2013\u2014]?\s*MARANHAO\b/.test(grupo);
   }
 
   const _INFRA_RE      = /tipo\s*:\s*infra(?:estrutura)?\b|\binfra(?:estrutura)?\b/i;
@@ -3608,11 +3636,23 @@
       }
       return true;
     });
+    const _dedupNovo = (arr) => {
+      const vistos = new Set();
+      return arr.filter(m => {
+        const chave = m.chaveUnica;
+        if (chave && !chave.startsWith('hash:')) {
+          if (vistos.has(chave)) return false;
+          vistos.add(chave);
+        }
+        return true;
+      });
+    };
     let msgs = _dedup(
       filtroMassivoTipoAtual === 'INFRA'
         ? _todosAtivos.filter(m => msgMatchInfra(m))
         : _todosAtivos.filter(m => m.temMassivo)
     );
+    const catMsgs = _dedupNovo(_todosAtivos.filter(m => msgMatchCatMaranhao(m)));
 
     // Contadores por UF — deduplica por chaveUnica (1 por BDESK/ATRIX, não conta atualizações)
     const _baseAll = _todosAtivos.filter(m => m.temMassivo || msgMatchInfra(m));
@@ -3633,11 +3673,21 @@
     });
     const _ids = { total:'mas-total', PA:'mas-PA', MA:'mas-MA', AP:'mas-AP', AM:'mas-AM' };
     Object.entries(_ids).forEach(([k, id]) => { const el = document.getElementById(id); if (el) el.textContent = cnt[k]; });
+    const catNum = document.getElementById('mas-CAT');
+    if (catNum) catNum.textContent = catMsgs.length;
     const badge = document.getElementById('massivoCount');
     if (badge) badge.textContent = cnt.total + ' hoje';
+    const catBadge = document.getElementById('catCount');
+    if (catBadge) catBadge.textContent = catMsgs.length + ' hoje';
+    const catList = document.getElementById('catList');
+    if (catList) {
+      catList.innerHTML = catMsgs.length
+        ? catMsgs.map(m => buildCard(m)).join('')
+        : '<p style="color:var(--muted);font-size:.78rem;text-align:center;padding:14px">Nenhuma mensagem CAT - Maranhão.</p>';
+    }
 
     // Piscar contadores e abas com não lidos
-    atualizarMassivoBlinks(_base);
+    atualizarMassivoBlinks(_base, catMsgs);
 
     // Filtro UF
     if (filtroMassivoUFAtual !== 'TODOS') {
@@ -3656,7 +3706,9 @@
     lista.innerHTML = msgs.map(m => buildCard(m)).join('');
   }
 
-  function atualizarMassivoBlinks(msgs) {
+  function atualizarMassivoBlinks(msgs, catMsgs = []) {
+    const catCard = document.getElementById('mas-card-CAT');
+    if (catCard) catCard.classList.toggle('blink-alert', catMsgs.some(m => !m.lida));
     // pisca cartões UF quando há não lidos naquela UF
     ['PA','MA','AP','AM'].forEach(uf => {
       const card = document.getElementById('mas-card-' + uf);
@@ -3671,6 +3723,10 @@
         : msgs.some(m => !m.lida && m.tipoMassivo === tipo);
       if (btn) btn.classList.toggle('blink-alert', temNaoLida && filtroMassivoTipoAtual !== tipo);
     });
+  }
+
+  function scrollCatPanel() {
+    document.getElementById('catPanel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function filtrarMassivoUF(uf, btn) {

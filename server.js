@@ -278,6 +278,18 @@ function contemFiltro(texto, filtro) {
   return texto.toUpperCase().includes(filtro.toUpperCase());
 }
 
+function normalizarTextoBusca(texto = '') {
+  return String(texto)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase();
+}
+
+function isCatMaranhaoGrupo(nome = '') {
+  const normalizado = normalizarTextoBusca(nome).replace(/\s+/g, ' ').trim();
+  return /\bCAT\s*[-\u2013\u2014]?\s*MARANHAO\b/.test(normalizado);
+}
+
 function hashMensagem(texto, remetente, dataDia) {
   return crypto
     .createHash('sha1')
@@ -378,6 +390,7 @@ function carregarMensagens() {
         m.temMassivo  = temMassivo;
         m.tipoMassivo = tipoMassivo;
       }
+      m.temCatMaranhao = isCatMaranhaoGrupo(m.nomeGrupo || '');
     });
 
     const compactado = compactarMensagensDuplicadasPorId(mensagens);
@@ -1055,9 +1068,15 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
     ? !!(chamadosHoje[_chavePreFiltro] || mensagens.some(m => m.chaveUnica === _chavePreFiltro && m.dataDia === hoje()))
     : false;
 
+  let chat = null, contact = null;
+  try { chat = await msg.getChat(); } catch (_) {}
+  try { contact = await msg.getContact(); } catch (_) {}
+  const nomeGrupoDetectado = chat?.isGroup ? (chat.name || '') : '';
+  const temCatMaranhao = isCatMaranhaoGrupo(nomeGrupoDetectado);
+
   // Passa se: tem município OU Wanderson OU (fechado + Bdesk/Atrix + histórico do dia)
-  if (detectados.length === 0 && !temWanderson && !(temFechado && temChamado && temHistoricoDoDia)) {
-    console.log(`[FILTRADO:${origem}] de=${msg.from} - sem municipio/Wanderson/Fechado+historico`);
+  if (detectados.length === 0 && !temWanderson && !temCatMaranhao && !(temFechado && temChamado && temHistoricoDoDia)) {
+    console.log(`[FILTRADO:${origem}] de=${msg.from} - sem municipio/Wanderson/CAT/Fechado+historico`);
     syncHealth.mensagensIgnoradas++;
     return false;
   }
@@ -1107,10 +1126,6 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
     }
   }
 
-  let chat = null, contact = null;
-  try { chat = await msg.getChat(); } catch (_) {}
-  try { contact = await msg.getContact(); } catch (_) {}
-
   // Baixa mídia quando disponível (imagens, arquivos, vídeos)
   let mediaData = null, mediaMime = null, mediaFilename = null;
   if (msg.hasMedia) {
@@ -1152,6 +1167,7 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
     temWanderson,
     temRuptura,
     temFechado,
+    temCatMaranhao,
     temCmoReparo: cmoReparoConfigurado || temCmoReparo,
     temCmoAtivacao: cmoAtivacaoConfigurado || temCmoAtivacao,
     // Grupo Infraestrutura: marca como INFRA se detectou município cadastrado
