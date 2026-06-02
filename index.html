@@ -3003,7 +3003,9 @@
   // ── Marcar lida ───────────────────────────────────────────────────────────
   async function marcarTodasLidas(btn) {
     const naoLidas = todasMensagens.filter(m => !m.lida).length;
-    if (!naoLidas) return;
+    const naoLidasWpp = _chatListTotalUnread || 0;
+    if (!naoLidas && !naoLidasWpp) return;
+    const textoOriginal = btn ? btn.textContent : '';
     if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
     try {
       const r = await apiFetch('/api/mensagens/todas-lidas', { method: 'POST' });
@@ -3022,7 +3024,7 @@
         atualizarMobBadges();
       }
     } catch(e) { console.error('Erro ao marcar todas como lidas:', e); }
-    finally { if (btn) { btn.textContent = '✓'; btn.disabled = false; } }
+    finally { if (btn) { btn.textContent = textoOriginal || '✓'; btn.disabled = false; } }
   }
 
   function marcarLida(id) {

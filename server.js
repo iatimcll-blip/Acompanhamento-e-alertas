@@ -601,22 +601,64 @@ app.post('/api/sync/mensagens', autenticar, async (_, res) => {
   });
 });
 
+async function sincronizarLeituraChats(chatIds) {
+  if (statusWpp !== 'conectado') return { sincronizados: 0, erros: [{ erro: 'WhatsApp nao conectado' }] };
+  const ids = [...new Set((chatIds || []).filter(Boolean))];
+  let sincronizados = 0;
+  const erros = [];
+
+  for (const chatId of ids) {
+    try {
+      const chat = _chatObjects[chatId] || await Promise.race([
+        client.getChatById(chatId),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ao buscar chat')), 12000)),
+      ]);
+      if (chat) _chatObjects[chatId] = chat;
+      if (typeof chat?.sendSeen === 'function') {
+        await chat.sendSeen();
+      } else if (typeof client.sendSeen === 'function') {
+        await client.sendSeen(chatId);
+      } else {
+        throw new Error('metodo sendSeen indisponivel');
+      }
+      sincronizados++;
+    } catch (e) {
+      erros.push({ chatId, erro: e.message });
+      console.error(`[LIDAS] Erro ao sincronizar chat ${chatId}:`, e.message);
+    }
+  }
+
+  return { sincronizados, erros };
+}
+
+function atualizarChatsComoLidos(chatIds) {
+  const ids = new Set((chatIds || []).filter(Boolean));
+  chatList = chatList.map(c => ids.has(c.id) ? { ...c, naoLidas: 0 } : c);
+  contadores.totalWhatsapp = chatList.reduce((acc, c) => acc + (c.naoLidas || 0), 0);
+  broadcast('chats', chatList);
+  broadcast('contadores', contadores);
+}
+
 // Marcar todas as mensagens como lidas
-app.post('/api/mensagens/todas-lidas', autenticar, (req, res) => {
+app.post('/api/mensagens/todas-lidas', autenticar, async (req, res) => {
   const agora = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
   const atualizadas = [];
+  const chatIds = new Set(chatList.filter(c => (c.naoLidas || 0) > 0).map(c => c.id));
   mensagens.forEach(m => {
     if (!m.lida) {
       m.lida = true;
       m.lidaEm = agora;
       atualizadas.push({ id: m.id, lidaEm: agora });
+      if (m.numero) chatIds.add(m.numero);
     }
   });
+  const syncWpp = await sincronizarLeituraChats([...chatIds]);
+  atualizarChatsComoLidos([...chatIds]);
   if (atualizadas.length > 0) {
     salvarMensagens();
     atualizadas.forEach(a => broadcast('lida', a));
   }
-  res.json({ ok: true, total: atualizadas.length });
+  res.json({ ok: true, total: atualizadas.length, whatsapp: syncWpp });
 });
 
 // Marcar mensagem como lida
