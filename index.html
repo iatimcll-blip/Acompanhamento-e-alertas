@@ -1427,6 +1427,12 @@
         Escaneie o QR
       </div>
     </div>
+    <div id="syncHealthBox" style="padding:8px 13px;border-top:1px solid var(--border);font-size:.66rem;color:var(--subtext);line-height:1.45">
+      <div style="font-weight:700;color:var(--text);margin-bottom:3px">Sincronizacao</div>
+      <div id="syncHealthLive">Ao vivo: aguardando</div>
+      <div id="syncHealthSync">Sync: aguardando</div>
+      <div id="syncHealthStats">Aceitas: 0 | Ignoradas: 0</div>
+    </div>
     <div id="btnDesconectarWrap" style="display:none;padding:6px 13px;border-top:1px solid var(--border)">
       <button onclick="desconectarWhatsApp()" id="btnDesconectar"
         style="width:100%;font-size:.7rem;font-weight:700;padding:6px 10px;border-radius:6px;cursor:pointer;
@@ -2086,11 +2092,43 @@
       else if (tipo === 'chamado_removido') { delete chamadosStatusLocal[dados.chave]; if (chaveAtualAberta === dados.chave) fecharAtz(); renderChamadosPanel(); }
       else if (tipo === 'atualizar-mensagem') { atualizarMensagemLocal(dados); }
       else if (tipo === 'sync_status') {
+        if (dados.syncHealth) atualizarSyncHealth(dados.syncHealth);
         if (dados.em_andamento) console.log('[SYNC] Sincronização em andamento...');
         else console.log(`[SYNC] Concluído — analisadas:${dados.analisadas} aceitas:${dados.aceitas} erros:${dados.erros||0}`);
       }
+      else if (tipo === 'sync_health') atualizarSyncHealth(dados);
     };
   }
+
+  function tempoRelativo(ts) {
+    if (!ts) return 'aguardando';
+    const diff = Math.max(0, Date.now() - Number(ts));
+    const seg = Math.floor(diff / 1000);
+    if (seg < 10) return 'agora';
+    if (seg < 60) return `${seg}s atras`;
+    const min = Math.floor(seg / 60);
+    if (min < 60) return `${min}min atras`;
+    const h = Math.floor(min / 60);
+    return `${h}h atras`;
+  }
+
+  function atualizarSyncHealth(h) {
+    if (!h) return;
+    window._ultimoSyncHealth = h;
+    const live = document.getElementById('syncHealthLive');
+    const sync = document.getElementById('syncHealthSync');
+    const stats = document.getElementById('syncHealthStats');
+    if (live) live.textContent = `Ao vivo: ${tempoRelativo(h.ultimaMensagemAoVivoEm)}`;
+    if (sync) {
+      const erro = h.ultimaSyncErro ? ` | erro: ${h.ultimaSyncErro}` : '';
+      sync.textContent = `Sync: ${tempoRelativo(h.ultimaSyncFimEm)} (${h.ultimaSyncAnalisadas || 0}/${h.ultimaSyncAceitas || 0}, erros ${h.ultimaSyncErros || 0})${erro}`;
+    }
+    if (stats) stats.textContent = `Aceitas: ${h.mensagensAceitas || 0} | Ignoradas: ${h.mensagensIgnoradas || 0}`;
+  }
+
+  setInterval(() => {
+    if (window._ultimoSyncHealth) atualizarSyncHealth(window._ultimoSyncHealth);
+  }, 30000);
 
   function atualizarMensagemLocal(dados) {
     const m = todasMensagens.find(x => x.id === dados.id);
@@ -2104,6 +2142,7 @@
     aplicarNomeInstancia(dados.instanceName);
     atualizarStatus(dados.statusWpp);
     atualizarContadores(dados.contadores);
+    atualizarSyncHealth(dados.syncHealth);
     todasMensagens = dados.mensagens || [];
     chamadosStatusLocal = dados.chamadosStatus || {};
     atualizarTopCounter();

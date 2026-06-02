@@ -190,6 +190,21 @@ let mensagensProcessadasIds = new Set();
 let mensagensEmProcessamentoIds = new Set();
 let contadores      = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
 let statusWpp       = 'desconectado';
+let syncHealth       = {
+  conectadoEm: null,
+  ultimaMensagemAoVivoEm: null,
+  ultimaMensagemAceitaEm: null,
+  ultimaSyncInicioEm: null,
+  ultimaSyncFimEm: null,
+  ultimaSyncDuracaoMs: null,
+  ultimaSyncAnalisadas: 0,
+  ultimaSyncAceitas: 0,
+  ultimaSyncErros: 0,
+  ultimaSyncErro: null,
+  mensagensAoVivoRecebidas: 0,
+  mensagensAceitas: 0,
+  mensagensIgnoradas: 0,
+};
 
 const SHEETS_WEBHOOK = process.env.SHEETS_WEBHOOK_URL || '';
 
@@ -571,7 +586,7 @@ app.post('/api/sheets/push', autenticar, async (req, res) => {
 });
 
 // ── API REST ─────────────────────────────────────────────────────────────────
-app.get('/api/status',    autenticar, (_, res) => res.json({ status: statusWpp, contadores, instanceName: APP_INSTANCE_NAME }));
+app.get('/api/status',    autenticar, (_, res) => res.json({ status: statusWpp, contadores, syncHealth, instanceName: APP_INSTANCE_NAME }));
 app.get('/api/mensagens', autenticar, (_, res) => res.json(mensagens.filter(m => m.dataDia === hoje())));
 app.get('/api/base',      autenticar, (_, res) => res.json(BASE));
 app.get('/api/chats',     autenticar, (_, res) => res.json(chatList));
@@ -787,7 +802,7 @@ wss.on('connection', (ws, req) => {
     ws.close(4001, 'Token inválido');
     return;
   }
-  ws.send(JSON.stringify({ tipo:'init', dados: { statusWpp, contadores, mensagens, chatList, chamadosStatus, instanceName: APP_INSTANCE_NAME, usuario: { nome: ws.usuario.nome, perfil: ws.usuario.perfil } } }));
+  ws.send(JSON.stringify({ tipo:'init', dados: { statusWpp, contadores, syncHealth, mensagens, chatList, chamadosStatus, instanceName: APP_INSTANCE_NAME, usuario: { nome: ws.usuario.nome, perfil: ws.usuario.perfil } } }));
 });
 
 // Detecta número de chamado: Bdesk (6 dígitos) ou Atrix (DDMMYYYY-NNNNN)
@@ -930,6 +945,7 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   if (!idMensagem) return false;
 
   if (mensagensProcessadasIds.has(idMensagem) || mensagensEmProcessamentoIds.has(idMensagem) || mensagens.some(m => m.id === idMensagem)) {
+    syncHealth.mensagensIgnoradas++;
     console.log(`[IGNORADA:${origem}] id=${idMensagem} ja processado`);
     return false;
   }
@@ -938,21 +954,28 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   try {
 
   if (msg.fromMe) {
+    syncHealth.mensagensIgnoradas++;
     console.log(`[IGNORADA:${origem}] id=${idMensagem} enviada pelo proprio numero`);
     return false;
   }
 
   // Conta todas as mensagens do WhatsApp antes de qualquer filtro
   if (origem === 'ao vivo') {
+    syncHealth.ultimaMensagemAoVivoEm = Date.now();
+    syncHealth.mensagensAoVivoRecebidas++;
     contadores.totalWhatsapp = (contadores.totalWhatsapp || 0) + 1;
     broadcast('contadores', contadores);
+    broadcast('sync_health', syncHealth);
   }
 
   const texto = msg.body;
 
   console.log(`[MSG:${origem}] de=${msg.from} grupo=${msg.from.includes('@g.us')} quoted=${!!msg.hasQuotedMsg} texto="${(texto||'').substring(0,80)}"`);
 
-  if (!texto || texto.trim() === '') return false;
+  if (!texto || texto.trim() === '') {
+    syncHealth.mensagensIgnoradas++;
+    return false;
+  }
 
   const msgDate = msg.timestamp
     ? new Date(msg.timestamp * 1000)
@@ -983,6 +1006,7 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   // Passa se: tem município OU Wanderson OU (fechado + Bdesk/Atrix + histórico do dia)
   if (detectados.length === 0 && !temWanderson && !(temFechado && temChamado && temHistoricoDoDia)) {
     console.log(`[FILTRADO:${origem}] de=${msg.from} - sem municipio/Wanderson/Fechado+historico`);
+    syncHealth.mensagensIgnoradas++;
     return false;
   }
 
@@ -1136,9 +1160,12 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   }
 
   salvarMensagens();
+  syncHealth.ultimaMensagemAceitaEm = Date.now();
+  syncHealth.mensagensAceitas++;
   console.log(`[ACEITO:${origem}] ${entrada.hora} | ${entrada.de} | munis=${entrada.municipios.join(',')} | ${texto.substring(0,60)}`);
   broadcast('mensagem', entrada);
   broadcast('contadores', contadores);
+  broadcast('sync_health', syncHealth);
 
   // Push automático para Google Sheets (BASE_MENSAGENS)
   if (!duplicado && SHEETS_WEBHOOK) {
@@ -1199,8 +1226,10 @@ async function sincronizarMensagensRecentes(chatsOrigem = null) {
   if (sincronizandoMensagens) return { ok: false, erro: 'Sincronizacao ja em andamento' };
 
   sincronizandoMensagens = true;
+  syncHealth.ultimaSyncInicioEm = Date.now();
+  syncHealth.ultimaSyncErro = null;
   let analisadas = 0, aceitas = 0, erros = 0;
-  broadcast('sync_status', { em_andamento: true, analisadas: 0, aceitas: 0 });
+  broadcast('sync_status', { em_andamento: true, analisadas: 0, aceitas: 0, syncHealth });
   try {
     const chats = chatsOrigem || await Promise.race([
       client.getChats(),
@@ -1251,11 +1280,21 @@ async function sincronizarMensagensRecentes(chatsOrigem = null) {
       salvarMensagens();
       broadcast('contadores', contadores);
     }
-    broadcast('sync_status', { em_andamento: false, analisadas, aceitas, erros });
+    syncHealth.ultimaSyncFimEm = Date.now();
+    syncHealth.ultimaSyncDuracaoMs = syncHealth.ultimaSyncFimEm - syncHealth.ultimaSyncInicioEm;
+    syncHealth.ultimaSyncAnalisadas = analisadas;
+    syncHealth.ultimaSyncAceitas = aceitas;
+    syncHealth.ultimaSyncErros = erros;
+    broadcast('sync_status', { em_andamento: false, analisadas, aceitas, erros, syncHealth });
+    broadcast('sync_health', syncHealth);
     console.log(`[SYNC] analisadas=${analisadas} aceitas=${aceitas} erros=${erros}`);
     return { ok: true, analisadas, aceitas, erros };
   } catch (e) {
-    broadcast('sync_status', { em_andamento: false, erro: e.message });
+    syncHealth.ultimaSyncFimEm = Date.now();
+    syncHealth.ultimaSyncDuracaoMs = syncHealth.ultimaSyncInicioEm ? syncHealth.ultimaSyncFimEm - syncHealth.ultimaSyncInicioEm : null;
+    syncHealth.ultimaSyncErro = e.message;
+    broadcast('sync_status', { em_andamento: false, erro: e.message, syncHealth });
+    broadcast('sync_health', syncHealth);
     throw e;
   } finally {
     sincronizandoMensagens = false;
@@ -1291,7 +1330,9 @@ function registrarEventos() {
   client.on('ready', async () => {
     console.log('WhatsApp conectado!');
     statusWpp = 'conectado';
+    syncHealth.conectadoEm = Date.now();
     broadcast('status', { status: 'conectado' });
+    broadcast('sync_health', syncHealth);
     setTimeout(() => {
       sincronizarMensagensRecentes().catch(e => {
         console.error('Erro ao sincronizar mensagens no ready:', e.message);
@@ -1304,7 +1345,9 @@ function registrarEventos() {
   client.on('disconnected', reason => {
     console.log('WhatsApp desconectado:', reason);
     statusWpp = 'desconectado';
+    syncHealth.conectadoEm = null;
     broadcast('status', { status: 'desconectado' });
+    broadcast('sync_health', syncHealth);
     if (!reiniciando) {
       reiniciando = true;
       console.log('Reconectando em 10 segundos...');
