@@ -203,7 +203,7 @@ let chamadosHoje    = {}; // chave → { msgId, atualizacoes }
 let chamadosStatus  = {}; // chave → { chamado, titulo, localidade, status, cmo, origem, timeline, criadoEm }
 let mensagensProcessadasIds = new Set();
 let mensagensEmProcessamentoIds = new Set();
-let contadores      = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
+let contadores      = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, CAT:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
 let statusWpp       = 'desconectado';
 let syncHealth       = {
   conectadoEm: null,
@@ -402,7 +402,7 @@ function carregarMensagens() {
     ]);
 
     // Recalcula contadores a partir das mensagens salvas
-    contadores = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
+    contadores = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, CAT:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
     const _FECH_RE = /\bvalidad[oa]\b|\bnormalizad[oa]\b|\benvi(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bmand(?:ar?|e|ou)\s+(?:a\s+)?rfo\b|\bcancelad[oa]\b|\bcancelamento\b/i;
     mensagens.forEach(m => {
       // Re-detecta temFechado para mensagens salvas antes do campo existir
@@ -411,6 +411,10 @@ function carregarMensagens() {
         m.temFechado = _FECH_RE.test(t);
       }
       if (!m.duplicado) {
+        if (m.temCatMaranhao) {
+          contadores.CAT++;
+          return;
+        }
         // Fechado conta se: tem município OU (tem Bdesk/Atrix — histórico implícito pois foi salvo)
         if (m.temFechado && ((m.uf||[]).length > 0 || m.bdesk || m.atrix)) {
           contadores.fechado++;
@@ -1187,7 +1191,9 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   if (mensagens.length > 500) mensagens.pop();
 
   if (!duplicado) {
-    if (temFechado && (detectados.length > 0 || (temChamado && temHistoricoDoDia))) {
+    if (temCatMaranhao) {
+      contadores.CAT = (contadores.CAT || 0) + 1;
+    } else if (temFechado && (detectados.length > 0 || (temChamado && temHistoricoDoDia))) {
       contadores.fechado++;
     } else if (!temFechado && detectados.length > 0) {
       entrada.uf.forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
@@ -1505,7 +1511,7 @@ function agendarResetMeiaNoite() {
   setTimeout(() => {
     // Para o sync periódico antes do reset para evitar processamento em estado inconsistente
     if (_syncPeriodico) { clearInterval(_syncPeriodico); _syncPeriodico = null; }
-    contadores      = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
+    contadores      = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, CAT:0, totalWhatsapp:0, cmoReparo:0, cmoAtivacao:0, fechado:0 };
     chatList        = [];
     chamadosHoje    = {};
     chamadosStatus  = {};
