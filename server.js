@@ -1375,7 +1375,7 @@ async function sincronizarMensagensRecentes(chatsOrigem = null) {
   }
 }
 
-// Rotina de sincronização periódica automática (a cada 5 min)
+// Rotina de sincronização periódica automática (a cada 2 min)
 let _syncPeriodico = null;
 function iniciarSyncPeriodico() {
   if (_syncPeriodico) clearInterval(_syncPeriodico);
@@ -1386,7 +1386,7 @@ function iniciarSyncPeriodico() {
         console.error('[SYNC PERIÓDICO] Erro:', e.message)
       );
     }
-  }, 5 * 60 * 1000);
+  }, 2 * 60 * 1000);
 }
 
 function registrarEventos() {
