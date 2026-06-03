@@ -196,6 +196,27 @@ const MASSIVO_RE = [
 ];
 
 // ── Estado em memória ───────────────────────────────────────────────────────
+function isMensagemMassivoPainel(m = {}) {
+  const temUFCadastrada = (m.uf || []).length > 0;
+  return !!m.temMassivo || (!!m.nomeGrupo && /infra(?:estrutura)?/i.test(m.nomeGrupo) && temUFCadastrada);
+}
+
+function isMensagemPrincipalPainel(m = {}) {
+  return !m.duplicado
+    && !m.temCatMaranhao
+    && !isMensagemMassivoPainel(m)
+    && !m.temFechado
+    && (m.uf || []).length > 0;
+}
+
+function isMensagemFechadaPainel(m = {}) {
+  return !m.duplicado
+    && !m.temCatMaranhao
+    && !isMensagemMassivoPainel(m)
+    && !!m.temFechado
+    && ((m.uf || []).length > 0 || m.bdesk || m.atrix);
+}
+
 let mensagens       = [];
 let chatList        = [];
 let _chatObjects    = {}; // cache dos objetos de chat reais (evita getChatById lento)
@@ -416,9 +437,9 @@ function carregarMensagens() {
           return;
         }
         // Fechado conta se: tem município OU (tem Bdesk/Atrix — histórico implícito pois foi salvo)
-        if (m.temFechado && ((m.uf||[]).length > 0 || m.bdesk || m.atrix)) {
+        if (isMensagemFechadaPainel(m)) {
           contadores.fechado++;
-        } else if (!m.temFechado && (m.uf||[]).length > 0) {
+        } else if (isMensagemPrincipalPainel(m)) {
           (m.uf||[]).forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
           contadores.total++;
         }
@@ -1119,11 +1140,14 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
       m.chaveUnica === chaveUnica && m.dataDia === hoje() && !m.temFechado && !m.duplicado
     );
     if (original) {
+      const originalEraPrincipal = isMensagemPrincipalPainel(original);
       original.temFechado = true;
       fechouChamadoAtivo = true;
-      (original.uf || []).forEach(u => { if (contadores[u] !== undefined && contadores[u] > 0) contadores[u]--; });
-      if (contadores.total > 0) contadores.total--;
-      contadores.fechado++;
+      if (originalEraPrincipal) {
+        (original.uf || []).forEach(u => { if (contadores[u] !== undefined && contadores[u] > 0) contadores[u]--; });
+        if (contadores.total > 0) contadores.total--;
+      }
+      if (isMensagemFechadaPainel(original)) contadores.fechado++;
       console.log(`[FECHAMENTO] chave=${chaveUnica} movido de ativo para fechado`);
       broadcast('atualizar-mensagem', { id: original.id, temFechado: true });
       salvarMensagens(true);
@@ -1193,9 +1217,9 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   if (!duplicado) {
     if (temCatMaranhao) {
       contadores.CAT = (contadores.CAT || 0) + 1;
-    } else if (temFechado && (detectados.length > 0 || (temChamado && temHistoricoDoDia))) {
+    } else if (isMensagemFechadaPainel(entrada)) {
       contadores.fechado++;
-    } else if (!temFechado && detectados.length > 0) {
+    } else if (isMensagemPrincipalPainel(entrada)) {
       entrada.uf.forEach(u => { if (contadores[u] !== undefined) contadores[u]++; });
       contadores.total++;
     }

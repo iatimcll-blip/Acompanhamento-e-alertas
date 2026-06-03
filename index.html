@@ -1967,6 +1967,28 @@
     return _INFRA_RE.test(m.texto);
   }
 
+  function msgMatchMassivoPainel(m) {
+    return !!(m && (m.temMassivo || msgMatchInfra(m)));
+  }
+
+  function msgMatchPainelPrincipal(m) {
+    return !!m
+      && !m.duplicado
+      && !msgMatchCatMaranhao(m)
+      && !msgMatchMassivoPainel(m)
+      && !_clientIsFechado(m)
+      && (m.uf || []).length > 0;
+  }
+
+  function msgMatchFechadoPainel(m) {
+    return !!m
+      && !m.duplicado
+      && !msgMatchCatMaranhao(m)
+      && !msgMatchMassivoPainel(m)
+      && _clientIsFechado(m)
+      && ((m.uf || []).length > 0 || m.bdesk || m.atrix);
+  }
+
   // ── Mobile Navigation ─────────────────────────────────────────────────────
   function mobIsMobile() { return window.innerWidth <= 800; }
 
@@ -1979,11 +2001,11 @@
 
   function atualizarMobBadges() {
     if (!mobIsMobile()) return;
-    const naoLidas = todasMensagens.filter(m => !m.lida).length;
+    const naoLidas = todasMensagens.filter(m => msgMatchPainelPrincipal(m) && !m.lida).length;
     const bFeed = document.getElementById('mobBadgeFeed');
     if (bFeed) { bFeed.textContent = naoLidas > 99 ? '99+' : naoLidas || ''; bFeed.classList.toggle('hidden', naoLidas === 0); }
 
-    const masNaoLidas = todasMensagens.filter(m => m.temMassivo && !m.lida).length;
+    const masNaoLidas = todasMensagens.filter(m => msgMatchMassivoPainel(m) && !m.lida).length;
     const bMas = document.getElementById('mobBadgeMas');
     if (bMas) { bMas.textContent = masNaoLidas || ''; bMas.classList.toggle('hidden', masNaoLidas === 0); }
 
@@ -2066,20 +2088,22 @@
 
   // Verifica se a mensagem corresponde ao filtro/aba atualmente selecionado
   function mensagemMatchesFiltro(m) {
-    if (filtroLocalidade) return (m.municipios||[]).includes(filtroLocalidade);
+    if (msgMatchCatMaranhao(m) || msgMatchMassivoPainel(m)) return false;
+    if (filtroLocalidade) return msgMatchPainelPrincipal(m) && (m.municipios||[]).includes(filtroLocalidade);
     switch (filtroFeedAtual) {
-      case 'TODOS':      return true;
-      case 'PA':         return (m.uf||[]).includes('PA') && !_clientIsFechado(m);
-      case 'MA':         return (m.uf||[]).includes('MA') && !_clientIsFechado(m);
-      case 'AP':         return (m.uf||[]).includes('AP') && !_clientIsFechado(m);
-      case 'AM':         return (m.uf||[]).includes('AM') && !_clientIsFechado(m);
-      case 'URGENTE':    return !!m.temAcionamento;
-      case 'RUPTURA':    return !!m.temRuptura;
-      case 'NAOIDA':     return !m.lida;
-      case 'FLAGGED':    return !!m.flagged;
+      case 'TODOS':      return msgMatchPainelPrincipal(m);
+      case 'PA':         return msgMatchPainelPrincipal(m) && (m.uf||[]).includes('PA');
+      case 'MA':         return msgMatchPainelPrincipal(m) && (m.uf||[]).includes('MA');
+      case 'AP':         return msgMatchPainelPrincipal(m) && (m.uf||[]).includes('AP');
+      case 'AM':         return msgMatchPainelPrincipal(m) && (m.uf||[]).includes('AM');
+      case 'URGENTE':    return msgMatchPainelPrincipal(m) && !!m.temAcionamento;
+      case 'RUPTURA':    return msgMatchPainelPrincipal(m) && !!m.temRuptura;
+      case 'NAOIDA':     return msgMatchPainelPrincipal(m) && !m.lida;
+      case 'FECHADO':    return msgMatchFechadoPainel(m);
+      case 'FLAGGED':    return !!m.flagged && (msgMatchPainelPrincipal(m) || msgMatchFechadoPainel(m) || !!m.temWanderson || _clientIsWanderson(m));
       case 'WANDERSON':  return !!m.temWanderson || _clientIsWanderson(m);
-      case 'CMO_REPARO':    return msgMatchCmoReparo(m);
-      case 'CMO_ATIVACAO':  return msgMatchCmoAtivacao(m);
+      case 'CMO_REPARO':    return msgMatchPainelPrincipal(m) && msgMatchCmoReparo(m);
+      case 'CMO_ATIVACAO':  return msgMatchPainelPrincipal(m) && msgMatchCmoAtivacao(m);
       default:              return false;
     }
   }
@@ -2115,6 +2139,10 @@
 
   function getActiveNonCatMsgs() {
     return getActiveMsgs().filter(m => !msgMatchCatMaranhao(m));
+  }
+
+  function getFeedBaseMsgs() {
+    return getActiveNonCatMsgs().filter(m => !msgMatchMassivoPainel(m));
   }
 
   // ── WebSocket ─────────────────────────────────────────────────────────────
@@ -2320,19 +2348,18 @@
 
   function atualizarContadoresDisplay() {
     let c;
-    const _baseMsgs = selectedChats.size > 0 ? getActiveNonCatMsgs() : todasMensagens.filter(m => !msgMatchCatMaranhao(m));
+    const _baseMsgs = selectedChats.size > 0 ? getFeedBaseMsgs() : todasMensagens.filter(m => !msgMatchCatMaranhao(m) && !msgMatchMassivoPainel(m));
     const _catMsgs  = getActiveMsgs().filter(m => !m.duplicado && msgMatchCatMaranhao(m));
     const naoLidas = _baseMsgs.filter(m =>
-      !m.duplicado && !m.lida && (m.uf||[]).length > 0 && !_clientIsFechado(m)
+      msgMatchPainelPrincipal(m) && !m.lida
     ).length;
     if (selectedChats.size > 0) {
       c = { total:0, PA:0, MA:0, AP:0, AM:0, WANDERSON:0, CAT:0, fechado:0 };
-      getActiveNonCatMsgs().forEach(m => {
+      getFeedBaseMsgs().forEach(m => {
         if (m.duplicado) return;
-        const _mTemChamado = !!(m.bdesk || m.atrix);
-        if (_clientIsFechado(m) && ((m.uf||[]).length > 0 || _mTemChamado)) {
+        if (msgMatchFechadoPainel(m)) {
           c.fechado++;
-        } else if (!_clientIsFechado(m) && (m.uf||[]).length > 0) {
+        } else if (msgMatchPainelPrincipal(m)) {
           m.uf.forEach(u => { if (c[u] !== undefined) c[u]++; });
           c.total++;
         }
@@ -2665,27 +2692,31 @@
 
   function renderFeed() {
     const lista = document.getElementById('msgList');
-    let msgs = getActiveNonCatMsgs();
+    let msgs = getFeedBaseMsgs();
 
     if (filtroLocalidade) {
-      msgs = msgs.filter(m => (m.municipios || []).includes(filtroLocalidade));
+      msgs = msgs.filter(m => msgMatchPainelPrincipal(m) && (m.municipios || []).includes(filtroLocalidade));
     } else if (filtroFeedAtual === 'RUPTURA') {
-      msgs = msgs.filter(m => m.temRuptura);
+      msgs = msgs.filter(m => msgMatchPainelPrincipal(m) && m.temRuptura);
     } else if (filtroFeedAtual === 'URGENTE') {
-      msgs = msgs.filter(m => m.temAcionamento && !m.lida);
+      msgs = msgs.filter(m => msgMatchPainelPrincipal(m) && m.temAcionamento && !m.lida);
     } else if (filtroFeedAtual === 'NAOIDA') {
-      msgs = msgs.filter(m => !m.lida && (m.detectados||[]).length > 0);
+      msgs = msgs.filter(m => msgMatchPainelPrincipal(m) && !m.lida);
     } else if (filtroFeedAtual === 'FLAGGED') {
-      msgs = msgs.filter(m => m.flagged);
+      msgs = msgs.filter(m => m.flagged && (msgMatchPainelPrincipal(m) || msgMatchFechadoPainel(m) || m.temWanderson || _clientIsWanderson(m)));
     } else if (filtroFeedAtual === 'WANDERSON') {
       msgs = msgs.filter(m => m.temWanderson || _clientIsWanderson(m));
+    } else if (filtroFeedAtual === 'CMO_REPARO') {
+      msgs = msgs.filter(m => msgMatchPainelPrincipal(m) && msgMatchCmoReparo(m));
+    } else if (filtroFeedAtual === 'CMO_ATIVACAO') {
+      msgs = msgs.filter(m => msgMatchPainelPrincipal(m) && msgMatchCmoAtivacao(m));
     } else if (filtroFeedAtual === 'FECHADO') {
-      msgs = msgs.filter(m => _clientIsFechado(m) && ((m.uf||[]).length > 0 || m.bdesk || m.atrix));
+      msgs = msgs.filter(m => msgMatchFechadoPainel(m));
     } else if (['PA','MA','AP','AM'].includes(filtroFeedAtual)) {
       // Filtra pela UF cadastrada; exclui fechados (eles vão para a aba FECHADO)
-      msgs = msgs.filter(m => (m.uf || []).includes(filtroFeedAtual) && !_clientIsFechado(m));
+      msgs = msgs.filter(m => msgMatchPainelPrincipal(m) && (m.uf || []).includes(filtroFeedAtual));
     } else {
-      // TODOS: mostra todas as mensagens recebidas sem filtro adicional
+      msgs = msgs.filter(m => msgMatchPainelPrincipal(m));
     }
 
     // Filtro de busca livre (chamado, texto, grupo, município)
@@ -3432,13 +3463,13 @@
 
   // ── UF blink bar (item 4) ─────────────────────────────────────────────────
   function atualizarUFBlinks() {
-    const msgs = getActiveNonCatMsgs();
+    const msgs = getFeedBaseMsgs();
 
     // Abas UF — pisca somente se tem mensagens não lidas naquela UF
     ['PA','MA','AP','AM'].forEach(uf => {
       const blinkEl = document.getElementById('blink-' + uf);
       const tabEl   = document.getElementById('ftab-' + uf);
-      const temNaoLida = msgs.some(m => !m.lida && (m.uf||[]).includes(uf) && !_clientIsFechado(m));
+      const temNaoLida = msgs.some(m => msgMatchPainelPrincipal(m) && !m.lida && (m.uf||[]).includes(uf));
       if (blinkEl) blinkEl.classList.toggle('blink-' + uf.toLowerCase(), temNaoLida);
       if (tabEl)   tabEl.classList.toggle('blink-alert', temNaoLida && filtroFeedAtual !== uf);
     });
@@ -3446,7 +3477,7 @@
     // Aba FECHADO — pisca se há fechados não lidos
     const tabFech = document.getElementById('ftab-FECHADO') || document.querySelector('.ftab[onclick*="FECHADO"]');
     if (tabFech) {
-      const temFechNaoLido = msgs.some(m => !m.lida && _clientIsFechado(m));
+      const temFechNaoLido = msgs.some(m => msgMatchFechadoPainel(m) && !m.lida);
       tabFech.classList.toggle('blink-alert', temFechNaoLido && filtroFeedAtual !== 'FECHADO');
     }
 
@@ -3460,12 +3491,12 @@
     // Aba URGENTE — pisca se há acionamentos não lidos
     const tabUrg = document.getElementById('ftab-URGENTE') || document.querySelector('.ftab[onclick*="URGENTE"]');
     if (tabUrg) {
-      const temUrgNaoLido = msgs.some(m => !m.lida && m.temAcionamento);
+      const temUrgNaoLido = msgs.some(m => msgMatchPainelPrincipal(m) && !m.lida && m.temAcionamento);
       tabUrg.classList.toggle('blink-alert', temUrgNaoLido && filtroFeedAtual !== 'URGENTE');
     }
 
     // Badge numérico no botão "Não lidas"
-    const _naoLidasTotal = msgs.filter(m => !m.lida).length;
+    const _naoLidasTotal = msgs.filter(m => msgMatchPainelPrincipal(m) && !m.lida).length;
     const badgeNL = document.getElementById('badge-naoLidas');
     if (badgeNL) {
       badgeNL.textContent = _naoLidasTotal > 99 ? '99+' : _naoLidasTotal;
