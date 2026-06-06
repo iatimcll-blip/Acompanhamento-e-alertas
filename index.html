@@ -2344,6 +2344,9 @@
     if (!c) return;
     _serverContadores = c;
     atualizarContadoresDisplay();
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'wpp_message_count', count: c.total || 0 }, '*');
+    }
   }
 
   function atualizarContadoresDisplay() {
