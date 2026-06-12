@@ -1393,271 +1393,8 @@
     .stab:not(.ativo) { color: rgba(255,255,255,.65) !important; }
     /* Hover: branco pleno */
     .ftab:hover, .chamados-ftab:hover, .stab:hover { color: #fff !important; }
-    /* Camada visual Codex - painel operacional mais legivel */
-    html { font-size: 14px; }
-    body {
-      background:
-        radial-gradient(circle at 18% 0%, rgba(34,197,94,.10), transparent 30%),
-        radial-gradient(circle at 100% 18%, rgba(245,158,11,.10), transparent 28%),
-        #111411;
-    }
-    :root {
-      --bg: #111411;
-      --surface: #151914;
-      --card: #fbfcf8;
-      --card2: #f0f4ec;
-      --card3: #e5ece0;
-      --border: #d8e0d2;
-      --border2: #c7d2c0;
-      --text: #172015;
-      --subtext: #52604d;
-      --muted: #778171;
-      --silver: #172015;
-      --verde: #128c5f;
-      --verde-dk: #0b6d4a;
-      --verde-wpp: #24d366;
-      --azul: #1f6feb;
-      --laranja: #d97706;
-      --roxo: #7c3aed;
-      --esmeralda: #059669;
-      --vermelho: #dc2626;
-      --amarelo: #ca8a04;
-      --metal: #8a9584;
-      --flag-cor: #d97706;
-    }
-    .topbar {
-      height: 68px;
-      padding: 0 20px;
-      background: rgba(15, 19, 15, .96);
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      box-shadow: 0 12px 34px rgba(0,0,0,.28);
-    }
-    .mcll-letters {
-      font-size: 2rem;
-      letter-spacing: 0;
-      filter: none;
-    }
-    .mcll-sub-text { letter-spacing: 2px; color: #c9d8c6; }
-    .badge-live,
-    .conn-pill,
-    .msg-counter-pill,
-    .cmo-pill,
-    .date-pill {
-      border-radius: 8px;
-    }
-    .app-layout {
-      grid-template-columns: 280px minmax(0, 1fr);
-      background: transparent;
-    }
-    .sidebar {
-      margin: 10px 0 10px 10px;
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 10px;
-      background: rgba(21,25,20,.96);
-      box-shadow: 0 16px 36px rgba(0,0,0,.22);
-    }
-    .sidebar-hd {
-      padding: 14px 16px;
-      background: linear-gradient(135deg, rgba(18,140,95,.28), rgba(31,111,235,.12));
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-    .sidebar-hd strong { color: #ffffff; font-size: .9rem; }
-    .sidebar-hd small { color: #b8d7c7; }
-    .wpp-connect,
-    #syncHealthBox,
-    #btnDesconectarWrap,
-    .sidebar-chats-hd {
-      border-color: rgba(255,255,255,.08) !important;
-    }
-    .qr-box {
-      border-radius: 10px;
-      border-color: rgba(36,211,102,.42);
-      background: rgba(255,255,255,.04);
-      color: #d9e6d4;
-    }
-    .chats-vazio { color: rgba(255,255,255,.58); }
-    .main-content {
-      padding: 10px;
-      gap: 10px;
-    }
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(8, minmax(120px, 1fr));
-      gap: 10px;
-    }
-    .stat-card {
-      min-height: 92px;
-      padding: 14px 14px 12px;
-      border-radius: 10px;
-      background: linear-gradient(180deg, #ffffff, #f4f7f1);
-      border: 1px solid rgba(216,224,210,.95);
-      box-shadow: 0 12px 28px rgba(8,16,10,.14);
-    }
-    .stat-card:hover {
-      background: #ffffff;
-      transform: translateY(-1px);
-      box-shadow: 0 16px 32px rgba(8,16,10,.18);
-    }
-    .stat-lbl {
-      font-size: .72rem;
-      color: #596554;
-      text-transform: uppercase;
-      letter-spacing: 0;
-    }
-    .stat-num {
-      margin: 7px 0 3px;
-      font-size: 1.75rem;
-      color: #121a10;
-    }
-    .stat-sub { color: #667260; }
-    .stat-card::before {
-      height: 4px;
-      border-radius: 10px 10px 0 0;
-    }
-    .uf-blink-bar { gap: 10px; }
-    .uf-blink-item {
-      padding: 8px 10px;
-      border-radius: 8px;
-      background: rgba(255,255,255,.88);
-      color: #42503d;
-      box-shadow: 0 8px 18px rgba(8,16,10,.08);
-      letter-spacing: 0;
-    }
-    .quadrant-grid { gap: 10px; }
-    .timer-section,
-    .detail-wrap,
-    .feed-wrap,
-    .chamados-painel,
-    .massivo-section,
-    .cat-section,
-    .table-section,
-    .settings-modal,
-    .chat-modal,
-    .atz-panel {
-      border-radius: 10px;
-      background: #fbfcf8;
-      border: 1px solid var(--border);
-      box-shadow: 0 16px 34px rgba(8,16,10,.12);
-    }
-    .timer-hd,
-    .detail-hd,
-    .feed-hd,
-    .chamados-hd,
-    .massivo-hd,
-    .cat-hd,
-    .table-hd,
-    .atz-hd,
-    .chat-modal-hd,
-    .settings-modal-hd {
-      background: #ffffff;
-      border-bottom: 1px solid var(--border);
-    }
-    .timer-hd h2,
-    .feed-hd h2,
-    .chamados-hd h2,
-    .massivo-hd h2,
-    .cat-hd h2,
-    .detail-hd h3,
-    .table-hd h3 {
-      color: #172015;
-      letter-spacing: 0;
-    }
-    .filter-bar,
-    .chamados-filter,
-    .massivo-filter,
-    #tableFilterBar {
-      background: #eef3ea;
-      border-color: var(--border);
-    }
-    .ftab,
-    .chamados-ftab,
-    .localidade-select {
-      border-radius: 999px;
-      background: #ffffff;
-      color: #4f5c49;
-      border-color: #d8e0d2;
-    }
-    .filter-bar .ftab,
-    .massivo-filter .ftab,
-    .chamados-filter .chamados-ftab {
-      min-width: 48px;
-      padding: 5px 12px;
-      color: #3f4d39 !important;
-      font-weight: 800;
-      text-align: center;
-    }
-    .filter-bar .ftab[style*="vermelho"],
-    .massivo-filter .ftab[style*="vermelho"] { color: #b91c1c !important; }
-    .filter-bar .ftab[style*="flag-cor"] { color: #b45309 !important; }
-    .filter-bar .ftab[style*="verde"] { color: #047857 !important; }
-    #ftab-PA:not(.ativo) { color: #1d4ed8 !important; border-color: rgba(29,78,216,.36) !important; background: #ffffff !important; }
-    #ftab-MA:not(.ativo) { color: #b45309 !important; border-color: rgba(180,83,9,.36) !important; background: #ffffff !important; }
-    #ftab-AP:not(.ativo) { color: #047857 !important; border-color: rgba(4,120,87,.36) !important; background: #ffffff !important; }
-    #ftab-AM:not(.ativo) { color: #6d28d9 !important; border-color: rgba(109,40,217,.36) !important; background: #ffffff !important; }
-    .ftab.ativo,
-    .chamados-ftab.ativo {
-      color: #ffffff !important;
-      background: #128c5f !important;
-      border-color: #128c5f !important;
-      box-shadow: 0 8px 18px rgba(18,140,95,.24);
-    }
-    .feed-search {
-      background: #ffffff;
-      color: #172015;
-      border-color: #d8e0d2;
-      border-radius: 8px;
-    }
-    .msg-card,
-    .chamado-item,
-    .mas-item,
-    .timer-item,
-    .detail-kv,
-    .mas-card,
-    .user-item-admin {
-      border-radius: 8px;
-      background: #ffffff;
-      border-color: #d8e0d2;
-      box-shadow: 0 8px 20px rgba(8,16,10,.07);
-    }
-    .msg-card:hover,
-    .chamado-item:hover,
-    .mas-card:hover {
-      background: #f8fbf5;
-    }
-    .msg-card.lida { opacity: .58; }
-    .chip,
-    .msg-tag,
-    .tag-pill {
-      border-radius: 999px;
-    }
-    .msg-text,
-    .detalhe-vazio,
-    .chamados-vazio,
-    .timer-empty {
-      color: #4f5c49;
-    }
-    .chat-row {
-      color: #e8f2e4;
-    }
-    .chat-row:hover,
-    .chat-row.selected {
-      background: rgba(36,211,102,.11);
-    }
-    @media (max-width: 1180px) {
-      .stats-row { grid-template-columns: repeat(4, minmax(130px, 1fr)); }
-      .app-layout { grid-template-columns: 250px minmax(0, 1fr); }
-    }
-    @media (max-width: 800px) {
-      .topbar { height: 56px; padding: 0 10px; }
-      .sidebar { margin: 0; border-radius: 0; }
-      .main-content { padding: 0; }
-      .app-layout[data-mob="stats"] .stats-row {
-        grid-template-columns: repeat(2, 1fr);
-        padding: 8px;
-      }
-      .stat-card { min-height: 78px; }
-    }
   </style>
+  <link rel="stylesheet" href="painel-redesign.css">
   <script src="cnl-data.js"></script>
 </head>
 <body>
@@ -1681,20 +1418,20 @@
       <span class="dp-clock" id="relogioAgora">00:00:00</span>
     </div>
     <div class="msg-counter-pill" id="topMsgCounterWrap" style="cursor:pointer" title="Ver não lidas" onclick="filtrarFeed('NAOIDA', document.getElementById('ftab-NAOIDA'))">
-      💬 Não lidas: <span id="topMsgCounter">0</span>
+      Não lidas: <span id="topMsgCounter">0</span>
     </div>
     <div class="cmo-pill cmo-reparo" id="topCmoReparo" title="Ver chamados CMO Reparo" onclick="filtrarCmo('reparo')" style="cursor:pointer">
-      🔧 Reparo <span id="topCmoReparoNum">0</span>
+      Reparo <span id="topCmoReparoNum">0</span>
     </div>
     <div class="cmo-pill cmo-atv" id="topCmoAtv" title="Ver chamados CMO Ativação" onclick="filtrarCmo('ativacao')" style="cursor:pointer">
-      ⚡ Ativação <span id="topCmoAtvNum">0</span>
+      Ativação <span id="topCmoAtvNum">0</span>
     </div>
     <span class="badge-live">● AO VIVO</span>
     <div class="conn-pill">
       <div class="conn-dot" id="connDot"></div>
       <span id="connLabel">Desconectado</span>
     </div>
-    <button id="btnSettings" class="btn-settings" onclick="abrirSettings()" title="Configurações" style="display:none">⚙</button>
+    <button id="btnSettings" class="btn-settings" onclick="abrirSettings()" title="Configurações" style="display:none">Config</button>
     <div style="display:flex;align-items:center;gap:8px;margin-left:8px;border-left:1px solid rgba(255,255,255,.08);padding-left:12px">
       <span id="userNome" style="font-size:.72rem;color:#c8ccd8;font-weight:500"></span>
       <span id="userPerfil" style="font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:4px"></span>
@@ -1728,19 +1465,19 @@
         style="width:100%;font-size:.7rem;font-weight:700;padding:6px 10px;border-radius:6px;cursor:pointer;
                background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;
                display:flex;align-items:center;justify-content:center;gap:6px;transition:background .12s">
-        🔌 Desconectar WhatsApp
+        Desconectar WhatsApp
       </button>
     </div>
     <div class="sidebar-chats">
       <div class="sidebar-chats-hd">
         <span>Grupos e Contatos</span>
-        <button id="btnLimparSel" class="btn-limpar-sel" onclick="limparSel()">✕ Limpar</button>
+        <button id="btnLimparSel" class="btn-limpar-sel" onclick="limparSel()">Limpar</button>
         <button onclick="marcarTodasLidas(this)" title="Marcar todas as mensagens como lidas" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.78rem;padding:2px 5px;border-radius:4px;transition:color .2s;" onmouseover="this.style.color='#4ade80'" onmouseout="this.style.color='var(--muted)'">✓</button>
-        <button id="btnRefreshChats" onclick="refreshChats()" title="Atualizar lista de chats" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.78rem;padding:2px 5px;border-radius:4px;transition:color .2s;" onmouseover="this.style.color='#4ade80'" onmouseout="this.style.color='var(--muted)'">🔄</button>
+        <button id="btnRefreshChats" onclick="refreshChats()" title="Atualizar lista de chats" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.78rem;padding:2px 5px;border-radius:4px;transition:color .2s;" onmouseover="this.style.color='#4ade80'" onmouseout="this.style.color='var(--muted)'">Atualizar</button>
         <span id="chatCount" style="color:var(--subtext)">0</span>
       </div>
       <div id="chatList">
-        <div class="chats-vazio" id="chatsVazioMsg">Clique em 🔄 para carregar<br>grupos e contatos</div>
+        <div class="chats-vazio" id="chatsVazioMsg">Clique em Atualizar para carregar<br>grupos e contatos</div>
       </div>
     </div>
   </aside>
@@ -1807,7 +1544,7 @@
       <div class="quadrant">
         <div class="timer-section">
           <div class="timer-hd" onclick="toggleTimer()">
-            <h2>⏰ Monitor de Reports — 60 min <span class="timer-toggle" id="timerToggleIco">▾</span></h2>
+            <h2>Monitor de reports — 60 min <span class="timer-toggle" id="timerToggleIco">▾</span></h2>
             <span class="timer-badge" id="timerBadge">Sem acionamentos</span>
           </div>
           <div class="timer-body" id="timerPanel">
@@ -1820,7 +1557,7 @@
       <div class="quadrant">
         <div class="detail-wrap" id="detalhePanel">
           <div class="detail-hd">
-            <h3><button class="mob-back-btn" onclick="fecharDetalhe()">‹</button>📋 Detalhes</h3>
+            <h3><button class="mob-back-btn" onclick="fecharDetalhe()">‹</button>Detalhes</h3>
             <button class="btn-fechar" onclick="fecharDetalhe()">✕</button>
           </div>
           <div class="detail-body" id="detalheBody">
@@ -1833,12 +1570,12 @@
       <div class="quadrant">
         <div class="feed-wrap">
           <div class="feed-hd">
-            <h2>💬 Mensagens <span class="filtro-ativo-tag" id="filtroAtivoTag"></span></h2>
+            <h2>Acionamentos <span class="filtro-ativo-tag" id="filtroAtivoTag"></span></h2>
             <div class="feed-search-wrap">
-              <input type="text" id="feedBusca" class="feed-search" placeholder="🔍 Buscar chamado, texto, grupo…" oninput="setBusca(this.value)" autocomplete="off" name="mcll-busca" readonly onfocus="this.removeAttribute('readonly')">
+              <input type="text" id="feedBusca" class="feed-search" placeholder="Buscar chamado, texto, grupo…" oninput="setBusca(this.value)" autocomplete="off" name="mcll-busca" readonly onfocus="this.removeAttribute('readonly')">
             </div>
             <button onclick="marcarTodasLidas(this)" title="Marcar todas como lidas"
-              style="flex-shrink:0;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--verde);font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap">✓ Todas lidas</button>
+              style="flex-shrink:0;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--verde);font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap">Todas lidas</button>
             <span class="msg-count-badge" id="msgCount">0 hoje</span>
           </div>
           <div class="filter-bar" id="filterTabs">
@@ -1847,11 +1584,11 @@
             <button class="ftab f-ma"  id="ftab-MA"       onclick="filtrarFeed('MA',this)">MA</button>
             <button class="ftab f-ap"  id="ftab-AP"       onclick="filtrarFeed('AP',this)">AP</button>
             <button class="ftab f-am"  id="ftab-AM"       onclick="filtrarFeed('AM',this)">AM</button>
-            <button class="ftab"       id="ftab-URGENTE"  onclick="filtrarFeed('URGENTE',this)"  style="color:var(--vermelho);border-color:rgba(185,28,28,.35)">🚨 Urgentes</button>
-            <button class="ftab"       id="ftab-RUPTURA"  onclick="filtrarFeed('RUPTURA',this)"  style="color:var(--vermelho);border-color:rgba(185,28,28,.35)">⚡ Ruptura</button>
-            <button class="ftab"       id="ftab-NAOIDA"   onclick="filtrarFeed('NAOIDA',this)"   style="color:var(--subtext)">🔔 Não lidas <span id="badge-naoLidas" style="display:none;background:var(--vermelho);color:#fff;font-size:.55rem;font-weight:900;padding:1px 5px;border-radius:8px;margin-left:3px;vertical-align:middle"></span></button>
-            <button class="ftab"       id="ftab-FLAGGED"  onclick="filtrarFeed('FLAGGED',this)"  style="color:var(--flag-cor);border-color:rgba(146,64,14,.35)">⚑ Sinalizadas</button>
-            <button class="ftab"       id="ftab-FECHADO"   onclick="filtrarFeed('FECHADO',this)"  style="color:var(--verde);border-color:rgba(21,128,61,.35)">✅ Fechados</button>
+            <button class="ftab"       id="ftab-URGENTE"  onclick="filtrarFeed('URGENTE',this)"  style="color:var(--vermelho);border-color:rgba(185,28,28,.35)">Urgentes</button>
+            <button class="ftab"       id="ftab-RUPTURA"  onclick="filtrarFeed('RUPTURA',this)"  style="color:var(--vermelho);border-color:rgba(185,28,28,.35)">Ruptura</button>
+            <button class="ftab"       id="ftab-NAOIDA"   onclick="filtrarFeed('NAOIDA',this)"   style="color:var(--subtext)">Não lidas <span id="badge-naoLidas" style="display:none;background:var(--vermelho);color:#fff;font-size:.55rem;font-weight:900;padding:1px 5px;border-radius:8px;margin-left:3px;vertical-align:middle"></span></button>
+            <button class="ftab"       id="ftab-FLAGGED"  onclick="filtrarFeed('FLAGGED',this)"  style="color:var(--flag-cor);border-color:rgba(146,64,14,.35)">Sinalizadas</button>
+            <button class="ftab"       id="ftab-FECHADO"   onclick="filtrarFeed('FECHADO',this)"  style="color:var(--verde);border-color:rgba(21,128,61,.35)">Fechados</button>
             <button class="ftab"       id="ftab-WANDERSON" onclick="filtrarFeed('WANDERSON',this)" style="color:var(--wanderson);border-color:rgba(180,83,9,.35)">@W</button>
             <select class="localidade-select" id="filtroLocalidade" onchange="filtrarPorLocalidade(this.value)">
               <option value="">Todas as localidades</option>
@@ -1867,7 +1604,7 @@
       <div class="quadrant">
         <div class="chamados-painel">
           <div class="chamados-hd">
-            <h2>🔧 Chamados CMO Reparos</h2>
+            <h2>Chamados CMO Reparos</h2>
             <span class="chamados-badge" id="chamadosBadge">0</span>
           </div>
           <div class="chamados-filter">
@@ -1877,10 +1614,10 @@
             <button class="chamados-ftab cf-rep"  onclick="filtrarChamadosStatus('em_reparo',this)">Reparo</button>
             <button class="chamados-ftab cf-atv"  onclick="filtrarChamadosStatus('em_ativacao',this)">Ativação</button>
             <button class="chamados-ftab cf-fin"  onclick="filtrarChamadosStatus('finalizado',this)">Finalizados</button>
-            <button class="chamados-ftab cf-cmor ativo" id="chamadosFtabCmoR" onclick="filtrarChamadosCmo('reparo',this)" style="color:#fff;background:rgba(194,65,12,.8);border-color:rgba(194,65,12,.6)">🔧 CMO Reparo</button>
+            <button class="chamados-ftab cf-cmor ativo" id="chamadosFtabCmoR" onclick="filtrarChamadosCmo('reparo',this)" style="color:#fff;background:rgba(194,65,12,.8);border-color:rgba(194,65,12,.6)">CMO Reparo</button>
           </div>
           <div class="chamados-list" id="chamadosList">
-            <div class="chamados-vazio"><span>📋</span>Nenhum chamado registrado.<br>Aguardando acionamentos…</div>
+            <div class="chamados-vazio"><span></span>Nenhum chamado registrado.<br>Aguardando acionamentos…</div>
           </div>
         </div>
       </div>
@@ -1889,7 +1626,7 @@
       <div class="quadrant">
         <div class="massivo-section">
           <div class="massivo-hd">
-            <h2>🚨 Chamados Massivos</h2>
+            <h2>Chamados massivos</h2>
             <span class="msg-count-badge" id="massivoCount">0 hoje</span>
           </div>
           <div class="massivo-stats">
@@ -1955,7 +1692,7 @@
   <div class="atz-modal-box">
     <div class="atz-panel" id="atzPanel">
       <div class="atz-hd">
-        <h3>🔄 Atualização / Status</h3>
+        <h3>Atualização / Status</h3>
         <button class="btn-fechar" onclick="fecharAtz()" title="Fechar">✕</button>
       </div>
       <div class="atz-body" id="atzBody">
@@ -1991,31 +1728,31 @@
 <!-- Mobile Bottom Navigation -->
 <nav class="mob-bottom-nav" id="mobNav" aria-label="Navegação mobile">
   <button class="mob-tab ativo" data-tab="feed" onclick="mobTab('feed')">
-    <span class="mob-icon">💬</span>
+    <span class="mob-icon">M</span>
     <span>Mensagens</span>
     <span class="mob-badge hidden" id="mobBadgeFeed"></span>
   </button>
   <button class="mob-tab" data-tab="timer" onclick="mobTab('timer')">
-    <span class="mob-icon">⏰</span>
+    <span class="mob-icon">T</span>
     <span>Monitor</span>
     <span class="mob-badge hidden" id="mobBadgeTimer"></span>
   </button>
   <button class="mob-tab" data-tab="massivos" onclick="mobTab('massivos')">
-    <span class="mob-icon">🚨</span>
+    <span class="mob-icon">A</span>
     <span>Massivos</span>
     <span class="mob-badge hidden" id="mobBadgeMas"></span>
   </button>
   <button class="mob-tab" data-tab="chamados" onclick="mobTab('chamados')">
-    <span class="mob-icon">📋</span>
+    <span class="mob-icon">C</span>
     <span>Chamados</span>
     <span class="mob-badge hidden" id="mobBadgeCham"></span>
   </button>
   <button class="mob-tab" data-tab="stats" onclick="mobTab('stats')">
-    <span class="mob-icon">📊</span>
+    <span class="mob-icon">S</span>
     <span>Stats</span>
   </button>
   <button class="mob-tab" data-tab="chats" onclick="mobTab('chats')">
-    <span class="mob-icon">📱</span>
+    <span class="mob-icon">W</span>
     <span>Chats</span>
   </button>
 </nav>
@@ -2025,16 +1762,16 @@
   <div class="settings-modal">
     <div class="settings-modal-hd">
       <div>
-        <div class="settings-modal-title">⚙ Configurações</div>
+        <div class="settings-modal-title">Configurações</div>
         <div class="settings-modal-sub">Gerenciamento de usuários e sistema</div>
       </div>
       <button class="btn-modal-close" onclick="fecharSettings()">✕</button>
     </div>
     <div class="settings-modal-body">
       <div class="stabs">
-        <button class="stab ativo" id="stab-btn-usuarios" onclick="settingsTab('usuarios',this)">👥 Usuários</button>
+        <button class="stab ativo" id="stab-btn-usuarios" onclick="settingsTab('usuarios',this)">Usuários</button>
         <button class="stab" id="stab-btn-novo" onclick="settingsTab('novo',this)">➕ Novo Usuário</button>
-        <button class="stab" id="stab-btn-filtros" onclick="settingsTab('filtros',this)">⚙ Filtros</button>
+        <button class="stab" id="stab-btn-filtros" onclick="settingsTab('filtros',this)">Filtros</button>
       </div>
       <!-- Aba: lista de usuários -->
       <div id="stab-usuarios" class="stab-content ativo">
@@ -2044,12 +1781,12 @@
       <div id="stab-filtros" class="stab-content">
         <div style="display:flex;flex-direction:column;gap:12px;padding:4px 0">
           <div>
-            <label style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">🔧 CMO Reparo — Palavra-chave / Carimbo</label>
+            <label style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">CMO Reparo — Palavra-chave / Carimbo</label>
             <input id="filtroCmoReparo" class="settings-input" type="text" placeholder="Ex: Carimbo Transferência - CMO REPARO" />
             <div style="font-size:.64rem;color:var(--muted);margin-top:3px">Padrão do servidor: Carimbo Transferência - CMO REPARO</div>
           </div>
           <div>
-            <label style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">⚡ CMO Ativação — Palavra-chave / Carimbo</label>
+            <label style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">CMO Ativação — Palavra-chave / Carimbo</label>
             <input id="filtroCmoAtivacao" class="settings-input" type="text" placeholder="Ex: Carimbo Transferência - CMO ATIVAÇÃO" />
             <div style="font-size:.64rem;color:var(--muted);margin-top:3px">Deixe vazio para usar padrões automáticos do sistema</div>
           </div>
@@ -2382,7 +2119,7 @@
 
   function filtrarCmo(tipo) {
     const filtro = tipo === 'reparo' ? 'CMO_REPARO' : 'CMO_ATIVACAO';
-    const label  = tipo === 'reparo' ? '🔧 CMO Reparo' : '⚡ CMO Ativação';
+    const label  = tipo === 'reparo' ? 'CMO Reparo' : 'CMO Ativação';
     filtroFeedAtual = filtro;
     filtroLocalidade = '';
     document.getElementById('filtroLocalidade').value = '';
@@ -2643,8 +2380,8 @@
   async function desconectarWhatsApp() {
     const btn = document.getElementById('btnDesconectar');
     if (!confirm('Desconectar o WhatsApp? Um novo QR Code será gerado para reconectar.')) return;
-    if (btn) { btn.disabled = true; btn.textContent = '⏳ Desconectando…'; }
-    const reabilitar = () => { if (btn) { btn.disabled = false; btn.innerHTML = '🔌 Desconectar WhatsApp'; } };
+    if (btn) { btn.disabled = true; btn.textContent = 'Desconectando…'; }
+    const reabilitar = () => { if (btn) { btn.disabled = false; btn.innerHTML = 'Desconectar WhatsApp'; } };
     try {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 10000);
@@ -2741,7 +2478,7 @@
   async function refreshChats() {
     const btn = document.getElementById('btnRefreshChats');
     const el  = document.getElementById('chatList');
-    if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+    if (btn) { btn.textContent = '...'; btn.disabled = true; }
     el.innerHTML = '<div class="chats-vazio">Carregando chats...<br><small>Pode levar até 2 minutos</small></div>';
     try {
       const tok = localStorage.getItem('mcll_token');
@@ -2749,22 +2486,22 @@
       if (!r.ok) {
         const j = await r.json();
         el.innerHTML = `<div class="chats-vazio">Erro: ${escHtml(j.erro || 'falha')}</div>`;
-        if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
+        if (btn) { btn.textContent = 'Atualizar'; btn.disabled = false; }
       }
       // resposta chega via WebSocket (evento 'chats' ou 'chats_erro')
     } catch(e) {
       el.innerHTML = `<div class="chats-vazio">Sem conexão: ${escHtml(e.message)}</div>`;
-      if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
+      if (btn) { btn.textContent = 'Atualizar'; btn.disabled = false; }
     }
     // Reabilita botão após 50s (cobertura máxima do timeout do servidor)
-    setTimeout(() => { if (btn) { btn.textContent = '🔄'; btn.disabled = false; } }, 130000);
+    setTimeout(() => { if (btn) { btn.textContent = 'Atualizar'; btn.disabled = false; } }, 130000);
   }
 
   function chatListErro(msg) {
     const btn = document.getElementById('btnRefreshChats');
     const el  = document.getElementById('chatList');
     el.innerHTML = `<div class="chats-vazio">Não foi possível carregar.<br><small>${escHtml(msg||'')}</small><br><button onclick="refreshChats()" style="margin-top:8px;font-size:.72rem;padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--silver);cursor:pointer;">Tentar novamente</button></div>`;
-    if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
+    if (btn) { btn.textContent = 'Atualizar'; btn.disabled = false; }
   }
 
   // ── Chat list (itens 2, 3, 6) — data-cid + event delegation ─────────────
@@ -2788,7 +2525,7 @@
     const el  = document.getElementById('chatList');
     const cnt = document.getElementById('chatCount');
     const btn = document.getElementById('btnRefreshChats');
-    if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
+    if (btn) { btn.textContent = 'Atualizar'; btn.disabled = false; }
     if (!chats || !chats.length) {
       el.innerHTML = '<div class="chats-vazio">Nenhum chat encontrado</div>';
       if (cnt) cnt.textContent = '0';
@@ -2863,7 +2600,7 @@
         let midiaEl = '';
         if (m.hasMedia) {
           const mime = m.mediaMime || '';
-          const icone = mime.startsWith('image/') ? '🖼' : mime.startsWith('video/') ? '🎥' : mime.startsWith('audio/') ? '🎵' : '📎';
+          const icone = mime.startsWith('image/') ? 'Imagem' : mime.startsWith('video/') ? 'Vídeo' : mime.startsWith('audio/') ? 'Áudio' : 'Arquivo';
           const nome  = escHtml(m.mediaFilename || mime || 'mídia');
           midiaEl = `<div id="mid-${escAttr(m.id)}" style="margin-bottom:4px">
             <button onclick="carregarMidiaModal('${escAttr(m.id)}',this)"
@@ -2889,7 +2626,7 @@
   async function carregarMidiaModal(msgId, btn) {
     const wrap = document.getElementById('mid-' + msgId);
     if (!wrap) return;
-    if (btn) { btn.textContent = '⏳ Carregando…'; btn.disabled = true; }
+    if (btn) { btn.textContent = 'Carregando…'; btn.disabled = true; }
     try {
       const r = await apiFetch('/api/message-media', { method: 'POST', body: JSON.stringify({ msgId }) });
       const d = await r.json();
@@ -3110,14 +2847,14 @@
     if (selecionada)  cls.push('selecionada');
     if (m.duplicado)  cls.push('duplicado');
 
-    const icon = m.temRuptura ? '⚡' : urgente ? '🚨' : fechado ? '✅' : m.grupo ? '👥' : '👤';
+    const icon = m.temRuptura ? 'Ruptura' : urgente ? 'Urgente' : fechado ? 'Fechado' : m.grupo ? 'Grupo' : 'Contato';
     const chipsUF  = (m.uf || []).map(u => `<span class="chip uf-${u.toLowerCase()}">${u}</span>`).join('');
     const chipsSig = (m.siglas || []).slice(0,2).map(s => `<span class="chip sigla">${s}</span>`).join('');
     const chipsMu  = (m.municipios || []).slice(0,2).map(mu => `<span class="chip muni">${escHtml(mu)}</span>`).join('');
     const chipCh   = m.chamado ? `<span class="chip chamado">🎫 ${m.chamado.numero}</span>` : '';
     const chipDup  = m.duplicado ? `<span class="chip dup">atualização</span>` : '';
-    const chipRup  = m.temRuptura ? `<span class="chip ruptura">⚡ RUPTURA</span>` : '';
-    const chipFech = fechado ? `<span class="chip fechado-chip">✅ Fechado</span>` : '';
+    const chipRup  = m.temRuptura ? `<span class="chip ruptura">Ruptura</span>` : '';
+    const chipFech = fechado ? `<span class="chip fechado-chip">Fechado</span>` : '';
     const tipoCls  = { BDESK:'mas-tipo-bdesk', TOTAL:'mas-tipo-total', CONJUNTA:'mas-tipo-conjunta', RUPTURA:'mas-tipo-ruptura', INFRA:'mas-tipo-infra' };
     const chipMas  = m.temMassivo && m.tipoMassivo ? `<span class="mas-item-tipo ${tipoCls[m.tipoMassivo]||''}">${m.tipoMassivo}</span>` : '';
     const lidaBadge = m.lida ? `<span class="badge-lida">✓ ${m.lidaEm || ''}</span>` : '';
@@ -3127,7 +2864,7 @@
       ? `<div class="msg-thumb"><img src="data:${escAttr(m.mediaMime)};base64,${m.mediaData}" onclick="event.stopPropagation();verMidia('${escAttr(m.id)}')" /></div>` : '';
     // Indicador de mídia não-imagem
     const midiaNome = !m.mediaData && m.mediaMime
-      ? `<span class="chip muni">📎 ${escHtml(m.mediaFilename || m.mediaMime.split('/')[1] || 'arquivo')}</span>` : '';
+      ? `<span class="chip muni">${escHtml(m.mediaFilename || m.mediaMime.split('/')[1] || 'arquivo')}</span>` : '';
 
     const btnAtualizar = (m.chamado || m.temMassivo)
       ? `<button class="btn-atualizar" onclick="event.stopPropagation();abrirAtualicaoMassivo('${escAttr(m.id)}')" title="Abrir painel de atualização">Atualizar</button>`
@@ -3143,7 +2880,7 @@
       <div class="msg-topo">
         <span class="msg-remetente">${icon} ${escHtml(m.nomeGrupo || m.de || 'Desconhecido')}</span>
         <span class="msg-hora">🕐 ${tsCompleto}</span>
-        <button class="btn-flag ${flagCls}" onclick="event.stopPropagation();toggleFlag('${escAttr(m.id)}')" title="Sinalizar">⚑</button>
+        <button class="btn-flag ${flagCls}" onclick="event.stopPropagation();toggleFlag('${escAttr(m.id)}')" title="Sinalizar">Sinalizar</button>
       </div>
       ${thumbEl}
       <div class="msg-text" id="mt-${escAttr(m.id)}">${escHtml(m.texto||'')}</div>
@@ -3230,8 +2967,8 @@
       `<option value="${s}" ${dados.status === s ? 'selected' : ''}>${s.replace('_',' ')}</option>`
     ).join('');
 
-    const cmoLabel = dados.cmo === 'reparo' ? '<span class="atz-badge cmo-r">🔧 CMO Reparo</span>'
-                   : dados.cmo === 'ativacao' ? '<span class="atz-badge cmo-a">⚡ CMO Ativação</span>' : '';
+    const cmoLabel = dados.cmo === 'reparo' ? '<span class="atz-badge cmo-r">CMO Reparo</span>'
+                   : dados.cmo === 'ativacao' ? '<span class="atz-badge cmo-a">CMO Ativação</span>' : '';
 
     const statusLabel = dados.status === 'finalizado'
       ? '<span class="atz-badge finalizado">✓ Finalizado</span>'
@@ -3269,7 +3006,7 @@
         <div class="atz-chamado-sub">${escHtml(dados.localidade || '')}</div>
         <div class="atz-status-row">
           ${statusLabel}${cmoLabel}
-          <span class="atz-badge origem">📱 ${escHtml(dados.origem||'WhatsApp')}</span>
+          <span class="atz-badge origem">${escHtml(dados.origem||'WhatsApp')}</span>
         </div>
         <select class="atz-status-select" onchange="alterarStatusAtz(this.value)">${statusOpts}</select>
       </div>
@@ -3280,7 +3017,7 @@
       <div class="atz-timeline-block">
         <div class="atz-timeline-hd">
           <span>Timeline do dia (${_tl.length})</span>
-          ${_tl.length ? `<button class="btn-copiar-tl" onclick="copiarTimeline(this)">📋 Copiar</button>` : ''}
+          ${_tl.length ? `<button class="btn-copiar-tl" onclick="copiarTimeline(this)">Copiar</button>` : ''}
         </div>
         ${timelineHtml || '<div style="color:var(--muted);font-size:.74rem">Nenhum registro ainda.</div>'}
       </div>
@@ -3289,7 +3026,7 @@
         <div class="atz-nova-ts">[${agora}]</div>
         <textarea class="atz-textarea" id="atzNovaTexto" placeholder="Digite a atualização…"></textarea>
         <div class="atz-btns">
-          <button class="btn-salvar-sheets" onclick="salvarAtzESheets()">📊 Atualização</button>
+          <button class="btn-salvar-sheets" onclick="salvarAtzESheets()">Atualização</button>
           <button class="btn-finalizar" onclick="finalizarChamado()">Finalizar</button>
         </div>
         <div class="atz-save-status" id="atzSaveStatus"></div>
@@ -3411,12 +3148,12 @@
         mediaEl = `<a href="data:${escAttr(m.mediaMime)};base64,${m.mediaData}" download="${escAttr(m.mediaFilename||'arquivo')}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);border-radius:8px;color:#93c5fd;font-size:.78rem;font-weight:700;text-decoration:none">⬇ Baixar ${escHtml(m.mediaFilename||m.mediaMime.split('/')[1]||'arquivo')}</a>`;
       }
     } else if (!m.mediaData && m.mediaMime) {
-      mediaEl = `<div style="font-size:.72rem;color:var(--muted)">📎 Mídia: ${escHtml(m.mediaFilename||m.mediaMime)} <span style="color:var(--muted)">(não baixada)</span></div>`;
+      mediaEl = `<div style="font-size:.72rem;color:var(--muted)">Mídia: ${escHtml(m.mediaFilename||m.mediaMime)} <span style="color:var(--muted)">(não baixada)</span></div>`;
     }
 
     body.innerHTML = `
       <div>
-        <div class="detalhe-de">${m.grupo?'👥':'👤'} ${escHtml(m.de || 'Desconhecido')}</div>
+        <div class="detalhe-de">${m.grupo?'Grupo':'Contato'} ${escHtml(m.de || 'Desconhecido')}</div>
         ${m.grupo && m.nomeGrupo ? `<div class="detalhe-grupo">Grupo: ${escHtml(m.nomeGrupo)}</div>` : ''}
         <div class="detalhe-hora">🕐 ${tsCompleto}</div>
       </div>
@@ -3472,7 +3209,7 @@
     const naoLidasWpp = _chatListTotalUnread || 0;
     if (!naoLidas && !naoLidasWpp) return;
     const textoOriginal = btn ? btn.textContent : '';
-    if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+    if (btn) { btn.textContent = '...'; btn.disabled = true; }
     try {
       const r = await apiFetch('/api/mensagens/todas-lidas', { method: 'POST' });
       const data = await r.json();
@@ -3757,7 +3494,7 @@
 
       // Linha 2 — localidade piscando
       const linha2 = t.localidade
-        ? `<div class="timer-line2-loc"><span class="timer-localidade-blink">📍 ${escHtml(t.localidade)}</span></div>`
+        ? `<div class="timer-line2-loc"><span class="timer-localidade-blink">${escHtml(t.localidade)}</span></div>`
         : `<div class="timer-line2-loc" style="font-size:.72rem;color:var(--muted)">${escHtml((t.titulo||'').substring(0,50))}</div>`;
 
       // Linha 3 — controle do cronômetro
@@ -3914,7 +3651,7 @@
     }
 
     if (!filtradas.length) {
-      list.innerHTML = '<div class="chamados-vazio"><span>📋</span>Nenhum chamado nesta categoria.</div>';
+      list.innerHTML = '<div class="chamados-vazio"><span></span>Nenhum chamado nesta categoria.</div>';
       return;
     }
 
@@ -3931,9 +3668,9 @@
       const status   = d.status || 'aguardando';
       const statusLbl = { aguardando:'Aguardando', em_atendimento:'Em atendimento', em_reparo:'Em reparo', em_ativacao:'Em ativação', finalizado:'Finalizado' }[status] || status;
       const cmoHtml  = d.cmo === 'reparo'
-        ? '<span class="chamado-sc" style="background:rgba(194,65,12,.18);color:#7c2d12">🔧Reparo</span>'
+        ? '<span class="chamado-sc" style="background:rgba(194,65,12,.18);color:#7c2d12">Reparo</span>'
         : d.cmo === 'ativacao'
-        ? '<span class="chamado-sc" style="background:rgba(126,34,206,.18);color:#4c1d95">⚡Ativação</span>'
+        ? '<span class="chamado-sc" style="background:rgba(126,34,206,.18);color:#4c1d95">Ativação</span>'
         : '';
       const lastTs   = (d.timeline||[]).at(-1)?.ts;
       const tempoStr = lastTs ? `<span class="chamado-tempo">${new Date(lastTs).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>` : '';
@@ -3953,7 +3690,7 @@
           <div class="chamado-row">
             <span class="chamado-sc csc-${escAttr(status)}">${statusLbl}</span>
             ${cmoHtml}
-            <button class="chamado-btn-atz" onclick="event.stopPropagation();abrirChamadoDoPainel('${escAttr(chave)}')">🔄 Atualizar</button>
+            <button class="chamado-btn-atz" onclick="event.stopPropagation();abrirChamadoDoPainel('${escAttr(chave)}')">Atualizar</button>
           </div>
         </div>`;
     }).join('');
@@ -4148,7 +3885,7 @@
     const texto = window._tlTextoAtual || '';
     if (!texto) return;
     navigator.clipboard?.writeText(texto).then(() => {
-      if (btn) { btn.textContent = '✓ Copiado'; setTimeout(() => { btn.textContent = '📋 Copiar'; }, 2000); }
+      if (btn) { btn.textContent = 'Copiado'; setTimeout(() => { btn.textContent = 'Copiar'; }, 2000); }
     }).catch(() => {});
   }
 
@@ -4205,7 +3942,7 @@
       const users = await r.json();
       el.innerHTML = users.map(u => `
         <div class="user-item-admin" id="ui-${escAttr(u.id)}">
-          <div class="ui-avatar">${u.perfil === 'administrador' ? '👑' : '👤'}</div>
+          <div class="ui-avatar">${u.perfil === 'administrador' ? 'Admin' : 'Usuário'}</div>
           <div class="ui-info">
             <div class="ui-nome">${escHtml(u.nome)}</div>
             <div class="ui-email">${escHtml(u.email)}</div>
