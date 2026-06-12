@@ -667,3 +667,160 @@ textarea {
     transition-duration: .01ms !important;
   }
 }
+
+/* Organização final: todos os painéis críticos visíveis no desktop. */
+@media (min-width: 1081px) {
+  .topbar {
+    height: 60px;
+    min-height: 60px;
+  }
+
+  .app-layout {
+    height: calc(100dvh - 60px) !important;
+    grid-template-columns: 244px minmax(0, 1fr) !important;
+  }
+
+  .mob-bottom-nav {
+    inset: 60px auto 0 0;
+  }
+
+  .sidebar {
+    margin: 8px 0 8px 8px;
+  }
+
+  .main-content {
+    height: calc(100dvh - 60px) !important;
+    min-height: 0;
+    padding: 8px;
+    gap: 8px;
+    overflow: hidden !important;
+  }
+
+  .stats-row {
+    height: 78px !important;
+    grid-template-columns: repeat(8, minmax(104px, 1fr)) !important;
+    gap: 8px;
+  }
+
+  .stat-card {
+    min-height: 78px;
+    padding: 10px 12px 8px;
+    border-radius: 11px;
+  }
+
+  .stat-num {
+    margin: 4px 0 2px;
+    font-size: 1.48rem;
+  }
+
+  .stat-lbl,
+  .stat-sub {
+    font-size: .64rem;
+  }
+
+  .uf-blink-bar {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .uf-blink-item {
+    min-height: 28px;
+    padding: 6px 8px;
+    font-size: .68rem;
+  }
+
+  .quadrant-grid {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: grid !important;
+    gap: 8px !important;
+    grid-template-columns: minmax(390px, 1.24fr) minmax(300px, .86fr) minmax(280px, .78fr) !important;
+    grid-template-rows: minmax(0, .58fr) minmax(0, .42fr) !important;
+    grid-template-areas:
+      "mensagens detalhes reports"
+      "mensagens chamados massivos" !important;
+  }
+
+  .grid-rh {
+    display: none !important;
+  }
+
+  .quadrant {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  .quadrant:nth-child(1) { grid-area: reports !important; }
+  .quadrant:nth-child(2) { grid-area: detalhes !important; }
+  .quadrant:nth-child(3) { grid-area: mensagens !important; }
+  .quadrant:nth-child(4) { grid-area: massivos !important; }
+  .quadrant:nth-child(5) { grid-area: chamados !important; }
+
+  .feed-wrap,
+  .detail-wrap,
+  .timer-section,
+  .chamados-painel,
+  .massivo-section {
+    height: 100% !important;
+    min-height: 0 !important;
+  }
+
+  .feed-hd,
+  .detail-hd,
+  .timer-hd,
+  .chamados-hd,
+  .massivo-hd,
+  .cat-hd {
+    min-height: 36px;
+    padding-top: 7px;
+    padding-bottom: 6px;
+  }
+
+  .filter-bar,
+  .chamados-filter,
+  .massivo-filter {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+
+  .ftab,
+  .chamados-ftab,
+  .localidade-select {
+    min-height: 24px;
+    padding: 4px 10px;
+    font-size: .66rem;
+  }
+
+  .msg-list,
+  .timer-body,
+  .chamados-list,
+  .massivo-list,
+  .detail-body {
+    min-height: 0;
+  }
+
+  .msg-card {
+    padding: 11px 12px;
+  }
+
+  .timer-body {
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: minmax(70px, auto) !important;
+  }
+
+  .massivo-stats {
+    flex-shrink: 0;
+  }
+
+  .mas-card {
+    min-height: 48px;
+  }
+
+  .cat-section {
+    height: clamp(112px, 33%, 220px);
+    min-height: 112px;
+  }
+}
