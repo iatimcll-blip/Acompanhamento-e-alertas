@@ -1393,7 +1393,272 @@
     .stab:not(.ativo) { color: rgba(255,255,255,.65) !important; }
     /* Hover: branco pleno */
     .ftab:hover, .chamados-ftab:hover, .stab:hover { color: #fff !important; }
+    /* Camada visual Codex - painel operacional mais legivel */
+    html { font-size: 14px; }
+    body {
+      background:
+        radial-gradient(circle at 18% 0%, rgba(34,197,94,.10), transparent 30%),
+        radial-gradient(circle at 100% 18%, rgba(245,158,11,.10), transparent 28%),
+        #111411;
+    }
+    :root {
+      --bg: #111411;
+      --surface: #151914;
+      --card: #fbfcf8;
+      --card2: #f0f4ec;
+      --card3: #e5ece0;
+      --border: #d8e0d2;
+      --border2: #c7d2c0;
+      --text: #172015;
+      --subtext: #52604d;
+      --muted: #778171;
+      --silver: #172015;
+      --verde: #128c5f;
+      --verde-dk: #0b6d4a;
+      --verde-wpp: #24d366;
+      --azul: #1f6feb;
+      --laranja: #d97706;
+      --roxo: #7c3aed;
+      --esmeralda: #059669;
+      --vermelho: #dc2626;
+      --amarelo: #ca8a04;
+      --metal: #8a9584;
+      --flag-cor: #d97706;
+    }
+    .topbar {
+      height: 68px;
+      padding: 0 20px;
+      background: rgba(15, 19, 15, .96);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 12px 34px rgba(0,0,0,.28);
+    }
+    .mcll-letters {
+      font-size: 2rem;
+      letter-spacing: 0;
+      filter: none;
+    }
+    .mcll-sub-text { letter-spacing: 2px; color: #c9d8c6; }
+    .badge-live,
+    .conn-pill,
+    .msg-counter-pill,
+    .cmo-pill,
+    .date-pill {
+      border-radius: 8px;
+    }
+    .app-layout {
+      grid-template-columns: 280px minmax(0, 1fr);
+      background: transparent;
+    }
+    .sidebar {
+      margin: 10px 0 10px 10px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 10px;
+      background: rgba(21,25,20,.96);
+      box-shadow: 0 16px 36px rgba(0,0,0,.22);
+    }
+    .sidebar-hd {
+      padding: 14px 16px;
+      background: linear-gradient(135deg, rgba(18,140,95,.28), rgba(31,111,235,.12));
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .sidebar-hd strong { color: #ffffff; font-size: .9rem; }
+    .sidebar-hd small { color: #b8d7c7; }
+    .wpp-connect,
+    #syncHealthBox,
+    #btnDesconectarWrap,
+    .sidebar-chats-hd {
+      border-color: rgba(255,255,255,.08) !important;
+    }
+    .qr-box {
+      border-radius: 10px;
+      border-color: rgba(36,211,102,.42);
+      background: rgba(255,255,255,.04);
+      color: #d9e6d4;
+    }
+    .chats-vazio { color: rgba(255,255,255,.58); }
+    .main-content {
+      padding: 10px;
+      gap: 10px;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(120px, 1fr));
+      gap: 10px;
+    }
+    .stat-card {
+      min-height: 92px;
+      padding: 14px 14px 12px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #ffffff, #f4f7f1);
+      border: 1px solid rgba(216,224,210,.95);
+      box-shadow: 0 12px 28px rgba(8,16,10,.14);
+    }
+    .stat-card:hover {
+      background: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 16px 32px rgba(8,16,10,.18);
+    }
+    .stat-lbl {
+      font-size: .72rem;
+      color: #596554;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+    .stat-num {
+      margin: 7px 0 3px;
+      font-size: 1.75rem;
+      color: #121a10;
+    }
+    .stat-sub { color: #667260; }
+    .stat-card::before {
+      height: 4px;
+      border-radius: 10px 10px 0 0;
+    }
+    .uf-blink-bar { gap: 10px; }
+    .uf-blink-item {
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.88);
+      color: #42503d;
+      box-shadow: 0 8px 18px rgba(8,16,10,.08);
+      letter-spacing: 0;
+    }
+    .quadrant-grid { gap: 10px; }
+    .timer-section,
+    .detail-wrap,
+    .feed-wrap,
+    .chamados-painel,
+    .massivo-section,
+    .cat-section,
+    .table-section,
+    .settings-modal,
+    .chat-modal,
+    .atz-panel {
+      border-radius: 10px;
+      background: #fbfcf8;
+      border: 1px solid var(--border);
+      box-shadow: 0 16px 34px rgba(8,16,10,.12);
+    }
+    .timer-hd,
+    .detail-hd,
+    .feed-hd,
+    .chamados-hd,
+    .massivo-hd,
+    .cat-hd,
+    .table-hd,
+    .atz-hd,
+    .chat-modal-hd,
+    .settings-modal-hd {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+    }
+    .timer-hd h2,
+    .feed-hd h2,
+    .chamados-hd h2,
+    .massivo-hd h2,
+    .cat-hd h2,
+    .detail-hd h3,
+    .table-hd h3 {
+      color: #172015;
+      letter-spacing: 0;
+    }
+    .filter-bar,
+    .chamados-filter,
+    .massivo-filter,
+    #tableFilterBar {
+      background: #eef3ea;
+      border-color: var(--border);
+    }
+    .ftab,
+    .chamados-ftab,
+    .localidade-select {
+      border-radius: 999px;
+      background: #ffffff;
+      color: #4f5c49;
+      border-color: #d8e0d2;
+    }
+    .filter-bar .ftab,
+    .massivo-filter .ftab,
+    .chamados-filter .chamados-ftab {
+      min-width: 48px;
+      padding: 5px 12px;
+      color: #3f4d39 !important;
+      font-weight: 800;
+      text-align: center;
+    }
+    .filter-bar .ftab[style*="vermelho"],
+    .massivo-filter .ftab[style*="vermelho"] { color: #b91c1c !important; }
+    .filter-bar .ftab[style*="flag-cor"] { color: #b45309 !important; }
+    .filter-bar .ftab[style*="verde"] { color: #047857 !important; }
+    #ftab-PA:not(.ativo) { color: #1d4ed8 !important; border-color: rgba(29,78,216,.36) !important; background: #ffffff !important; }
+    #ftab-MA:not(.ativo) { color: #b45309 !important; border-color: rgba(180,83,9,.36) !important; background: #ffffff !important; }
+    #ftab-AP:not(.ativo) { color: #047857 !important; border-color: rgba(4,120,87,.36) !important; background: #ffffff !important; }
+    #ftab-AM:not(.ativo) { color: #6d28d9 !important; border-color: rgba(109,40,217,.36) !important; background: #ffffff !important; }
+    .ftab.ativo,
+    .chamados-ftab.ativo {
+      color: #ffffff !important;
+      background: #128c5f !important;
+      border-color: #128c5f !important;
+      box-shadow: 0 8px 18px rgba(18,140,95,.24);
+    }
+    .feed-search {
+      background: #ffffff;
+      color: #172015;
+      border-color: #d8e0d2;
+      border-radius: 8px;
+    }
+    .msg-card,
+    .chamado-item,
+    .mas-item,
+    .timer-item,
+    .detail-kv,
+    .mas-card,
+    .user-item-admin {
+      border-radius: 8px;
+      background: #ffffff;
+      border-color: #d8e0d2;
+      box-shadow: 0 8px 20px rgba(8,16,10,.07);
+    }
+    .msg-card:hover,
+    .chamado-item:hover,
+    .mas-card:hover {
+      background: #f8fbf5;
+    }
+    .msg-card.lida { opacity: .58; }
+    .chip,
+    .msg-tag,
+    .tag-pill {
+      border-radius: 999px;
+    }
+    .msg-text,
+    .detalhe-vazio,
+    .chamados-vazio,
+    .timer-empty {
+      color: #4f5c49;
+    }
+    .chat-row {
+      color: #e8f2e4;
+    }
+    .chat-row:hover,
+    .chat-row.selected {
+      background: rgba(36,211,102,.11);
+    }
+    @media (max-width: 1180px) {
+      .stats-row { grid-template-columns: repeat(4, minmax(130px, 1fr)); }
+      .app-layout { grid-template-columns: 250px minmax(0, 1fr); }
+    }
+    @media (max-width: 800px) {
+      .topbar { height: 56px; padding: 0 10px; }
+      .sidebar { margin: 0; border-radius: 0; }
+      .main-content { padding: 0; }
+      .app-layout[data-mob="stats"] .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 8px;
+      }
+      .stat-card { min-height: 78px; }
+    }
   </style>
+  <script src="cnl-data.js"></script>
 </head>
 <body>
 
@@ -1493,22 +1758,22 @@
       <div class="stat-card stat-pa" id="card-PA" onclick="filtrarFeed('PA',null)">
         <div class="stat-lbl">Pará — PA</div>
         <div class="stat-num" id="statPA">0</div>
-        <div class="stat-sub">46 municípios</div>
+        <div class="stat-sub">46 municípios CNL</div>
       </div>
       <div class="stat-card stat-ma" id="card-MA" onclick="filtrarFeed('MA',null)">
         <div class="stat-lbl">Maranhão — MA</div>
         <div class="stat-num" id="statMA">0</div>
-        <div class="stat-sub">São Luís e região</div>
+        <div class="stat-sub">3 municípios CNL</div>
       </div>
       <div class="stat-card stat-ap" id="card-AP" onclick="filtrarFeed('AP',null)">
         <div class="stat-lbl">Amapá — AP</div>
         <div class="stat-num" id="statAP">0</div>
-        <div class="stat-sub">Macapá · ADX</div>
+        <div class="stat-sub">1 município CNL</div>
       </div>
       <div class="stat-card stat-am" id="card-AM" onclick="filtrarFeed('AM',null)">
         <div class="stat-lbl">Amazonas — AM</div>
         <div class="stat-num" id="statAM">0</div>
-        <div class="stat-sub">Parintins · ADX</div>
+        <div class="stat-sub">1 município CNL</div>
       </div>
       <div class="stat-card stat-fechado" id="card-FECHADO" onclick="filtrarFeed('FECHADO',null)">
         <div class="stat-lbl">Fechado</div>
@@ -1811,6 +2076,13 @@
 </div>
 
 <script>
+  const IS_LOCAL_PREVIEW = ['localhost', '127.0.0.1'].includes(location.hostname);
+  if (IS_LOCAL_PREVIEW && !localStorage.getItem('mcll_token')) {
+    localStorage.setItem('mcll_token', 'preview-local');
+    localStorage.setItem('mcll_nome', 'Prévia Codex');
+    localStorage.setItem('mcll_perfil', 'administrador');
+  }
+
   // ── Auth ──────────────────────────────────────────────────────────────────
   (function() {
     const token  = localStorage.getItem('mcll_token');
@@ -2150,6 +2422,7 @@
   function conectarWS() {
     const token   = localStorage.getItem('mcll_token') || '';
     if (!token) { window.location.href = '/'; return; }
+    if (IS_LOCAL_PREVIEW) return;
     const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
     ws = new WebSocket(`${wsProto}://${location.host}?token=${encodeURIComponent(token)}`);
     ws.onopen  = () => { _wsDelay = 3000; };
@@ -2247,7 +2520,7 @@
     renderChamadosPanel();
     atualizarDropdownLocalidades();
     atualizarMobBadges();
-    apiFetch('/api/base').then(r => r.json()).then(b => { BASE = b; }).catch(() => {});
+    carregarBaseCnl();
   }
 
   // ── QR ────────────────────────────────────────────────────────────────────
@@ -2295,6 +2568,76 @@
         btn.style.opacity = ok ? '' : '0.45';
       }
     });
+  }
+
+  function carregarBaseCnl() {
+    return apiFetch('/api/base')
+      .then(r => r.json())
+      .then(b => {
+        BASE = Array.isArray(b) && b.length ? b : (window.CNL_FALLBACK || []);
+        renderizarTabela(BASE);
+        atualizarDropdownLocalidades();
+      })
+      .catch(() => {
+        BASE = window.CNL_FALLBACK || [];
+        renderizarTabela(BASE);
+        atualizarDropdownLocalidades();
+      });
+  }
+
+  function iniciarPreviewLocal() {
+    if (!IS_LOCAL_PREVIEW || todasMensagens.length) return;
+    atualizarStatus('conectado');
+    const agora = Date.now();
+    const makeMsg = (id, minutos, grupo, texto, uf, municipios, siglas, extra = {}) => ({
+      id,
+      numero: grupo.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '@g.us',
+      de: grupo,
+      nomeGrupo: grupo,
+      hora: new Date(agora - minutos * 60000).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
+      ts: agora - minutos * 60000,
+      texto,
+      uf,
+      municipios,
+      siglas,
+      detectados: municipios.map((muni, idx) => ({
+        uf: uf[idx] || uf[0],
+        muni,
+        sigla: siglas[idx] || siglas[0],
+        eps: (BASE.find(r => r.muni === muni || r.sigla === siglas[idx]) || {}).eps || 'SLN'
+      })),
+      temAcionamento: true,
+      temMassivo: false,
+      temRuptura: false,
+      lida: false,
+      duplicado: false,
+      chaveUnica: id,
+      ...extra
+    });
+    todasMensagens = [
+      makeMsg('preview-blm', 4, 'Grupo PA - Belém Ops', 'Falha massiva em BELEM PA, sigla BLM, atendimento SLN. Cliente pede retorno urgente.', ['PA'], ['BELEM'], ['BLM'], { temMassivo:true }),
+      makeMsg('preview-sls', 12, 'Grupo MA - São Luís', 'São Luís MA com oscilação reportada. SLS em acompanhamento para reparo CMO.', ['MA'], ['SAO LUIS'], ['SLS'], { temCmoReparo:true }),
+      makeMsg('preview-mcp', 24, 'Grupo AP - Macapá', 'MACAPA AP sinaliza degradação. Sigla MCP, atendimento ADX.', ['AP'], ['MACAPA'], ['MCP'], { temMassivo:true }),
+      makeMsg('preview-pin', 31, 'Grupo AM - Parintins', 'PARINTINS AM com ruptura informada pela equipe de campo. Sigla PIN.', ['AM'], ['PARINTINS'], ['PIN'], { temRuptura:true, temMassivo:true }),
+      makeMsg('preview-aiu', 48, 'Ana - Ananindeua PA', 'AIU Ananindeua PA aguardando validação do técnico.', ['PA'], ['ANANINDEUA'], ['AIU'], { lida:true })
+    ];
+    renderChatList([
+      { id:'grupo-pa@g.us', nome:'Grupo PA - Belém Ops', grupo:true, naoLidas:2, lastTs:agora - 4 * 60000, lastTexto:'Falha massiva em BELEM PA, sigla BLM' },
+      { id:'grupo-ma@g.us', nome:'Grupo MA - São Luís', grupo:true, naoLidas:1, lastTs:agora - 12 * 60000, lastTexto:'SLS em acompanhamento para reparo CMO' },
+      { id:'grupo-ap@g.us', nome:'Grupo AP - Macapá', grupo:true, naoLidas:1, lastTs:agora - 24 * 60000, lastTexto:'MACAPA AP sinaliza degradação' },
+      { id:'grupo-am@g.us', nome:'Grupo AM - Parintins', grupo:true, naoLidas:1, lastTs:agora - 31 * 60000, lastTexto:'PARINTINS AM com ruptura informada' }
+    ]);
+    _serverContadores = { total:4, PA:1, MA:1, AP:1, AM:1, fechado:0, WANDERSON:0, CAT:0 };
+    todasMensagens.forEach(m => {
+      if (m.temAcionamento && !m.lida) iniciarTimers(m, m.ts, m.texto);
+    });
+    atualizarContadoresDisplay();
+    atualizarDropdownLocalidades();
+    renderFeed();
+    renderMassivo();
+    renderChamadosPanel();
+    renderTimers();
+    atualizarMobBadges();
   }
 
   async function desconectarWhatsApp() {
@@ -4098,7 +4441,18 @@
       }, ms));
     }
     conectarWS();
-    apiFetch('/api/base').then(r => r.json()).then(b => { BASE = b; }).catch(() => {});
+    carregarBaseCnl().then(() => {
+      if (IS_LOCAL_PREVIEW) iniciarPreviewLocal();
+    });
+    if (IS_LOCAL_PREVIEW) {
+      setTimeout(() => {
+        if (!BASE.length) {
+          BASE = window.CNL_FALLBACK || [];
+          renderizarTabela(BASE);
+        }
+        iniciarPreviewLocal();
+      }, 600);
+    }
     // Auto-abrir tabela no layout de quadrantes
     tabelaAberta = true;
     const tb = document.getElementById('tableBody');
