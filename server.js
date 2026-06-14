@@ -242,6 +242,79 @@ let syncHealth       = {
   mensagensIgnoradas: 0,
 };
 
+const CHAT_LOAD_TIMEOUT_MS = Number(process.env.CHAT_LOAD_TIMEOUT_MS || 45000);
+const CHAT_SYNC_TIMEOUT_MS = Number(process.env.CHAT_SYNC_TIMEOUT_MS || 8000);
+
+function comTimeout(promise, ms, mensagem = 'timeout') {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(mensagem)), ms)),
+  ]);
+}
+
+function isOrigemSincronizavelId(id = '') {
+  const valor = String(id || '');
+  if (!valor) return false;
+  if (valor === 'status@broadcast') return false;
+  if (valor.endsWith('@broadcast')) return false;
+  if (valor.endsWith('@newsletter')) return false;
+  return true;
+}
+
+function isChatSincronizavel(chat) {
+  return isOrigemSincronizavelId(chat?.id?._serialized || '');
+}
+
+function registrarChatsNoCache(chats = []) {
+  for (const chat of chats) {
+    if (isChatSincronizavel(chat)) _chatObjects[chat.id._serialized] = chat;
+  }
+}
+
+function atualizarListaChats(chats = []) {
+  const validos = chats.filter(isChatSincronizavel);
+  registrarChatsNoCache(validos);
+  chatList = validos.slice(0, 150).map(c => ({
+    id:       c.id._serialized,
+    nome:     c.name || (c.isGroup ? '' : resolverNome(c.id.user || '')),
+    grupo:    c.isGroup,
+    naoLidas: c.unreadCount || 0,
+  }));
+  contadores.totalWhatsapp = validos.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
+  broadcast('chats', chatList);
+  broadcast('contadores', contadores);
+  return validos;
+}
+
+async function carregarChatsComFallback(origem = 'sync', timeoutMs = CHAT_LOAD_TIMEOUT_MS) {
+  const cache = Object.values(_chatObjects).filter(isChatSincronizavel);
+  if (carregandoChats) {
+    if (cache.length) {
+      console.log(`[${origem}] getChats ja em andamento - usando ${cache.length} chats em cache`);
+      return { chats: cache, frescos: false, cache: true };
+    }
+    throw new Error('Carregamento de chats ja em andamento');
+  }
+
+  carregandoChats = true;
+  try {
+    const chats = await comTimeout(client.getChats(), timeoutMs, 'timeout ao carregar chats');
+    const validos = atualizarListaChats(chats);
+    console.log(`[${origem}] ${validos.length} chats carregados`);
+    return { chats: validos, frescos: true, cache: false };
+  } catch (e) {
+    syncHealth.ultimaSyncErro = e.message;
+    broadcast('sync_health', syncHealth);
+    if (cache.length) {
+      console.log(`[${origem}] getChats falhou (${e.message}) - usando ${cache.length} chats em cache`);
+      return { chats: cache, frescos: false, cache: true, erro: e.message };
+    }
+    throw e;
+  } finally {
+    carregandoChats = false;
+  }
+}
+
 const SHEETS_WEBHOOK = process.env.SHEETS_WEBHOOK_URL || '';
 
 // ── Express + HTTP + WebSocket ──────────────────────────────────────────────
@@ -804,23 +877,9 @@ let carregandoChats = false;
 app.post('/api/chats/refresh', autenticar, async (req, res) => {
   if (statusWpp !== 'conectado') return res.status(503).json({ erro: 'WhatsApp não conectado' });
   if (carregandoChats) return res.status(429).json({ erro: 'Carregamento já em andamento' });
-  carregandoChats = true;
   res.json({ ok: true, msg: 'Carregando chats em segundo plano...' });
   try {
-    const chats = await Promise.race([
-      client.getChats(),
-      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 120000)),
-    ]);
-    chats.forEach(c => { _chatObjects[c.id._serialized] = c; });
-    chatList = chats.slice(0, 150).map(c => ({
-      id:       c.id._serialized,
-      nome:     c.name || (c.isGroup ? '' : resolverNome(c.id.user || '')),
-      grupo:    c.isGroup,
-      naoLidas: c.unreadCount || 0,
-    }));
-    contadores.totalWhatsapp = chats.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
-    broadcast('chats', chatList);
-    broadcast('contadores', contadores);
+    const { chats } = await carregarChatsComFallback('REFRESH', 120000);
     sincronizarMensagensRecentes(chats).catch(e => {
       console.error('Erro ao sincronizar mensagens apos refresh:', e.message);
     });
@@ -828,8 +887,6 @@ app.post('/api/chats/refresh', autenticar, async (req, res) => {
   } catch (e) {
     console.error('Erro ao carregar chats (refresh):', e.message);
     broadcast('chats_erro', { erro: e.message });
-  } finally {
-    carregandoChats = false;
   }
 });
 
@@ -1035,6 +1092,12 @@ let sincronizandoMensagens = false;
 async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   const idMensagem = msg?.id?._serialized;
   if (!idMensagem) return false;
+  const origemId = msg?.from || '';
+
+  if (!isOrigemSincronizavelId(origemId)) {
+    syncHealth.mensagensIgnoradas++;
+    return false;
+  }
 
   if (mensagensProcessadasIds.has(idMensagem) || mensagensEmProcessamentoIds.has(idMensagem) || mensagens.some(m => m.id === idMensagem)) {
     syncHealth.mensagensIgnoradas++;
@@ -1330,16 +1393,14 @@ async function sincronizarMensagensRecentes(chatsOrigem = null) {
   try {
     let chats, chatsFrescos = false;
     if (chatsOrigem) {
-      chats = chatsOrigem;
+      chats = chatsOrigem.filter(isChatSincronizavel);
     } else {
       try {
-        chats = await Promise.race([
-          client.getChats(),
-          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ao carregar chats')), 30000)),
-        ]);
-        chatsFrescos = true;
+        const resultado = await carregarChatsComFallback('SYNC', CHAT_LOAD_TIMEOUT_MS);
+        chats = resultado.chats;
+        chatsFrescos = resultado.frescos;
       } catch (e) {
-        const cached = Object.values(_chatObjects);
+        const cached = Object.values(_chatObjects).filter(isChatSincronizavel);
         if (!cached.length) throw e;
         console.log(`[SYNC] getChats falhou (${e.message}) — usando ${cached.length} chats em cache`);
         chats = cached;
@@ -1347,15 +1408,7 @@ async function sincronizarMensagensRecentes(chatsOrigem = null) {
     }
     // Popula e transmite lista de grupos/contatos automaticamente (sem precisar clicar em 🔄)
     if (chatsFrescos && chats.length > 0) {
-      chats.forEach(c => { _chatObjects[c.id._serialized] = c; });
-      chatList = chats.slice(0, 150).map(c => ({
-        id:       c.id._serialized,
-        nome:     c.name || (c.isGroup ? '' : resolverNome(c.id.user || '')),
-        grupo:    c.isGroup,
-        naoLidas: c.unreadCount || 0,
-      }));
-      contadores.totalWhatsapp = chats.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
-      broadcast('chats', chatList);
+      atualizarListaChats(chats);
     }
     // Ordena por mensagem mais recente (inclui chats sem não-lidas mas com msgs de hoje)
     const agora = Date.now() / 1000;
@@ -1377,7 +1430,7 @@ async function sincronizarMensagensRecentes(chatsOrigem = null) {
       try {
         const msgs = await Promise.race([
           chat.fetchMessages({ limit: 40 }),
-          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000)),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), CHAT_SYNC_TIMEOUT_MS)),
         ]);
         for (const msg of msgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))) {
           analisadas++;
@@ -1455,27 +1508,17 @@ function registrarEventos() {
     setTimeout(async () => {
       let chatsCarregados = null;
       try {
-        chatsCarregados = await Promise.race([
-          client.getChats(),
-          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 90000)),
-        ]);
-        chatsCarregados.forEach(c => { _chatObjects[c.id._serialized] = c; });
-        chatList = chatsCarregados.slice(0, 150).map(c => ({
-          id:       c.id._serialized,
-          nome:     c.name || (c.isGroup ? '' : resolverNome(c.id.user || '')),
-          grupo:    c.isGroup,
-          naoLidas: c.unreadCount || 0,
-        }));
-        contadores.totalWhatsapp = chatsCarregados.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
-        broadcast('chats', chatList);
-        broadcast('contadores', contadores);
+        const resultado = await carregarChatsComFallback('READY', 90000);
+        chatsCarregados = resultado.chats;
         console.log(`[READY] ${chatList.length} chats carregados`);
       } catch (e) {
         console.error('[READY] Erro ao carregar chats:', e.message);
       }
-      sincronizarMensagensRecentes(chatsCarregados).catch(e => {
-        console.error('Erro ao sincronizar mensagens no ready:', e.message);
-      });
+      if (chatsCarregados?.length) {
+        sincronizarMensagensRecentes(chatsCarregados).catch(e => {
+          console.error('Erro ao sincronizar mensagens no ready:', e.message);
+        });
+      }
     }, 5000);
   });
 
