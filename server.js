@@ -1088,6 +1088,8 @@ function criarCliente() {
 
 let client = criarCliente();
 let sincronizandoMensagens = false;
+let _qrCount = 0;          // QRs gerados na sessão atual sem autenticação
+let _qrLimpoSessao = false; // evita limpeza dupla
 
 async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   const idMensagem = msg?.id?._serialized;
@@ -1486,8 +1488,13 @@ function iniciarSyncPeriodico() {
 }
 
 function registrarEventos() {
+  // Reset do contador de QRs a cada novo cliente
+  _qrCount = 0;
+  _qrLimpoSessao = false;
+
   client.on('qr', async (qr) => {
-    console.log('QR gerado — acesse http://localhost:3000 para escanear');
+    _qrCount++;
+    console.log(`QR gerado (#${_qrCount}) — acesse http://localhost:${PORT} para escanear`);
     statusWpp = 'aguardando_qr';
     try {
       const qrDataUrl = await qrcode.toDataURL(qr);
@@ -1495,6 +1502,33 @@ function registrarEventos() {
     } catch (e) {
       console.error('Erro ao gerar QR:', e.message);
     }
+
+    // Após 5 QRs sem autenticação a sessão está podre — limpa e reinicia
+    if (_qrCount >= 5 && !reiniciando && !_qrLimpoSessao) {
+      _qrLimpoSessao = true;
+      console.log('[WPP] 5 QRs sem autenticação — sessão corrompida, limpando e reiniciando...');
+      reiniciando = true;
+      setTimeout(async () => {
+        try { await client.destroy(); } catch (_) {}
+        try { fs.rmSync(path.join(WPP_SESSION_PATH, 'session'), { recursive: true, force: true }); } catch (_) {}
+        limparLockFilesChrome(WPP_SESSION_PATH);
+        _qrCount = 0;
+        _qrLimpoSessao = false;
+        client = criarCliente();
+        registrarEventos();
+        reiniciando = false;
+        iniciarWhatsApp();
+      }, 3000);
+    }
+  });
+
+  // Confirma que o QR foi escaneado e a sessão está sendo restaurada
+  client.on('authenticated', () => {
+    console.log('[WPP] Autenticado — aguardando ready...');
+    _qrCount = 0;
+    _qrLimpoSessao = false;
+    statusWpp = 'aguardando_qr';
+    broadcast('status', { status: 'autenticando' });
   });
 
   client.on('ready', async () => {
@@ -1594,8 +1628,24 @@ function limparLockFilesChrome(dir) {
 // ── Inicia servidor ─────────────────────────────────────────────────────────
 let reiniciando = false;
 
+function limparSessaoSeAntiga(diasLimite = 14) {
+  const sessionDir = path.join(WPP_SESSION_PATH, 'session');
+  if (!fs.existsSync(sessionDir)) return;
+  try {
+    const stat = fs.statSync(sessionDir);
+    const diffDias = (Date.now() - stat.mtimeMs) / (1000 * 60 * 60 * 24);
+    if (diffDias > diasLimite) {
+      console.log(`[WPP] Sessão com ${Math.floor(diffDias)} dias (limite ${diasLimite}) — limpando para forçar novo QR`);
+      fs.rmSync(sessionDir, { recursive: true, force: true });
+    }
+  } catch (e) {
+    console.error('[WPP] Erro ao verificar sessão antiga:', e.message);
+  }
+}
+
 async function iniciarWhatsApp() {
   if (reiniciando) return;
+  limparSessaoSeAntiga(14);
   limparLockFilesChrome(WPP_SESSION_PATH);
   try {
     await client.initialize();
