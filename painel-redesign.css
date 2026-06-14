@@ -824,3 +824,231 @@ textarea {
     min-height: 112px;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   REDESIGN TABS v2 — sistema de abas + indicadores regionais
+   Rollback: remover deste comentário até o fim do arquivo
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  --rd-norte:   #58a6ff;
+  --rd-macap:   #1db977;
+  --rd-massiva: #ef9f27;
+  --rd-infra:   #7c6ff7;
+}
+
+/* ── Ocultar elementos substituídos ───────────────────────── */
+.stats-row    { display: none !important; }
+.uf-blink-bar { display: none !important; }
+.cat-section  { display: none !important; }
+
+/* ── Nova barra de 7 contadores ───────────────────────────── */
+.rd-stats-row {
+  display: grid;
+  grid-template-columns: 1.25fr repeat(6, 1fr);
+  gap: 8px;
+  flex-shrink: 0;
+  height: 78px;
+}
+
+.rd-stat {
+  border-radius: 11px;
+  padding: 10px 12px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background .12s, transform .12s;
+}
+.rd-stat::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  border-radius: 11px 11px 0 0;
+  background: rgba(240,246,252,.18);
+}
+.rd-stat:hover { background: var(--card2); transform: translateY(-1px); }
+.rd-stat .stat-lbl { font-size: .64rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.rd-stat .stat-num { font-size: 1.48rem; font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--text); line-height: 1.1; margin: 3px 0 2px; }
+.rd-stat .stat-sub { font-size: .6rem; color: var(--muted); }
+
+.rd-stat.stat-total::before    { background: var(--verde) !important; }
+.rd-stat.stat-total .stat-num  { color: var(--verde); }
+.rd-stat.stat-fechado .stat-num { color: var(--verde); }
+.rd-stat.stat-wand .stat-num   { color: var(--amarelo); }
+
+.rd-stat-norte::before   { background: var(--rd-norte) !important; }
+.rd-stat-norte .stat-num   { color: var(--rd-norte); }
+.rd-stat-macap::before   { background: var(--rd-macap) !important; }
+.rd-stat-macap .stat-num   { color: var(--rd-macap); }
+.rd-stat-massiva::before { background: var(--rd-massiva) !important; }
+.rd-stat-massiva .stat-num { color: var(--rd-massiva); }
+.rd-stat-infra::before   { background: var(--rd-infra) !important; }
+.rd-stat-infra .stat-num   { color: var(--rd-infra); }
+
+/* ── Nova nav bar ─────────────────────────────────────────── */
+.rd-blink-bar {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  flex-shrink: 0;
+  height: 34px;
+}
+
+.rd-blink-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--subtext);
+  cursor: pointer;
+  user-select: none;
+  transition: background .12s, color .12s, border-color .12s, box-shadow .12s;
+}
+.rd-blink-item:hover { background: var(--card2); color: var(--text); border-color: var(--border2); }
+.rd-blink-item.ativo { background: rgba(88,166,255,.10); border-color: rgba(88,166,255,.30); color: var(--rd-norte); }
+
+.rd-blink-norte   { border-color: rgba(88,166,255,.22);  color: #7ab8ff; }
+.rd-blink-macap   { border-color: rgba(29,185,119,.22);  color: #4dd18e; }
+.rd-blink-massiva { border-color: rgba(239,159,39,.22);  color: var(--rd-massiva); }
+.rd-blink-infra   { border-color: rgba(124,111,247,.22); color: var(--rd-infra); }
+
+.rd-blink-massiva.ativo { background: rgba(239,159,39,.10); border-color: rgba(239,159,39,.30); color: var(--rd-massiva); }
+.rd-blink-infra.ativo   { background: rgba(124,111,247,.10); border-color: rgba(124,111,247,.30); color: var(--rd-infra); }
+
+.rd-blink-norte.blink    { animation: rd-blink-norte    1.1s step-start infinite; }
+.rd-blink-macap.blink    { animation: rd-blink-macap    1.1s step-start infinite; }
+.rd-blink-massiva.rd-pulse { animation: rd-pulse-massiva 2s ease-in-out infinite; }
+.rd-blink-infra.rd-pulse   { animation: rd-pulse-infra   2s ease-in-out infinite; }
+
+@keyframes rd-blink-norte {
+  0%,49%   { background: rgba(88,166,255,.18); color: var(--rd-norte); }
+  50%,100% { background: transparent; color: #7ab8ff; }
+}
+@keyframes rd-blink-macap {
+  0%,49%   { background: rgba(29,185,119,.15); color: var(--rd-macap); }
+  50%,100% { background: transparent; color: #4dd18e; }
+}
+@keyframes rd-pulse-massiva {
+  0%,100% { box-shadow: 0 0 0 0 rgba(239,159,39,0); }
+  50%     { box-shadow: 0 0 0 4px rgba(239,159,39,.4); }
+}
+@keyframes rd-pulse-infra {
+  0%,100% { box-shadow: 0 0 0 0 rgba(124,111,247,0); }
+  50%     { box-shadow: 0 0 0 4px rgba(124,111,247,.4); }
+}
+
+.rd-tab-sep {
+  width: 1px;
+  background: var(--border);
+  align-self: stretch;
+  flex-shrink: 0;
+  margin: 4px 0;
+}
+
+.rd-tab-btn {
+  flex: none;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .12s;
+}
+.rd-tab-btn:hover { background: var(--card2); color: var(--text); border-color: var(--border2); }
+.rd-tab-btn.ativo { background: rgba(88,166,255,.12); border-color: rgba(88,166,255,.30); color: #d6ebff; }
+.rd-tab-btn[data-tab="massiva"].ativo { background: rgba(239,159,39,.10); border-color: rgba(239,159,39,.30); color: #ffe4a5; }
+.rd-tab-btn[data-tab="infra"].ativo   { background: rgba(124,111,247,.10); border-color: rgba(124,111,247,.30); color: #d4d0ff; }
+
+/* ── Tab PRINCIPAL: 2 colunas, sem massivos/chamados ──────── */
+@media (min-width: 1081px) {
+  body[data-rd-tab="principal"] .quadrant-grid {
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, .9fr) !important;
+    grid-template-rows: minmax(0, .6fr) minmax(0, .4fr) !important;
+    grid-template-areas:
+      "mensagens detalhes"
+      "mensagens reports" !important;
+  }
+  body[data-rd-tab="principal"] .quadrant:nth-child(4),
+  body[data-rd-tab="principal"] .quadrant:nth-child(5) { display: none !important; }
+}
+
+/* ── Tab MASSIVA: Q4 full screen ──────────────────────────── */
+body[data-rd-tab="massiva"] .quadrant-grid {
+  display: flex !important;
+  flex-direction: column !important;
+}
+body[data-rd-tab="massiva"] .quadrant:not(:nth-child(4)) { display: none !important; }
+body[data-rd-tab="massiva"] .quadrant:nth-child(4) {
+  flex: 1 1 0;
+  display: flex !important;
+  min-height: 0 !important;
+}
+body[data-rd-tab="massiva"] .massivo-section { height: 100% !important; }
+body[data-rd-tab="massiva"] #mas-ftab-INFRA { display: none !important; }
+body[data-rd-tab="massiva"] #rdStatsRow .rd-stat-massiva { opacity: .3; pointer-events: none; }
+
+/* ── Tab INFRA: painel dedicado ────────────────────────────── */
+body[data-rd-tab="infra"] .quadrant-grid { display: none !important; }
+body[data-rd-tab="infra"] #rdInfraPanel  { display: flex !important; }
+body[data-rd-tab="infra"] #rdStatsRow .rd-stat-infra { opacity: .3; pointer-events: none; }
+
+/* ── Painel de infraestrutura ─────────────────────────────── */
+#rdInfraPanel {
+  display: none;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  border-radius: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 18px 42px rgba(0,0,0,.22);
+  overflow: hidden;
+}
+.rd-infra-hd {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  min-height: 42px;
+  background: rgba(124,111,247,.05);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.rd-infra-hd h2 { font-size: .86rem; font-weight: 700; color: var(--text); margin: 0; }
+.rd-infra-count {
+  font-size: .7rem;
+  background: rgba(124,111,247,.14);
+  color: var(--rd-infra);
+  border: 1px solid rgba(124,111,247,.24);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-family: var(--mono);
+  flex-shrink: 0;
+}
+.rd-infra-list {
+  flex: 1 1 0;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

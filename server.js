@@ -811,11 +811,8 @@ app.post('/api/chats/refresh', autenticar, async (req, res) => {
       client.getChats(),
       new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 120000)),
     ]);
-    // Cacheia objetos reais de chat para uso rápido em /api/chat-messages
     chats.forEach(c => { _chatObjects[c.id._serialized] = c; });
-    // Cacheia objetos reais de chat para uso rápido em /api/chat-messages
-    chats.forEach(c => { _chatObjects[c.id._serialized] = c; });
-    chatList = chats.slice(0, 80).map(c => ({
+    chatList = chats.slice(0, 150).map(c => ({
       id:       c.id._serialized,
       nome:     c.name || (c.isGroup ? '' : resolverNome(c.id.user || '')),
       grupo:    c.isGroup,
@@ -1005,7 +1002,7 @@ function analisarMensagem(texto) {
 function criarCliente() {
   return new Client({
     authStrategy: new LocalAuth({ dataPath: WPP_SESSION_PATH }),
-    webVersionCache: { type: 'none' },
+    webVersionCache: { type: 'local', path: WPP_SESSION_PATH },
     puppeteer: {
       headless: true,
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
@@ -1096,6 +1093,8 @@ async function processarMensagemWhatsApp(msg, origem = 'ao vivo') {
   let chat = null, contact = null;
   try { chat = await msg.getChat(); } catch (_) {}
   try { contact = await msg.getContact(); } catch (_) {}
+  // Mantém cache atualizado para evitar getChats() no sync periódico
+  if (chat && origem === 'ao vivo') _chatObjects[chat.id._serialized] = chat;
   const nomeGrupoDetectado = chat?.isGroup ? (chat.name || '') : '';
   const temCatMaranhao = isCatMaranhaoGrupo(nomeGrupoDetectado);
 
@@ -1329,14 +1328,27 @@ async function sincronizarMensagensRecentes(chatsOrigem = null) {
   let analisadas = 0, aceitas = 0, erros = 0;
   broadcast('sync_status', { em_andamento: true, analisadas: 0, aceitas: 0, syncHealth });
   try {
-    const chats = chatsOrigem || await Promise.race([
-      client.getChats(),
-      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ao carregar chats')), 90000)),
-    ]);
+    let chats, chatsFrescos = false;
+    if (chatsOrigem) {
+      chats = chatsOrigem;
+    } else {
+      try {
+        chats = await Promise.race([
+          client.getChats(),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ao carregar chats')), 30000)),
+        ]);
+        chatsFrescos = true;
+      } catch (e) {
+        const cached = Object.values(_chatObjects);
+        if (!cached.length) throw e;
+        console.log(`[SYNC] getChats falhou (${e.message}) — usando ${cached.length} chats em cache`);
+        chats = cached;
+      }
+    }
     // Popula e transmite lista de grupos/contatos automaticamente (sem precisar clicar em 🔄)
-    if (!chatsOrigem && chats.length > 0) {
+    if (chatsFrescos && chats.length > 0) {
       chats.forEach(c => { _chatObjects[c.id._serialized] = c; });
-      chatList = chats.slice(0, 80).map(c => ({
+      chatList = chats.slice(0, 150).map(c => ({
         id:       c.id._serialized,
         nome:     c.name || (c.isGroup ? '' : resolverNome(c.id.user || '')),
         grupo:    c.isGroup,
@@ -1354,13 +1366,18 @@ async function sincronizarMensagensRecentes(chatsOrigem = null) {
       .slice()
       .sort((a, b) => (b.lastMessage?.timestamp || 0) - (a.lastMessage?.timestamp || 0))
       .filter(c => (c.lastMessage?.timestamp || 0) >= tsHoje) // apenas chats com msgs hoje
-      .slice(0, 120);
+      .slice(0, 60);
 
+    const SYNC_MAX_MS = 3 * 60 * 1000; // aborta se ultrapassar 3 minutos
     for (const chat of ordenados) {
+      if (Date.now() - syncHealth.ultimaSyncInicioEm > SYNC_MAX_MS) {
+        console.log('[SYNC] Tempo máximo atingido — abortando loop de chats');
+        break;
+      }
       try {
         const msgs = await Promise.race([
           chat.fetchMessages({ limit: 40 }),
-          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000)),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000)),
         ]);
         for (const msg of msgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))) {
           analisadas++;
@@ -1399,18 +1416,20 @@ async function sincronizarMensagensRecentes(chatsOrigem = null) {
   }
 }
 
-// Rotina de sincronização periódica automática (a cada 2 min)
+// Rotina de sincronização periódica — usa cache de _chatObjects (sem getChats pesado)
+// Intervalo de 20 min: apenas complementa o fluxo online via client.on('message')
 let _syncPeriodico = null;
 function iniciarSyncPeriodico() {
   if (_syncPeriodico) clearInterval(_syncPeriodico);
   _syncPeriodico = setInterval(() => {
-    if (statusWpp === 'conectado' && !sincronizandoMensagens) {
-      console.log('[SYNC PERIÓDICO] Iniciando sincronização automática...');
-      sincronizarMensagensRecentes().catch(e =>
-        console.error('[SYNC PERIÓDICO] Erro:', e.message)
-      );
-    }
-  }, 2 * 60 * 1000);
+    if (statusWpp !== 'conectado' || sincronizandoMensagens) return;
+    const chatsCache = Object.values(_chatObjects);
+    if (!chatsCache.length) return;
+    console.log(`[SYNC PERIÓDICO] Iniciando com ${chatsCache.length} chats em cache...`);
+    sincronizarMensagensRecentes(chatsCache).catch(e =>
+      console.error('[SYNC PERIÓDICO] Erro:', e.message)
+    );
+  }, 20 * 60 * 1000);
 }
 
 function registrarEventos() {
@@ -1431,13 +1450,33 @@ function registrarEventos() {
     syncHealth.conectadoEm = Date.now();
     broadcast('status', { status: 'conectado' });
     broadcast('sync_health', syncHealth);
-    setTimeout(() => {
-      sincronizarMensagensRecentes().catch(e => {
+    iniciarSyncPeriodico();
+    // Carrega lista de chats com timeout generoso, depois inicia sync com os chats já carregados
+    setTimeout(async () => {
+      let chatsCarregados = null;
+      try {
+        chatsCarregados = await Promise.race([
+          client.getChats(),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 90000)),
+        ]);
+        chatsCarregados.forEach(c => { _chatObjects[c.id._serialized] = c; });
+        chatList = chatsCarregados.slice(0, 150).map(c => ({
+          id:       c.id._serialized,
+          nome:     c.name || (c.isGroup ? '' : resolverNome(c.id.user || '')),
+          grupo:    c.isGroup,
+          naoLidas: c.unreadCount || 0,
+        }));
+        contadores.totalWhatsapp = chatsCarregados.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
+        broadcast('chats', chatList);
+        broadcast('contadores', contadores);
+        console.log(`[READY] ${chatList.length} chats carregados`);
+      } catch (e) {
+        console.error('[READY] Erro ao carregar chats:', e.message);
+      }
+      sincronizarMensagensRecentes(chatsCarregados).catch(e => {
         console.error('Erro ao sincronizar mensagens no ready:', e.message);
       });
     }, 5000);
-    iniciarSyncPeriodico();
-    // Chats são carregados sob demanda via POST /api/chats/refresh para não sobrecarregar o container
   });
 
   client.on('disconnected', reason => {
@@ -1462,6 +1501,20 @@ function registrarEventos() {
   client.on('auth_failure', () => {
     statusWpp = 'erro_auth';
     broadcast('status', { status: 'erro_auth' });
+    console.log('Falha de autenticação — limpando sessão e reiniciando em 5s...');
+    if (!reiniciando) {
+      reiniciando = true;
+      setTimeout(async () => {
+        try { await client.destroy(); } catch (_) {}
+        // Remove dados de sessão para forçar novo QR limpo
+        try { fs.rmSync(path.join(WPP_SESSION_PATH, 'session'), { recursive: true, force: true }); } catch (_) {}
+        limparLockFilesChrome(WPP_SESSION_PATH);
+        client = criarCliente();
+        registrarEventos();
+        reiniciando = false;
+        iniciarWhatsApp();
+      }, 5000);
+    }
   });
 
   // ── Recebimento de mensagens ──────────────────────────────────────────────

@@ -1529,6 +1529,46 @@
       </div>
     </div>
 
+    <!-- ═══ REDESIGN: nova barra de 7 contadores ═══════════════════════════ -->
+    <div class="rd-stats-row" id="rdStatsRow">
+      <div class="rd-stat stat-total" onclick="filtrarFeed('TODOS',null)">
+        <div class="stat-lbl">Total do dia</div>
+        <div class="stat-num" id="rd-statTotal">0</div>
+        <div class="stat-sub">mensagens filtradas</div>
+      </div>
+      <div class="rd-stat rd-stat-norte" onclick="rdFiltrarNorte()">
+        <div class="stat-lbl">Norte</div>
+        <div class="stat-num" id="rd-statNORTE">0</div>
+        <div class="stat-sub">PA · AP · AM</div>
+      </div>
+      <div class="rd-stat rd-stat-macap" onclick="filtrarFeed('MA',null)">
+        <div class="stat-lbl">MA-CAP</div>
+        <div class="stat-num" id="rd-statMACAP">0</div>
+        <div class="stat-sub">Maranhão</div>
+      </div>
+      <div class="rd-stat rd-stat-massiva" onclick="rdSetTab('massiva')">
+        <div class="stat-lbl">Massiva</div>
+        <div class="stat-num" id="rd-statMASSIVA">0</div>
+        <div class="stat-sub">chamados massivos</div>
+      </div>
+      <div class="rd-stat rd-stat-infra" onclick="rdSetTab('infra')">
+        <div class="stat-lbl">Infra</div>
+        <div class="stat-num" id="rd-statINFRA">0</div>
+        <div class="stat-sub">infraestrutura</div>
+      </div>
+      <div class="rd-stat stat-fechado" onclick="filtrarFeed('FECHADO',null)">
+        <div class="stat-lbl">Fechado</div>
+        <div class="stat-num" id="rd-statFechado">0</div>
+        <div class="stat-sub">encerrados</div>
+      </div>
+      <div class="rd-stat stat-wand" onclick="filtrarFeed('WANDERSON',null)">
+        <div class="stat-lbl">Wanderson</div>
+        <div class="stat-num" id="rd-statWAND">0</div>
+        <div class="stat-sub">atribuídos</div>
+      </div>
+    </div>
+    <!-- ═══ FIM rd-stats-row ════════════════════════════════════════════════ -->
+
     <!-- UF Blink Bar (item 4) -->
     <div class="uf-blink-bar">
       <div class="uf-blink-item" id="blink-PA" onclick="filtrarFeed('PA',null)">PA — Pará</div>
@@ -1536,6 +1576,19 @@
       <div class="uf-blink-item" id="blink-AP" onclick="filtrarFeed('AP',null)">AP — Amapá</div>
       <div class="uf-blink-item" id="blink-AM" onclick="filtrarFeed('AM',null)">AM — Amazonas</div>
     </div>
+
+    <!-- ═══ REDESIGN: nova nav bar ══════════════════════════════════════════ -->
+    <div class="rd-blink-bar" id="rdBlinkBar">
+      <div class="rd-blink-item rd-blink-norte"   id="rd-blink-NORTE"   onclick="rdFiltrarNorte()">NORTE</div>
+      <div class="rd-blink-item rd-blink-macap"   id="rd-blink-MACAP"   onclick="filtrarFeed('MA',null)">MA-CAP</div>
+      <div class="rd-blink-item rd-blink-massiva" id="rd-blink-MASSIVA" onclick="rdSetTab('massiva')">MASSIVA</div>
+      <div class="rd-blink-item rd-blink-infra"   id="rd-blink-INFRA"   onclick="rdSetTab('infra')">INFRA</div>
+      <div class="rd-tab-sep"></div>
+      <button class="rd-tab-btn ativo" id="rd-tab-principal" data-tab="principal" onclick="rdSetTab('principal')">Principal</button>
+      <button class="rd-tab-btn"       id="rd-tab-massiva"   data-tab="massiva"   onclick="rdSetTab('massiva')">Massiva</button>
+      <button class="rd-tab-btn"       id="rd-tab-infra"     data-tab="infra"     onclick="rdSetTab('infra')">Infra</button>
+    </div>
+    <!-- ═══ FIM rd-blink-bar ════════════════════════════════════════════════ -->
 
     <!-- 4 Quadrantes (item 7) -->
     <div class="quadrant-grid">
@@ -1681,6 +1734,20 @@
       </div>
 
     </div>
+
+    <!-- ═══ REDESIGN: painel de infraestrutura ══════════════════════════════ -->
+    <div id="rdInfraPanel">
+      <div class="rd-infra-hd">
+        <h2>Infraestrutura</h2>
+        <span class="rd-infra-count" id="rdInfraCount">0 hoje</span>
+        <div style="flex:1"></div>
+        <button class="rd-tab-btn" onclick="rdSetTab('principal')">← Principal</button>
+      </div>
+      <div class="rd-infra-list" id="rdInfraList">
+        <p style="color:var(--muted);font-size:.78rem;text-align:center;padding:24px">Carregando...</p>
+      </div>
+    </div>
+    <!-- ═══ FIM rdInfraPanel ════════════════════════════════════════════════ -->
 
   </main>
 
@@ -4200,5 +4267,172 @@
     requestAnimationFrame(() => initGridResize());
   });
 </script>
+
+<!-- ═══ REDESIGN TABS: bloco JS aditivo ════════════════════════════════════
+     Rollback: remover este bloco + bloco "REDESIGN TABS v2" em painel-redesign.css
+     ══════════════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ── rdSetTab: alterna aba ativa ──────────────────────── */
+  function rdSetTab(tab) {
+    document.body.setAttribute('data-rd-tab', tab);
+    ['principal', 'massiva', 'infra'].forEach(function (t) {
+      var btn = document.getElementById('rd-tab-' + t);
+      if (btn) btn.classList.toggle('ativo', t === tab);
+    });
+    if (tab === 'infra') rdRenderInfra();
+  }
+  window.rdSetTab = rdSetTab;
+
+  /* ── rdFiltrarNorte: filtra PA+AP+AM no feed ──────────── */
+  function rdFiltrarNorte() {
+    rdSetTab('principal');
+    window._rdFiltroNORTE = true;
+    filtroLocalidade = '';
+    var sel = document.getElementById('filtroLocalidade');
+    if (sel) sel.value = '';
+    document.querySelectorAll('#filterTabs .ftab').forEach(function (b) { b.classList.remove('ativo'); });
+    document.querySelectorAll('.stat-card').forEach(function (c) { c.classList.remove('ativo'); });
+    document.querySelectorAll('.rd-blink-item').forEach(function (b) { b.classList.remove('ativo'); });
+    var nb = document.getElementById('rd-blink-NORTE');
+    if (nb) nb.classList.add('ativo');
+    var tag = document.getElementById('filtroAtivoTag');
+    if (tag) { tag.textContent = '● NORTE (PA · AP · AM)'; tag.classList.add('visivel'); }
+    renderFeed();
+    var fw = document.querySelector('.feed-wrap');
+    if (fw) fw.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  window.rdFiltrarNorte = rdFiltrarNorte;
+
+  /* ── Patch filtrarFeed: reseta NORTE ao usar outro filtro  */
+  var _origFiltrarFeed = window.filtrarFeed;
+  window.filtrarFeed = function (valor, btn) {
+    window._rdFiltroNORTE = false;
+    document.querySelectorAll('.rd-blink-item').forEach(function (b) { b.classList.remove('ativo'); });
+    document.body.setAttribute('data-rd-tab', 'principal');
+    document.querySelectorAll('.rd-tab-btn').forEach(function (b) {
+      b.classList.toggle('ativo', b.dataset.tab === 'principal');
+    });
+    return _origFiltrarFeed.apply(this, arguments);
+  };
+
+  /* ── Patch renderFeed: intercepta modo NORTE ──────────── */
+  var _origRenderFeed = window.renderFeed;
+  window.renderFeed = function () {
+    if (window._rdFiltroNORTE && !filtroLocalidade) {
+      _rdRenderFeedNorte();
+      if (typeof atualizarUFBlinks === 'function') atualizarUFBlinks();
+      return;
+    }
+    if (window._rdFiltroNORTE && filtroLocalidade) {
+      window._rdFiltroNORTE = false;
+    }
+    return _origRenderFeed.apply(this, arguments);
+  };
+
+  function _rdRenderFeedNorte() {
+    var lista = document.getElementById('msgList');
+    if (!lista) return;
+    var msgs = todasMensagens.filter(function (m) {
+      return msgMatchPainelPrincipal(m) &&
+        (m.uf || []).some(function (u) { return ['PA', 'AP', 'AM'].indexOf(u) !== -1; });
+    });
+    if (buscaTexto) {
+      msgs = msgs.filter(function (m) {
+        var h = [m.texto || '', m.de || '', m.nomeGrupo || '', (m.municipios || []).join(' ')].join(' ').toLowerCase();
+        return h.indexOf(buscaTexto) !== -1;
+      });
+    }
+    var badge = document.getElementById('msgCount');
+    if (badge) badge.textContent = msgs.length + ' filtradas';
+    lista.innerHTML = msgs.length
+      ? msgs.map(function (m) { return buildCard(m); }).join('')
+      : '<p style="color:var(--muted);font-size:.78rem;text-align:center;padding:18px">Nenhuma mensagem.</p>';
+  }
+
+  /* ── Patch atualizarContadoresDisplay: sincroniza rd-stats */
+  var _origContadores = window.atualizarContadoresDisplay;
+  window.atualizarContadoresDisplay = function () {
+    _origContadores.apply(this, arguments);
+    _rdAtualizarContadores();
+  };
+
+  function _rdAtualizarContadores() {
+    var msgs = todasMensagens.filter(function (m) { return !m.duplicado; });
+    var pa    = parseInt((document.getElementById('statPA')      || {}).textContent) || 0;
+    var ap    = parseInt((document.getElementById('statAP')      || {}).textContent) || 0;
+    var am    = parseInt((document.getElementById('statAM')      || {}).textContent) || 0;
+    var total = parseInt((document.getElementById('statTotal')   || {}).textContent) || 0;
+    var ma    = parseInt((document.getElementById('statMA')      || {}).textContent) || 0;
+    var fech  = parseInt((document.getElementById('statFechado') || {}).textContent) || 0;
+    var wand  = parseInt((document.getElementById('statWAND')    || {}).textContent) || 0;
+
+    var massiva = msgs.filter(function (m) { return m.temMassivo && !msgMatchInfra(m); }).length;
+    var infra   = msgs.filter(function (m) { return msgMatchInfra(m); }).length;
+
+    function set(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
+    set('rd-statTotal',   total);
+    set('rd-statNORTE',   pa + ap + am);
+    set('rd-statMACAP',   ma);
+    set('rd-statMASSIVA', massiva);
+    set('rd-statINFRA',   infra);
+    set('rd-statFechado', fech);
+    set('rd-statWAND',    wand);
+
+    var mEl = document.getElementById('rd-blink-MASSIVA');
+    if (mEl) mEl.classList.toggle('rd-pulse', massiva > 0);
+    var iEl = document.getElementById('rd-blink-INFRA');
+    if (iEl) iEl.classList.toggle('rd-pulse', infra > 0);
+  }
+
+  /* ── Patch atualizarUFBlinks: blink NORTE e MA-CAP ───── */
+  var _origUFBlinks = window.atualizarUFBlinks;
+  window.atualizarUFBlinks = function () {
+    _origUFBlinks.apply(this, arguments);
+    _rdUFBlinks();
+  };
+
+  function _rdUFBlinks() {
+    var msgs = typeof getFeedBaseMsgs === 'function' ? getFeedBaseMsgs() : todasMensagens;
+    var norteNaoLida = ['PA', 'AP', 'AM'].some(function (uf) {
+      return msgs.some(function (m) {
+        return msgMatchPainelPrincipal(m) && !m.lida && (m.uf || []).indexOf(uf) !== -1;
+      });
+    });
+    var maNaoLida = msgs.some(function (m) {
+      return msgMatchPainelPrincipal(m) && !m.lida && (m.uf || []).indexOf('MA') !== -1;
+    });
+    var nEl = document.getElementById('rd-blink-NORTE');
+    if (nEl) nEl.classList.toggle('blink', norteNaoLida && !window._rdFiltroNORTE);
+    var mEl = document.getElementById('rd-blink-MACAP');
+    if (mEl) mEl.classList.toggle('blink', maNaoLida && filtroFeedAtual !== 'MA');
+  }
+
+  /* ── rdRenderInfra: painel dedicado de infra ──────────── */
+  function rdRenderInfra() {
+    var lista = document.getElementById('rdInfraList');
+    if (!lista) return;
+    var msgs = todasMensagens.filter(function (m) { return !m.duplicado && msgMatchInfra(m); });
+    var badge = document.getElementById('rdInfraCount');
+    if (badge) badge.textContent = msgs.length + ' hoje';
+    lista.innerHTML = msgs.length
+      ? msgs.map(function (m) { return buildCard(m); }).join('')
+      : '<p style="color:var(--muted);font-size:.78rem;text-align:center;padding:24px">Nenhuma mensagem de infraestrutura.</p>';
+  }
+  window.rdRenderInfra = rdRenderInfra;
+
+  /* ── Init ─────────────────────────────────────────────── */
+  function _init() { rdSetTab('principal'); }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _init);
+  } else {
+    _init();
+  }
+
+}());
+</script>
+<!-- ═══ FIM REDESIGN TABS JS ════════════════════════════════════════════════ -->
 </body>
 </html>
