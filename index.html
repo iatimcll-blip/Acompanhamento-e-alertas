@@ -1599,6 +1599,10 @@
           <div class="timer-hd" onclick="toggleTimer()">
             <h2>Monitor de reports — 60 min <span class="timer-toggle" id="timerToggleIco">▾</span></h2>
             <span class="timer-badge" id="timerBadge">Sem acionamentos</span>
+            <div class="timer-scroll-actions">
+              <button type="button" class="timer-scroll-btn" title="Ver acionamentos anteriores" onclick="event.stopPropagation();document.getElementById('timerPanel').scrollBy({left:-360,behavior:'smooth'});">‹</button>
+              <button type="button" class="timer-scroll-btn" title="Ver próximos acionamentos" onclick="event.stopPropagation();document.getElementById('timerPanel').scrollBy({left:360,behavior:'smooth'});">›</button>
+            </div>
           </div>
           <div class="timer-body" id="timerPanel">
             <span class="timer-empty">Nenhum acionamento em andamento.</span>
