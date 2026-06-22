@@ -1885,6 +1885,13 @@
 
 <script>
   const IS_LOCAL_PREVIEW = ['localhost', '127.0.0.1'].includes(location.hostname);
+  const EMBED_SESSION = window.__MCLL_EMBED_SESSION__ || null;
+  if (EMBED_SESSION && EMBED_SESSION.token) {
+    localStorage.setItem('mcll_token', EMBED_SESSION.token);
+    localStorage.setItem('mcll_nome', EMBED_SESSION.nome || 'Espelho ATRIX');
+    localStorage.setItem('mcll_perfil', EMBED_SESSION.perfil || 'usuario');
+    document.body.classList.add('embed-atrix');
+  }
   if (IS_LOCAL_PREVIEW && !localStorage.getItem('mcll_token')) {
     localStorage.setItem('mcll_token', 'preview-local');
     localStorage.setItem('mcll_nome', 'Prévia Codex');

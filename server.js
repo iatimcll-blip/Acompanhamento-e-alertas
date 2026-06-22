@@ -24,6 +24,17 @@ const APP_INSTANCE_NAME = (process.env.APP_INSTANCE_NAME || process.env.INSTANCE
 const TZ = process.env.TZ_APP || 'America/Fortaleza';
 const CMO_REPARO_FILTRO = process.env.CMO_REPARO_FILTRO || 'Carimbo Transferência - CMO REPARO';
 const CMO_ATIVACAO_FILTRO = process.env.CMO_ATIVACAO_FILTRO || '';
+const EMBED_ALLOWED_ORIGINS = (process.env.EMBED_ALLOWED_ORIGINS || 'https://atrix-puce.vercel.app,http://localhost:3000,http://127.0.0.1:3000')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+const EMBED_USER = {
+  id: 'atrix-embed',
+  nome: 'Espelho ATRIX',
+  email: 'espelho@atrix.local',
+  perfil: 'usuario',
+  embed: true,
+};
 
 for (const dir of [DATA_DIR, WPP_SESSION_PATH]) {
   try { fs.mkdirSync(dir, { recursive: true }); } catch (e) {
@@ -322,9 +333,43 @@ const app    = express();
 const server = http.createServer(app);
 const wss    = new WebSocket.Server({ server });
 
-// Serve login.html na raiz, painel apenas autenticado
+function isEmbedRequestAllowed(req) {
+  const ref = req.get('referer') || req.get('referrer') || '';
+  if (!ref) return false;
+  try {
+    const origin = new URL(ref).origin;
+    return EMBED_ALLOWED_ORIGINS.includes(origin);
+  } catch {
+    return false;
+  }
+}
+
+function servePainelEmbed(req, res) {
+  if (!isEmbedRequestAllowed(req)) {
+    res.status(403).send('Espelho disponivel apenas dentro do painel ATRIX.');
+    return;
+  }
+  const token = jwt.sign(EMBED_USER, JWT_SECRET, { expiresIn: '24h' });
+  const session = {
+    token,
+    nome: EMBED_USER.nome,
+    perfil: EMBED_USER.perfil,
+  };
+  const file = path.join(__dirname, 'index.html');
+  let html = fs.readFileSync(file, 'utf8');
+  const marker = '  const IS_LOCAL_PREVIEW =';
+  html = html.replace(marker, `  window.__MCLL_EMBED_SESSION__ = ${JSON.stringify(session)};\n${marker}`);
+  res.setHeader('Cache-Control', 'no-store');
+  res.send(html);
+}
+
+// Serve login.html na raiz, painel autenticado ou modo espelho ATRIX
 app.get('/', (_, res) => { res.setHeader('Cache-Control','no-store'); res.sendFile(path.join(__dirname, 'login.html')); });
-app.get('/painel', (_, res) => { res.setHeader('Cache-Control','no-store'); res.sendFile(path.join(__dirname, 'index.html')); });
+app.get('/painel', (req, res) => {
+  if (req.query.embed === 'atrix') return servePainelEmbed(req, res);
+  res.setHeader('Cache-Control','no-store');
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 app.use(express.static(path.join(__dirname), { etag: false, lastModified: false }));
 app.use(express.json());
 app.get('/api/config', (_, res) => res.json({ instanceName: APP_INSTANCE_NAME }));
