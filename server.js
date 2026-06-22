@@ -344,7 +344,7 @@ function isEmbedRequestAllowed(req) {
   }
 }
 
-function servePainelEmbed(req, res) {
+function serveEmbedFile(req, res, filename) {
   if (!isEmbedRequestAllowed(req)) {
     res.status(403).send('Espelho disponivel apenas dentro do painel ATRIX.');
     return;
@@ -355,12 +355,25 @@ function servePainelEmbed(req, res) {
     nome: EMBED_USER.nome,
     perfil: EMBED_USER.perfil,
   };
-  const file = path.join(__dirname, 'index.html');
+  const file = path.join(__dirname, filename);
   let html = fs.readFileSync(file, 'utf8');
-  const marker = '  const IS_LOCAL_PREVIEW =';
-  html = html.replace(marker, `  window.__MCLL_EMBED_SESSION__ = ${JSON.stringify(session)};\n${marker}`);
+  const sessionJs = `window.__MCLL_EMBED_SESSION__ = ${JSON.stringify(session)};`;
+  if (html.includes('window.__MCLL_EMBED_SESSION__ = null;')) {
+    html = html.replace('window.__MCLL_EMBED_SESSION__ = null;', sessionJs);
+  } else {
+    const marker = '  const IS_LOCAL_PREVIEW =';
+    html = html.replace(marker, `  ${sessionJs}\n${marker}`);
+  }
   res.setHeader('Cache-Control', 'no-store');
   res.send(html);
+}
+
+function servePainelEmbed(req, res) {
+  return serveEmbedFile(req, res, 'index.html');
+}
+
+function serveMonitorEmbed(req, res) {
+  return serveEmbedFile(req, res, 'monitor.html');
 }
 
 // Serve login.html na raiz, painel autenticado ou modo espelho ATRIX
@@ -369,6 +382,10 @@ app.get('/painel', (req, res) => {
   if (req.query.embed === 'atrix') return servePainelEmbed(req, res);
   res.setHeader('Cache-Control','no-store');
   res.sendFile(path.join(__dirname, 'index.html'));
+});
+app.get('/monitor', (req, res) => {
+  if (req.query.embed === 'atrix') return serveMonitorEmbed(req, res);
+  res.redirect('/');
 });
 app.use(express.static(path.join(__dirname), { etag: false, lastModified: false }));
 app.use(express.json());

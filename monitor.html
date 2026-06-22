@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitor ATRIX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #eef2ef;
+      --surface: #ffffff;
+      --surface2: #f5f7f5;
+      --surface3: #edf1ee;
+      --bd: #d9e1dc;
+      --bd2: #c8d3ce;
+      --tx: #16201d;
+      --tx2: #4c5a55;
+      --tx3: #7a8882;
+      --green: #128c7e;
+      --green2: #25d366;
+      --blue: #2563eb;
+      --orange: #d97706;
+      --red: #dc2626;
+      --shadow: 0 12px 28px rgba(22,32,29,.10);
+      --r: 8px;
+    }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--tx);
+      font-size: 14px;
+    }
+    button { font-family: inherit; }
+    .page { height: 100dvh; display: grid; grid-template-rows: auto minmax(0,1fr); gap: 10px; padding: 10px; }
+    .top {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--bd);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: rgba(18,140,126,.12);
+      color: var(--green);
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .brand h1 { font-size: 17px; line-height: 1.15; font-weight: 800; letter-spacing: 0; }
+    .brand p { margin-top: 3px; color: var(--tx3); font-size: 11px; line-height: 1.3; }
+    .top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .chip {
+      min-height: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--bd);
+      background: var(--surface2);
+      color: var(--tx2);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--tx3); }
+    .dot.on { background: var(--green2); box-shadow: 0 0 0 3px rgba(37,211,102,.16); }
+    .btn {
+      min-height: 30px;
+      border: 1px solid var(--bd2);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--tx2);
+      padding: 6px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn:hover { border-color: rgba(18,140,126,.42); color: var(--tx); }
+    .content {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(310px, .78fr) minmax(0, 1.22fr);
+      gap: 10px;
+    }
+    .blocks { min-height: 0; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+    .block {
+      background: var(--surface);
+      border: 1px solid var(--bd);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .block-hd {
+      min-height: 50px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid var(--bd);
+      background: #f0f2f5;
+    }
+    .block-title { font-size: 15px; font-weight: 800; }
+    .block-sub { margin-top: 2px; color: var(--tx3); font-size: 11px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 58px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(18,140,126,.12);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 8px;
+      padding: 10px;
+    }
+    .kpi {
+      background: var(--surface2);
+      border: 1px solid var(--bd);
+      border-radius: var(--r);
+      padding: 10px;
+      min-height: 74px;
+    }
+    .kpi .label { color: var(--tx3); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .kpi .value { margin-top: 7px; color: var(--tx); font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+    .kpi .hint { margin-top: 5px; color: var(--tx3); font-size: 10px; }
+    .panel {
+      min-height: 0;
+      background:
+        linear-gradient(rgba(239,234,226,.92), rgba(239,234,226,.92)),
+        radial-gradient(circle at 16% 24%, rgba(18,140,126,.10), transparent 25%),
+        radial-gradient(circle at 84% 32%, rgba(37,211,102,.10), transparent 24%);
+      border: 1px solid var(--bd);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-rows: auto minmax(0,1fr);
+      overflow: hidden;
+    }
+    .panel-hd {
+      min-height: 50px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid var(--bd);
+      background: #f0f2f5;
+    }
+    .panel-hd h2 { font-size: 14px; font-weight: 800; }
+    .panel-hd span { color: var(--tx3); font-size: 11px; }
+    .panel-grid {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(250px,.82fr) minmax(0,1.18fr);
+      gap: 10px;
+      padding: 10px;
+    }
+    .box {
+      min-height: 0;
+      background: var(--surface);
+      border: 1px solid var(--bd);
+      border-radius: var(--r);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .box-hd {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--bd);
+      color: var(--tx);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .list { flex: 1; min-height: 0; overflow-y: auto; }
+    .row {
+      display: grid;
+      grid-template-columns: 38px minmax(0,1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid #edf1ee;
+      background: #fff;
+    }
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #dfe5e2;
+      color: #54656f;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .name { color: #111b21; font-size: 13px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .meta { margin-top: 3px; color: #667781; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .count {
+      min-width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      background: rgba(37,211,102,.16);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .msg {
+      padding: 10px 12px;
+      border-bottom: 1px solid #edf1ee;
+      background: #ffffff;
+    }
+    .msg-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .msg-name { color: #111b21; font-size: 12px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .msg-time { color: #667781; font-size: 10px; white-space: nowrap; }
+    .msg-text { margin-top: 6px; color: var(--tx2); font-size: 12px; line-height: 1.42; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .criteria {
+      padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .term {
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: var(--surface2);
+      border: 1px solid var(--bd);
+      color: var(--tx2);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .empty {
+      padding: 18px;
+      color: var(--tx3);
+      font-size: 12px;
+      text-align: center;
+      line-height: 1.5;
+    }
+    @media (max-width: 900px) {
+      .page { padding: 8px; }
+      .top { align-items: flex-start; flex-direction: column; }
+      .top-actions { width: 100%; justify-content: stretch; }
+      .chip, .btn { flex: 1; justify-content: center; }
+      .content, .panel-grid { grid-template-columns: 1fr; }
+      .blocks { max-height: 260px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="top">
+      <div class="brand">
+        <div class="brand-icon">M</div>
+        <div>
+          <h1>Monitor</h1>
+          <p>Grupos e contatos especificos por bloco</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="chip"><span class="dot" id="status-dot"></span><span id="status-label">Conectando</span></div>
+        <div class="chip">Atualizado <span id="updated-at">--:--</span></div>
+        <button class="btn" type="button" onclick="refreshAll()">Atualizar</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="blocks" id="blocks"></section>
+      <section class="panel">
+        <div class="panel-hd">
+          <div>
+            <h2 id="active-title">MA CAP</h2>
+            <span id="active-subtitle">Bloco 1</span>
+          </div>
+          <span id="active-count">0 alvos</span>
+        </div>
+        <div class="panel-grid">
+          <div class="box">
+            <div class="box-hd"><span>Grupos e contatos</span><span id="target-count">0</span></div>
+            <div class="list" id="target-list"></div>
+          </div>
+          <div class="box">
+            <div class="box-hd"><span>Ultimas mensagens</span><span id="message-count">0</span></div>
+            <div class="list" id="message-list"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    window.__MCLL_EMBED_SESSION__ = null;
+
+    const SESSION = window.__MCLL_EMBED_SESSION__;
+    const TOKEN = SESSION && SESSION.token;
+    const BLOCKS = [
+      {
+        id: 'ma-cap',
+        order: 1,
+        title: 'MA CAP',
+        subtitle: 'Maranhao Capital',
+        terms: ['ma cap', 'sao luis', 'sao jose de ribamar', 'paco do lumiar', 'raposa', 'slz', 'sln ma', 'giga+ ma', 'maranhao capital']
+      }
+    ];
+    let activeBlockId = 'ma-cap';
+    let state = { status: 'desconectado', chats: [], mensagens: [], contadores: {}, syncHealth: null };
+    let ws = null;
+
+    function norm(v) {
+      return String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+    function esc(v) {
+      return String(v == null ? '' : v).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+    function fmtTime(ts) {
+      if (!ts) return '--:--';
+      const d = new Date(Number(ts));
+      if (Number.isNaN(d.getTime())) return '--:--';
+      return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+    function initials(name) {
+      return String(name || '?').split(/\s+/).filter(Boolean).slice(0,2).map(p => p[0]).join('') || '?';
+    }
+    function textFor(item) {
+      return norm([
+        item.nome, item.name, item.nomeGrupo, item.de, item.numero, item.texto,
+        Array.isArray(item.uf) ? item.uf.join(' ') : item.uf,
+        Array.isArray(item.municipios) ? item.municipios.join(' ') : item.municipios,
+        Array.isArray(item.siglas) ? item.siglas.join(' ') : item.siglas
+      ].join(' '));
+    }
+    function matchesBlock(block, item) {
+      const hay = textFor(item);
+      return block.terms.some(term => hay.includes(norm(term)));
+    }
+    function chatsFor(block) {
+      return state.chats.filter(chat => matchesBlock(block, chat));
+    }
+    function messagesFor(block) {
+      return state.mensagens
+        .filter(msg => matchesBlock(block, msg))
+        .sort((a,b) => Number(b.ts || 0) - Number(a.ts || 0));
+    }
+    function currentBlock() {
+      return BLOCKS.find(b => b.id === activeBlockId) || BLOCKS[0];
+    }
+    function setStatus(status) {
+      state.status = status || state.status;
+      const ok = state.status === 'conectado';
+      document.getElementById('status-dot').classList.toggle('on', ok);
+      document.getElementById('status-label').textContent = ok ? 'WhatsApp conectado' : 'WhatsApp desconectado';
+    }
+    function renderBlocks() {
+      const root = document.getElementById('blocks');
+      root.innerHTML = BLOCKS.map(block => {
+        const chats = chatsFor(block);
+        const msgs = messagesFor(block);
+        const unread = chats.reduce((sum, c) => sum + (Number(c.naoLidas) || 0), 0);
+        const last = msgs[0];
+        return `<article class="block" data-block="${esc(block.id)}">
+          <div class="block-hd">
+            <div>
+              <div class="block-title">Bloco ${block.order}: ${esc(block.title)}</div>
+              <div class="block-sub">${esc(block.subtitle)}</div>
+            </div>
+            <button class="badge" type="button" onclick="selectBlock('${esc(block.id)}')">Abrir</button>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><div class="label">Alvos</div><div class="value">${chats.length}</div><div class="hint">grupos/contatos</div></div>
+            <div class="kpi"><div class="label">Nao lidas</div><div class="value">${unread}</div><div class="hint">soma dos alvos</div></div>
+            <div class="kpi"><div class="label">Mensagens</div><div class="value">${msgs.length}</div><div class="hint">base do dia</div></div>
+            <div class="kpi"><div class="label">Ultima</div><div class="value" style="font-size:20px">${fmtTime(last && last.ts)}</div><div class="hint">${last ? esc(last.nomeGrupo || last.de || 'mensagem') : 'sem evento'}</div></div>
+          </div>
+          <div class="criteria">${block.terms.slice(0,6).map(t => `<span class="term">${esc(t)}</span>`).join('')}</div>
+        </article>`;
+      }).join('');
+    }
+    function renderActive() {
+      const block = currentBlock();
+      const chats = chatsFor(block).sort((a,b) => (Number(b.naoLidas)||0) - (Number(a.naoLidas)||0) || String(a.nome||'').localeCompare(String(b.nome||'')));
+      const msgs = messagesFor(block).slice(0, 50);
+      document.getElementById('active-title').textContent = block.title;
+      document.getElementById('active-subtitle').textContent = `Bloco ${block.order} - ${block.subtitle}`;
+      document.getElementById('active-count').textContent = `${chats.length} alvos`;
+      document.getElementById('target-count').textContent = chats.length;
+      document.getElementById('message-count').textContent = msgs.length;
+      document.getElementById('target-list').innerHTML = chats.length ? chats.map(chat => {
+        const name = chat.nome || chat.id || 'Sem nome';
+        const unread = Number(chat.naoLidas) || 0;
+        return `<div class="row">
+          <div class="avatar">${esc(initials(name))}</div>
+          <div><div class="name">${esc(name)}</div><div class="meta">${chat.grupo ? 'Grupo' : 'Contato'} monitorado</div></div>
+          <div class="count">${unread}</div>
+        </div>`;
+      }).join('') : `<div class="empty">Nenhum grupo ou contato encontrado para MA CAP com os criterios atuais.</div>`;
+      document.getElementById('message-list').innerHTML = msgs.length ? msgs.map(msg => {
+        const name = msg.nomeGrupo || msg.de || msg.numero || 'Mensagem';
+        return `<div class="msg">
+          <div class="msg-top"><div class="msg-name">${esc(name)}</div><div class="msg-time">${fmtTime(msg.ts)}</div></div>
+          <div class="msg-text">${esc(msg.texto || '')}</div>
+        </div>`;
+      }).join('') : `<div class="empty">Ainda nao ha mensagens do dia relacionadas ao bloco MA CAP.</div>`;
+    }
+    function render() {
+      document.getElementById('updated-at').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      renderBlocks();
+      renderActive();
+    }
+    function selectBlock(id) {
+      activeBlockId = id;
+      renderActive();
+    }
+    async function apiFetch(url) {
+      const r = await fetch(url, { headers: { Authorization: 'Bearer ' + TOKEN } });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }
+    async function refreshAll() {
+      if (!TOKEN) return;
+      try {
+        const [status, chats, mensagens] = await Promise.all([
+          apiFetch('/api/status'),
+          apiFetch('/api/chats').catch(() => []),
+          apiFetch('/api/mensagens').catch(() => [])
+        ]);
+        state.status = status.status || state.status;
+        state.contadores = status.contadores || {};
+        state.syncHealth = status.syncHealth || null;
+        state.chats = Array.isArray(chats) ? chats : [];
+        state.mensagens = Array.isArray(mensagens) ? mensagens : [];
+        setStatus(state.status);
+        render();
+      } catch (e) {
+        setStatus('desconectado');
+        render();
+      }
+    }
+    function connectWS() {
+      if (!TOKEN) return;
+      try {
+        const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+        ws = new WebSocket(`${proto}://${location.host}?token=${encodeURIComponent(TOKEN)}`);
+        ws.onmessage = evt => {
+          const packet = JSON.parse(evt.data || '{}');
+          const tipo = packet.tipo;
+          const dados = packet.dados || {};
+          if (tipo === 'init') {
+            state.status = dados.statusWpp || state.status;
+            state.chats = dados.chatList || state.chats;
+            state.mensagens = dados.mensagens || state.mensagens;
+            state.contadores = dados.contadores || state.contadores;
+            setStatus(state.status);
+            render();
+          } else if (tipo === 'chats') {
+            state.chats = Array.isArray(dados) ? dados : state.chats;
+            render();
+          } else if (tipo === 'mensagens') {
+            state.mensagens = Array.isArray(dados) ? dados : state.mensagens;
+            render();
+          } else if (tipo === 'status') {
+            setStatus(dados.status || dados);
+            render();
+          } else if (tipo === 'contadores') {
+            state.contadores = dados || {};
+            render();
+          } else if (tipo === 'message' || tipo === 'mensagem') {
+            const msg = dados.mensagem || dados;
+            if (msg && msg.id) state.mensagens = [msg, ...state.mensagens.filter(m => m.id !== msg.id)];
+            render();
+          }
+        };
+        ws.onclose = () => setTimeout(connectWS, 5000);
+      } catch (_) {}
+    }
+
+    if (!TOKEN) {
+      document.body.innerHTML = '<div class="empty">Monitor disponivel apenas dentro do painel ATRIX.</div>';
+    } else {
+      setStatus('desconectado');
+      render();
+      refreshAll();
+      connectWS();
+      setInterval(refreshAll, 30000);
+    }
+  </script>
+</body>
+</html>
