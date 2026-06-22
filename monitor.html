@@ -330,6 +330,13 @@
         title: 'MA CAP',
         subtitle: 'Maranhao Capital',
         terms: ['ma cap', 'sao luis', 'sao jose de ribamar', 'paco do lumiar', 'raposa', 'slz', 'sln ma', 'giga+ ma', 'maranhao capital']
+      },
+      {
+        id: 'sln-pa',
+        order: 2,
+        title: 'SLN PA',
+        subtitle: 'SLN Para',
+        terms: ['sln pa', 'sln-pa', 'slnpa', 'pa cap', 'belem', 'ananindeua', 'marituba', 'santa izabel', 'castanhal']
       }
     ];
     let activeBlockId = 'ma-cap';
@@ -422,14 +429,14 @@
           <div><div class="name">${esc(name)}</div><div class="meta">${chat.grupo ? 'Grupo' : 'Contato'} monitorado</div></div>
           <div class="count">${unread}</div>
         </div>`;
-      }).join('') : `<div class="empty">Nenhum grupo ou contato encontrado para MA CAP com os criterios atuais.</div>`;
+      }).join('') : `<div class="empty">Nenhum grupo ou contato encontrado para ${esc(block.title)} com os criterios atuais.</div>`;
       document.getElementById('message-list').innerHTML = msgs.length ? msgs.map(msg => {
         const name = msg.nomeGrupo || msg.de || msg.numero || 'Mensagem';
         return `<div class="msg">
           <div class="msg-top"><div class="msg-name">${esc(name)}</div><div class="msg-time">${fmtTime(msg.ts)}</div></div>
           <div class="msg-text">${esc(msg.texto || '')}</div>
         </div>`;
-      }).join('') : `<div class="empty">Ainda nao ha mensagens do dia relacionadas ao bloco MA CAP.</div>`;
+      }).join('') : `<div class="empty">Ainda nao ha mensagens do dia relacionadas ao bloco ${esc(block.title)}.</div>`;
     }
     function render() {
       document.getElementById('updated-at').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
