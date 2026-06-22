@@ -1393,6 +1393,296 @@
     .stab:not(.ativo) { color: rgba(255,255,255,.65) !important; }
     /* Hover: branco pleno */
     .ftab:hover, .chamados-ftab:hover, .stab:hover { color: #fff !important; }
+
+    /* ATRIX embed: WhatsApp Web style, scoped to iframe mode */
+    body.embed-atrix {
+      font-size: 14px;
+      --bg: #eef2ef;
+      --surface: #ffffff;
+      --card: #ffffff;
+      --card2: #f5f7f5;
+      --card3: #edf1ee;
+      --border: #d9e1dc;
+      --border2: #c8d3ce;
+      --text: #16201d;
+      --subtext: #5f6d68;
+      --muted: #87938e;
+      --silver: #16201d;
+      --verde: #128c7e;
+      --verde-dk: #075e54;
+      --verde-wpp: #25d366;
+      --azul: #2563eb;
+      --laranja: #d97706;
+      --roxo: #7c3aed;
+      --esmeralda: #059669;
+      --vermelho: #dc2626;
+      --amarelo: #ca8a04;
+      --metal: #8a958f;
+      --flag-cor: #d97706;
+      background: #eef2ef;
+      color: var(--text);
+      overflow: hidden;
+    }
+    body.embed-atrix .topbar,
+    body.embed-atrix .mob-bottom-nav {
+      display: none !important;
+    }
+    body.embed-atrix .app-layout {
+      height: 100dvh;
+      display: grid;
+      grid-template-columns: clamp(300px, 31vw, 390px) minmax(0, 1fr);
+      gap: 10px;
+      padding: 10px;
+      background: #eef2ef;
+    }
+    body.embed-atrix .sidebar,
+    body.embed-atrix .main-content {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 12px 28px rgba(22, 32, 29, .10);
+      overflow: hidden;
+    }
+    body.embed-atrix .sidebar {
+      background: #ffffff;
+      display: flex !important;
+      min-width: 0;
+    }
+    body.embed-atrix .sidebar-hd {
+      height: 58px;
+      padding: 10px 14px;
+      background: #f0f2f5;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+    }
+    body.embed-atrix .sidebar-hd strong {
+      color: #111b21;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+    body.embed-atrix .sidebar-hd small {
+      color: #667781;
+      font-size: 11px;
+      letter-spacing: 0;
+    }
+    body.embed-atrix .wpp-connect {
+      padding: 12px 14px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+    }
+    body.embed-atrix .qr-box {
+      width: 156px;
+      height: 156px;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: #f7faf8;
+      color: var(--subtext);
+    }
+    body.embed-atrix .qr-box svg {
+      width: 42px;
+      height: 42px;
+      fill: #128c7e;
+    }
+    body.embed-atrix .sidebar-chats {
+      display: flex !important;
+      background: #ffffff;
+    }
+    body.embed-atrix .sidebar-chats-hd {
+      min-height: 42px;
+      padding: 8px 12px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      color: #667781;
+      letter-spacing: 0;
+      text-transform: none;
+      font-size: 12px;
+    }
+    body.embed-atrix .chat-item {
+      min-height: 66px;
+      padding: 10px 12px;
+      gap: 10px;
+      border-bottom: 1px solid #edf1ee;
+      background: #ffffff;
+      color: #111b21;
+    }
+    body.embed-atrix .chat-item:hover,
+    body.embed-atrix .chat-item.selected {
+      background: #f0f2f5;
+    }
+    body.embed-atrix .chat-avatar {
+      width: 42px;
+      height: 42px;
+      background: #dfe5e2;
+      border: 0;
+      color: #54656f;
+      box-shadow: none;
+    }
+    body.embed-atrix .chat-name {
+      color: #111b21;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    body.embed-atrix .chat-last,
+    body.embed-atrix .chat-time {
+      color: #667781;
+    }
+    body.embed-atrix .main-content {
+      position: relative;
+      padding: 10px;
+      gap: 10px;
+      background:
+        linear-gradient(rgba(239, 234, 226, .92), rgba(239, 234, 226, .92)),
+        radial-gradient(circle at 18% 18%, rgba(18, 140, 126, .10), transparent 26%),
+        radial-gradient(circle at 82% 30%, rgba(37, 211, 102, .10), transparent 24%);
+    }
+    body.embed-atrix .main-content::before {
+      content: 'Monitoramento WhatsApp';
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #f0f2f5;
+      color: #111b21;
+      font-size: 14px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    body.embed-atrix .stats-row {
+      height: auto;
+      min-height: 74px;
+      gap: 8px;
+      grid-template-columns: repeat(4, minmax(128px, 1fr));
+    }
+    body.embed-atrix .stat-card,
+    body.embed-atrix .timer-section,
+    body.embed-atrix .detail-wrap,
+    body.embed-atrix .feed-wrap,
+    body.embed-atrix .chamados-painel,
+    body.embed-atrix .massivo-section,
+    body.embed-atrix .cat-section,
+    body.embed-atrix .table-section,
+    body.embed-atrix .atz-panel,
+    body.embed-atrix .chat-modal,
+    body.embed-atrix .settings-modal {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(22, 32, 29, .08);
+    }
+    body.embed-atrix .timer-hd,
+    body.embed-atrix .detail-hd,
+    body.embed-atrix .feed-hd,
+    body.embed-atrix .chamados-hd,
+    body.embed-atrix .massivo-hd,
+    body.embed-atrix .cat-hd,
+    body.embed-atrix .table-hd,
+    body.embed-atrix .atz-hd,
+    body.embed-atrix .chat-modal-hd,
+    body.embed-atrix .settings-modal-hd {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+    }
+    body.embed-atrix .timer-hd h2,
+    body.embed-atrix .feed-hd h2,
+    body.embed-atrix .chamados-hd h2,
+    body.embed-atrix .massivo-hd h2,
+    body.embed-atrix .cat-hd h2,
+    body.embed-atrix .detail-hd h3,
+    body.embed-atrix .table-hd h3 {
+      color: var(--text);
+      letter-spacing: 0;
+    }
+    body.embed-atrix .filter-bar,
+    body.embed-atrix .chamados-filter,
+    body.embed-atrix .massivo-filter,
+    body.embed-atrix #tableFilterBar {
+      background: #f5f7f5;
+      border-color: var(--border);
+    }
+    body.embed-atrix .feed-search,
+    body.embed-atrix .localidade-select,
+    body.embed-atrix .settings-input {
+      background: #ffffff;
+      border-color: var(--border2);
+      color: var(--text);
+      border-radius: 8px;
+    }
+    body.embed-atrix button {
+      color: var(--text) !important;
+    }
+    body.embed-atrix .ftab,
+    body.embed-atrix .chamados-ftab,
+    body.embed-atrix .stab {
+      background: #ffffff;
+      border-color: var(--border2);
+      color: var(--subtext) !important;
+      border-radius: 999px;
+      letter-spacing: 0;
+    }
+    body.embed-atrix .ftab.ativo,
+    body.embed-atrix .chamados-ftab.ativo,
+    body.embed-atrix .stab.ativo,
+    body.embed-atrix .btn-atualizar,
+    body.embed-atrix .btn-settings-save,
+    body.embed-atrix .btn-salvar-sheets,
+    body.embed-atrix .btn-finalizar {
+      color: #ffffff !important;
+    }
+    body.embed-atrix .msg-card,
+    body.embed-atrix .timer-item,
+    body.embed-atrix .chamado-item,
+    body.embed-atrix .mas-card,
+    body.embed-atrix .detail-kv,
+    body.embed-atrix .user-item-admin {
+      background: #ffffff;
+      border-color: var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      box-shadow: 0 6px 16px rgba(22, 32, 29, .06);
+    }
+    body.embed-atrix .msg-card:hover,
+    body.embed-atrix .chamado-item:hover,
+    body.embed-atrix .mas-card:hover {
+      background: #f7faf8;
+    }
+    body.embed-atrix .msg-text,
+    body.embed-atrix .detalhe-vazio,
+    body.embed-atrix .chamados-vazio,
+    body.embed-atrix .timer-empty {
+      color: var(--subtext);
+    }
+    body.embed-atrix .msg-remetente,
+    body.embed-atrix .detalhe-de,
+    body.embed-atrix .timer-muni,
+    body.embed-atrix .chamado-num {
+      color: var(--text);
+    }
+    body.embed-atrix .quadrant-grid {
+      gap: 10px;
+    }
+    body.embed-atrix .chat-modal {
+      background: #efeae2;
+    }
+    body.embed-atrix .chat-modal-msgs {
+      background: #efeae2;
+    }
+    @media (max-width: 900px) {
+      body.embed-atrix .app-layout {
+        grid-template-columns: 1fr;
+        padding: 8px;
+      }
+      body.embed-atrix .sidebar {
+        min-height: 36dvh;
+      }
+      body.embed-atrix .stats-row {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+    }
   </style>
   <link rel="stylesheet" href="painel-redesign.css">
   <script src="cnl-data.js"></script>
@@ -1903,6 +2193,7 @@
     const token  = localStorage.getItem('mcll_token');
     const nome   = localStorage.getItem('mcll_nome')  || '';
     const perfil = localStorage.getItem('mcll_perfil') || '';
+    const isEmbed = !!EMBED_SESSION;
     if (!token) { location.replace('/'); return; }
     // Mostra usuário no topbar
     const nomeEl   = document.getElementById('userNome');
@@ -1919,11 +2210,17 @@
       document.querySelectorAll('.chat-modal-reply, .reply-box').forEach(el => el.classList.add('oculto'));
       // Oculta seção Grupos e Contatos para não-admin
       const chatsSection = document.querySelector('.sidebar-chats');
-      if (chatsSection) chatsSection.style.display = 'none';
+      if (chatsSection && !isEmbed) chatsSection.style.display = 'none';
     } else {
       // Mostra botão de configurações para admin
       const btnSettings = document.getElementById('btnSettings');
       if (btnSettings) btnSettings.style.display = 'flex';
+    }
+    if (isEmbed) {
+      const btnSettings = document.getElementById('btnSettings');
+      const btnDisconnect = document.getElementById('btnDesconectarWrap');
+      if (btnSettings) btnSettings.style.display = 'none';
+      if (btnDisconnect) btnDisconnect.style.display = 'none';
     }
   })();
 
